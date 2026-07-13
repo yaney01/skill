@@ -131,6 +131,8 @@ export function validateManifestObject(manifest, options = {}) {
   const manifestDir = manifestPath ? path.dirname(manifestPath) : process.cwd();
   const html = options.html || null;
   const strict = Boolean(options.strict);
+  const stage = options.stage || 'delivery';
+  if (!['planning', 'delivery'].includes(stage)) pushFinding(findings, 'error', 'manifest.invalid-stage', `Unknown manifest validation stage: ${stage}.`);
 
   if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
     pushFinding(findings, 'error', 'manifest.invalid-root', 'Manifest root must be a JSON object.');
@@ -192,7 +194,11 @@ export function validateManifestObject(manifest, options = {}) {
     if (!VISUAL_SOURCES.has(visual.source)) pushFinding(findings, 'error', 'visual.invalid-source', `Unknown visual source: ${visual.source ?? 'undefined'}.`, location);
     if (visual.slot != null && !parseRatio(visual.slot)) pushFinding(findings, 'error', 'visual.invalid-slot', `Invalid visual slot ratio: ${visual.slot}.`, location);
 
-    if (visual.required && visual.status !== 'ready') pushFinding(findings, 'error', 'visual.required-not-ready', `${slide.id} requires a visual but status is ${visual.status}.`, location);
+    if (visual.required && visual.status === 'not-needed') {
+      pushFinding(findings, 'error', 'visual.required-not-needed', `${slide.id} requires a visual and cannot be marked not-needed.`, location);
+    } else if (visual.required && visual.status !== 'ready') {
+      pushFinding(findings, stage === 'delivery' ? 'error' : 'warning', 'visual.required-not-ready', `${slide.id} requires a visual but status is ${visual.status}.`, location);
+    }
     if (visual.status === 'ready' && FILE_VISUAL_SOURCES.has(visual.source)) {
       if (typeof visual.path !== 'string' || !visual.path.trim()) pushFinding(findings, 'error', 'visual.missing-path', `${slide.id} uses ${visual.source} visual source but has no path.`, location);
       else if (!/^(?:data:|https?:|\/\/)/i.test(visual.path)) {

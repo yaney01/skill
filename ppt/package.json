@@ -1,9 +1,9 @@
 {
   "name": "html-ppt-agent-skill",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "type": "module",
-  "description": "Task-level regression, registered layouts, integrated source ingestion, project generation, production and backup themes, CJK typography, visual planning, semantic visual QA, bundling, browser QA, PDF export, examples, and automated tests for the HTML PPT agent skill.",
+  "description": "Presenter mode, task-level regression, registered layouts, integrated source ingestion, project generation, production themes, CJK typography, semantic visual QA, bundling, browser editing, PDF export, examples, and automated tests for the HTML PPT agent skill.",
   "scripts": {
     "create": "node scripts/create-deck.mjs",
     "ingest": "python3 scripts/ingest-source.py",
@@ -25,8 +25,9 @@
     "test:source": "node --test tests/source-ingestion.test.mjs tests/source-integration.test.mjs",
     "test:layouts": "node --test tests/layouts.test.mjs",
     "test:tasks": "node --test tests/task-regression.test.mjs",
+    "test:presenter": "node --test --test-concurrency=1 tests/presenter.test.mjs",
     "test:core": "node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs tests/task-regression.test.mjs",
-    "test:browser": "node --test --test-concurrency=1 tests/runtime.test.mjs tests/editor.test.mjs tests/visual-qa.test.mjs",
+    "test:browser": "node --test --test-concurrency=1 tests/runtime.test.mjs tests/presenter.test.mjs tests/editor.test.mjs tests/visual-qa.test.mjs",
     "test": "npm run test:core && npm run test:browser",
     "ci": "npm run layouts:validate && npm run tasks:validate && npm run test && npm run tasks:run && npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html",
     "themes:validate": "node scripts/validate-deck.mjs assets/themes/swiss-grid/preview.html && node scripts/validate-deck.mjs assets/themes/editorial-ink/preview.html && node scripts/validate-deck.mjs assets/themes/technical-field/preview.html && node scripts/validate-deck.mjs assets/themes/guizang-magazine/preview.html && node scripts/validate-deck.mjs assets/themes/guizang-swiss/preview.html",

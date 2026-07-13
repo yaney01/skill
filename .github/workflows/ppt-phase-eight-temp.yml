@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Clone branch and run focused render regression
+      - name: Clone branch and inspect focused render regression
         shell: bash
         env:
           CI: "1"
@@ -22,10 +22,24 @@ jobs:
           git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
           git fetch --depth=1 origin "$GITHUB_SHA" >/dev/null 2>&1
           git checkout --detach FETCH_HEAD >/dev/null 2>&1
+          printf 'HEAD=%s\n' "$(git rev-parse HEAD)"
+          grep -n "const visualNodes" ppt/scripts/qa-visual.mjs || true
           cd ppt
           npm install --silent >/dev/null 2>&1
           npx playwright install chromium >/dev/null 2>&1
+          node --test --test-name-pattern="slide root" tests/visual-qa.test.mjs
           node scripts/run-task-regression.mjs \
-            --mode render \
+            --mode contract \
             --case topic-only-zh-speaker \
             --output /tmp/render-topic-zh
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('/tmp/render-topic-zh/topic-only-zh-speaker/index.html').read_text(encoding='utf-8')
+          match = re.search(r'<section\b[^>]*data-slide-id="slide-03"[^>]*>', html, re.I)
+          print('SLIDE03=' + (match.group(0) if match else 'NOT FOUND'))
+          PY
+          node scripts/qa-visual.mjs \
+            /tmp/render-topic-zh/topic-only-zh-speaker/index.html \
+            --manifest /tmp/render-topic-zh/topic-only-zh-speaker/deck.json \
+            --json /tmp/render-topic-zh/topic-only-zh-speaker/qa/visual-report.json

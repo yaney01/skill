@@ -1,0 +1,15 @@
+:root {
+  --theme-stage: #111318;
+  --theme-paper: #f4f2ec;
+  --theme-ink: #111318;
+  --theme-muted: #626873;
+  --theme-line: #c9c7c0;
+  --theme-accent: #2455ff;
+  --theme-accent-2: #ff5b35;
+  --theme-white: #ffffff;
+  --theme-display: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-body: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --theme-gutter: 108px;
+  --theme-unit: 24px;
+}

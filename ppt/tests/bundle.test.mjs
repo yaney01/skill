@@ -12,6 +12,8 @@ test('the real example bundles into a portable single HTML file', () => {
   assert.match(html, /data-bundled-from="\.\.\/\.\.\/assets\/runtime\/viewport-base\.css"/);
   assert.match(html, /data-bundled-from="\.\.\/\.\.\/assets\/runtime\/deck-runtime\.js"/);
   assert.match(html, /data-bundled-from="\.\.\/\.\.\/assets\/runtime\/deck-editor\.js"/);
+  assert.match(html, /id="htmlPptManifest"/);
+  assert.match(html, /先说明这不是一次单纯的 AI 出图分享/);
   assert.match(html, /data:image\/svg\+xml;base64,/);
   assert.doesNotMatch(html, /(?:src|href)="(?:\.\.\/|\.\/|images\/)/);
 

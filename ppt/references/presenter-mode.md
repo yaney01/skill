@@ -17,7 +17,6 @@ The presenter window contains:
 - next-slide preview
 - current page and total page count
 - speaker notes
-- optional planned duration for the current slide
 - elapsed timer with reset
 - previous, next, and go-to-slide controls
 
@@ -25,9 +24,7 @@ Presenter controls and audience-window controls synchronize in both directions.
 
 ## Speaker notes contract
 
-Store notes in `deck.json`, not in HTML attributes.
-
-A simple note uses a string:
+Store notes in `deck.json`, not in HTML attributes. The production schema currently defines each slide note as a string:
 
 ```json
 {
@@ -37,19 +34,7 @@ A simple note uses a string:
 }
 ```
 
-The runtime also accepts a structured object:
-
-```json
-{
-  "notes": {
-    "speaker": "Explain the decision boundary and pause for questions.",
-    "durationSeconds": 75,
-    "private": true
-  }
-}
-```
-
-Use `durationSeconds` only as a planning target. The presenter timer remains an elapsed deck timer.
+Keep notes concise enough to scan while speaking. Structured timing, privacy metadata, and note editing are deferred until the editor-state contract is versioned.
 
 ## Development and bundled delivery
 
@@ -69,7 +54,7 @@ This keeps speaker notes available when the final HTML is opened offline. The ma
 - Notes do not appear in the audience window.
 - Notes are not rendered into slide screenshots, contact sheets, or PDF output.
 - Notes are present inside the delivered single-file HTML. Do not store secrets or information that must be excluded from the distributed file.
-- The `private` field means “presenter-only display,” not encryption.
+- “Presenter-only” means hidden from the audience view, not encrypted.
 
 ## Popup behavior
 

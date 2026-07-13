@@ -11,7 +11,7 @@ body { font-family: var(--theme-body); color: var(--theme-ink); }
 .theme-display { margin: 0; font: 800 112px/.93 var(--theme-display); letter-spacing: -.065em; }
 .theme-title { margin: 0; font: 800 72px/.98 var(--theme-display); letter-spacing: -.045em; }
 .theme-lead { margin: 0; font: 500 31px/1.48 var(--theme-body); color: var(--theme-muted); }
-.theme-folio { position: absolute; right: var(--theme-gutter); bottom: 42px; font: 700 18px/1 var(--theme-mono); }
+.theme-folio { position: absolute; right: var(--theme-gutter); bottom: 42px; font: 700 20px/1 var(--theme-mono); }
 .theme-rule { height: 12px; width: 210px; background: var(--theme-accent); }
 .theme-cover { display: grid; grid-template-columns: 1.38fr .62fr; gap: 70px; align-items: center; height: 100%; }
 .theme-cover__title { max-width: 1240px; }

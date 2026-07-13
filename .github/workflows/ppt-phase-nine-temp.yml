@@ -42,5 +42,6 @@ jobs:
         run: npm run tasks:qa
       - name: Verify bundled manifest
         run: |
+          # The manifest must be inline in the portable HTML.
           grep -q 'id="deckManifest"' examples/ai-ad-workflow/dist/ai-ad-workflow.html
           ! grep -q 'src="deck.json"' examples/ai-ad-workflow/dist/ai-ad-workflow.html

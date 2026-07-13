@@ -87,8 +87,10 @@ try {
   for (let index = 0; index < slideCount; index += 1) {
     await page.evaluate((current) => {
       document.querySelectorAll('.slide').forEach((slide, slideIndex) => {
-        slide.classList.toggle('active', slideIndex === current);
-        slide.classList.toggle('visible', slideIndex === current);
+        const active = slideIndex === current;
+        slide.classList.toggle('active', active);
+        slide.classList.toggle('visible', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
       });
     }, index);
     await page.waitForTimeout(60);
@@ -101,7 +103,11 @@ try {
       };
       const decorative = (element) => element.matches('[aria-hidden="true"],[data-visual-role="decoration"],[data-decorative="true"],.decorative');
       const selector = 'img,svg,canvas,video,[data-visual],[data-visual-type],[data-diagram],[data-chart],[data-image-slot],[role="img"],.diagram,.chart,.visual,.image-shell,.timeline,.compare,.roles,.evidence-grid,.loop,.metric';
-      const candidates = [...slide.querySelectorAll(selector)].filter((element) => visible(element) && !decorative(element));
+      const visualNodes = [
+        ...(slide.matches(selector) ? [slide] : []),
+        ...slide.querySelectorAll(selector),
+      ];
+      const candidates = visualNodes.filter((element) => visible(element) && !decorative(element));
       const evidenceCandidates = candidates.filter((element) => {
         const type = element.getAttribute('data-visual-type') || '';
         if (/typographic|intentional-text/i.test(type)) return false;
@@ -161,7 +167,7 @@ try {
         images: imageData,
         diagrams: candidates.filter((element) => element.matches('svg,[data-diagram],.diagram,.timeline,.compare') || /diagram|timeline|comparison/i.test(element.getAttribute('data-visual-type') || '')).length,
         charts: candidates.filter((element) => element.matches('canvas,[data-chart],.chart') || /chart/i.test(element.getAttribute('data-visual-type') || '')).length,
-        decorativeVisuals: [...slide.querySelectorAll(selector)].filter((element) => visible(element) && decorative(element)).length,
+        decorativeVisuals: visualNodes.filter((element) => visible(element) && decorative(element)).length,
         overlaps,
       };
     });

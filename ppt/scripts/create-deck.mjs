@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { buildVisualWorkOrders, writeVisualWorkOrders } from './lib/visual-work-orders.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, '..');
@@ -321,8 +322,16 @@ try {
     createdAt: new Date().toISOString(),
     generator: 'html-ppt-agent-skill',
   };
+  const deckPath = path.join(outputDirectory, 'deck.json');
   fs.writeFileSync(path.join(outputDirectory, 'index.html'), html, 'utf8');
-  fs.writeFileSync(path.join(outputDirectory, 'deck.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(deckPath, `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
+  const visualPlan = buildVisualWorkOrders(metadata, { stage: 'planning' });
+  writeVisualWorkOrders(visualPlan, {
+    jsonPath: path.join(outputDirectory, 'qa', 'visual-work-orders.json'),
+    markdownPath: path.join(outputDirectory, 'qa', 'visual-work-orders.md'),
+    manifestPath: deckPath,
+    force: true,
+  });
   fs.writeFileSync(path.join(outputDirectory, 'README.md'), buildProjectReadme({ title, deckId, theme, sourceInfo }), 'utf8');
   fs.writeFileSync(path.join(outputDirectory, 'images', '.gitkeep'), '', 'utf8');
   console.log(`Created HTML PPT project: ${outputDirectory}`);
@@ -331,7 +340,8 @@ try {
   if (theme) console.log(`Registered layouts: ${theme.layoutManifest.layouts.length}`);
   if (sourceInfo) { console.log(`Source: ${sourceInfo.manifest.source.type} — ${sourceInfo.manifest.pageCount} pages/sections`); console.log(`Source mode: ${sourceInfo.mode}`); }
   console.log(`Manifest slides: ${metadata.slides.length}`);
-  console.log(sourceInfo ? 'Next: review source/manifest.json and complete deck.json.source.mapping before authoring.' : 'Next: select registered layouts and complete the visual plan in deck.json.');
+  console.log('Visual work orders: qa/visual-work-orders.json and qa/visual-work-orders.md');
+  console.log(sourceInfo ? 'Next: review source/manifest.json, complete deck.json.source.mapping, then update the visual work orders.' : 'Next: select registered layouts and update the visual work orders before production.');
 } finally {
   if (sourceInfo?.tempRoot) fs.rmSync(sourceInfo.tempRoot, { recursive: true, force: true });
 }

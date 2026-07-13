@@ -2,8 +2,11 @@
 
 Use these as starting territories, not immutable themes. Every deck should adapt typography, palette, imagery, and graphic devices to its subject.
 
+Three territories now have executable production themes. Read [`themes.md`](themes.md) and initialize the selected theme with `create-deck.mjs --theme <id>`.
+
 ## 1. Swiss Grid
 
+- **Production theme:** `swiss-grid`
 - **Tone:** precise, modern, objective
 - **Typography:** large grotesk headline, neutral CJK sans, mono metadata
 - **Palette:** white/black plus one functional accent such as IKB blue, safety orange, acid yellow, or signal green
@@ -13,6 +16,7 @@ Use these as starting territories, not immutable themes. Every deck should adapt
 
 ## 2. Editorial Ink
 
+- **Production theme:** `editorial-ink`
 - **Tone:** thoughtful, cultural, premium
 - **Typography:** CJK serif display, clean sans body, restrained italics for Latin accents
 - **Palette:** warm paper, ink, muted secondary tone, one decisive accent
@@ -28,9 +32,11 @@ Use these as starting territories, not immutable themes. Every deck should adapt
 - **Devices:** oversized numbers, diagonal divisions, strong blocks, fast reveal
 - **Best for:** launches, pitches, campaign ideas, high-stakes recommendations
 - **Avoid:** using maximum emphasis on every slide
+- **Status:** territory only; no production theme yet
 
 ## 4. Technical Field
 
+- **Production theme:** `technical-field`
 - **Tone:** rigorous, engineered, advanced
 - **Typography:** modern sans plus mono labels/code
 - **Palette:** near-black, cool neutral, restrained luminous accent
@@ -46,6 +52,7 @@ Use these as starting territories, not immutable themes. Every deck should adapt
 - **Devices:** notebook rules, annotations, diagrams, evidence labels
 - **Best for:** workshops, teaching, methods, product strategy
 - **Avoid:** scrapbook decoration and fake handwriting unless context requires it
+- **Status:** territory only; no production theme yet
 
 ## 6. Image-Led Premium
 
@@ -55,6 +62,7 @@ Use these as starting territories, not immutable themes. Every deck should adapt
 - **Devices:** full-bleed photography, cinematic crops, subtle overlays
 - **Best for:** portfolio, brand, product story, keynote
 - **Avoid:** weak stock imagery, text over busy focal areas, repeated hero-image treatment
+- **Status:** territory only; no production theme yet
 
 ## Preview differentiation
 
@@ -68,3 +76,17 @@ Three previews must differ in more than color. Vary:
 - degree of formality
 
 Use real title-slide content. Never place internal labels such as “safe option,” “wildcard,” or style names on the slide.
+
+## Production selection
+
+After selecting one of the implemented directions:
+
+```bash
+node scripts/create-deck.mjs \
+  --name deck-name \
+  --title "Presentation title" \
+  --theme swiss-grid \
+  --output /absolute/path/to/project
+```
+
+Use `--list-themes` to inspect the installed theme catalog. If the chosen territory has no production theme, start from the neutral template and implement a deck-specific visual system instead of pretending an unrelated theme matches.

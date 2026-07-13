@@ -91,6 +91,8 @@
       this.startedAt = performance.now();
       this.manifest = null;
       this.byId = new Map();
+      this.timer = null;
+      this.heartbeat = null;
       if (!this.stage || !this.slides.length) return;
       this.channel = 'BroadcastChannel' in window ? new BroadcastChannel(`html-ppt-presenter:${this.deckId}`) : null;
       this.channel?.addEventListener('message', (event) => this.receive(event.data));
@@ -101,6 +103,11 @@
       });
       document.addEventListener('keydown', (event) => this.onKey(event), true);
       window.addEventListener('resize', () => this.scalePreviews(), { passive: true });
+      window.addEventListener('beforeunload', () => {
+        this.channel?.close?.();
+        window.clearInterval(this.timer);
+        window.clearInterval(this.heartbeat);
+      });
       this.ready = this.loadManifest().then((manifest) => {
         this.manifest = manifest;
         this.byId = new Map((manifest?.slides || []).map((slide) => [slide.id, slide]));
@@ -125,17 +132,34 @@
       if (this.presenter) {
         const navigation = ['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Home', 'End'];
         if (navigation.includes(event.key)) {
-          event.preventDefault(); event.stopImmediatePropagation();
+          event.preventDefault();
+          event.stopImmediatePropagation();
           if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) this.command(this.index + 1);
           else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) this.command(this.index - 1);
           else this.command(event.key === 'Home' ? 0 : this.slides.length - 1);
-        } else if (key === 't') { event.preventDefault(); this.startedAt = performance.now(); this.updateTimer(); }
-        else if (key === 'g') { event.preventDefault(); this.jump(); }
+        } else if (key === 't') {
+          event.preventDefault();
+          this.startedAt = performance.now();
+          this.updateTimer();
+        } else if (key === 'g') {
+          event.preventDefault();
+          this.jump();
+        }
         return;
       }
-      if (key === 'p') { event.preventDefault(); event.stopImmediatePropagation(); this.open(); }
-      else if (!document.documentElement.classList.contains('html-ppt-editing') && event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); this.toggleOverview(); }
-      else if (!document.documentElement.classList.contains('html-ppt-editing') && key === 'g') { event.preventDefault(); event.stopImmediatePropagation(); this.jump(); }
+      if (key === 'p') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.open();
+      } else if (!document.documentElement.classList.contains('html-ppt-editing') && event.key === 'Escape') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.toggleOverview();
+      } else if (!document.documentElement.classList.contains('html-ppt-editing') && key === 'g') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        this.jump();
+      }
     }
     send(message) {
       const payload = { htmlPptPresenter: true, deckId: this.deckId, sender: this.presenter ? 'presenter' : 'audience', ...message };
@@ -147,17 +171,27 @@
       if (!message?.htmlPptPresenter || message.deckId !== this.deckId || message.sender === (this.presenter ? 'presenter' : 'audience')) return;
       if (message.type === 'hello' && !this.presenter) this.send({ type: 'state', index: this.deck.index });
       if (message.type === 'show' && !this.presenter) this.deck.show(message.index);
-      if (message.type === 'state' && this.presenter) { this.index = this.clamp(message.index); this.renderPresenter(); }
+      if (message.type === 'state' && this.presenter) {
+        this.index = this.clamp(message.index);
+        this.renderPresenter();
+      }
     }
     clamp(index) { return Math.max(0, Math.min(Number(index) || 0, this.slides.length - 1)); }
-    command(index) { this.index = this.clamp(index); this.renderPresenter(); this.send({ type: 'show', index: this.index }); }
+    command(index) {
+      this.index = this.clamp(index);
+      this.renderPresenter();
+      this.send({ type: 'show', index: this.index });
+    }
     open() {
       const url = new URL(location.href);
       url.searchParams.set('presenter', '1');
       url.hash = `slide-${this.deck.index + 1}`;
       this.popup = window.open(url.href, `html-ppt-presenter-${this.deckId}`, 'popup,width=1440,height=900,resizable=yes');
       if (!this.popup) window.alert('Presenter window was blocked. Allow pop-ups, then press P again.');
-      else { this.popup.focus(); window.setTimeout(() => this.send({ type: 'state', index: this.deck.index }), 300); }
+      else {
+        this.popup.focus();
+        window.setTimeout(() => this.send({ type: 'state', index: this.deck.index }), 300);
+      }
     }
     jump() {
       const value = Number(window.prompt(`Go to slide (1–${this.slides.length})`, String((this.presenter ? this.index : this.deck.index) + 1)));
@@ -168,15 +202,32 @@
       this.addStyles();
       const overlay = document.createElement('div');
       overlay.className = 'html-ppt-overview';
-      overlay.innerHTML = '<header><strong>Slide overview</strong><span>Esc to close · G to jump</span></header><div class="html-ppt-overview-grid"></div>';
-      const grid = overlay.querySelector('.html-ppt-overview-grid');
+      const header = document.createElement('header');
+      const title = document.createElement('strong');
+      title.textContent = 'Slide overview';
+      const hint = document.createElement('span');
+      hint.textContent = 'Esc to close · G to jump';
+      header.append(title, hint);
+      const grid = document.createElement('div');
+      grid.className = 'html-ppt-overview-grid';
+      overlay.append(header, grid);
       this.slides.forEach((slide, index) => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.dataset.index = index;
-        button.innerHTML = `<span class="html-ppt-preview"><span class="html-ppt-preview-canvas"></span></span><b>${String(index + 1).padStart(2, '0')} · ${this.domHeadline(index)}</b>`;
-        button.querySelector('.html-ppt-preview-canvas').appendChild(this.clone(index));
-        button.addEventListener('click', () => { this.deck.show(index); this.toggleOverview(false); });
+        button.dataset.index = String(index);
+        const preview = document.createElement('span');
+        preview.className = 'html-ppt-preview';
+        const canvas = document.createElement('span');
+        canvas.className = 'html-ppt-preview-canvas';
+        canvas.appendChild(this.clone(index));
+        preview.appendChild(canvas);
+        const label = document.createElement('b');
+        label.textContent = `${String(index + 1).padStart(2, '0')} · ${this.domHeadline(index)}`;
+        button.append(preview, label);
+        button.addEventListener('click', () => {
+          this.deck.show(index);
+          this.toggleOverview(false);
+        });
         grid.appendChild(button);
       });
       document.body.appendChild(overlay);
@@ -187,26 +238,36 @@
       if (!this.overview) return;
       const open = typeof force === 'boolean' ? force : !this.overview.classList.contains('open');
       this.overview.classList.toggle('open', open);
-      if (open) { this.scalePreviews(); this.overview.querySelector('button.current')?.focus(); }
+      if (open) {
+        this.scalePreviews();
+        this.overview.querySelector('button.current')?.focus();
+      }
     }
-    selectOverview(index) { this.overview?.querySelectorAll('button').forEach((button, itemIndex) => button.classList.toggle('current', itemIndex === index)); }
+    selectOverview(index) {
+      this.overview?.querySelectorAll('button').forEach((button, itemIndex) => button.classList.toggle('current', itemIndex === index));
+    }
     buildPresenter() {
       this.addStyles();
       document.documentElement.classList.add('html-ppt-presenter');
       const ui = document.createElement('main');
       ui.className = 'html-ppt-presenter-ui';
-      ui.innerHTML = `<header><div><strong>${this.manifest?.title || document.title}</strong><span>Presenter view</span></div><time>00:00</time></header><section class="html-ppt-presenter-previews"><article><h2>Current</h2><div class="html-ppt-presenter-preview current"></div></article><article><h2>Next</h2><div class="html-ppt-presenter-preview next"></div></article></section><section class="html-ppt-presenter-notes"><div><span class="counter"></span><strong class="headline"></strong></div><p></p></section><footer><button data-action="previous">Previous</button><button data-action="next">Next</button><button data-action="jump">Go to slide</button><button data-action="timer">Reset timer</button></footer>`;
+      ui.innerHTML = '<header><div><strong></strong><span>Presenter view</span></div><time>00:00</time></header><section class="html-ppt-presenter-previews"><article><h2>Current</h2><div class="html-ppt-presenter-preview current"></div></article><article><h2>Next</h2><div class="html-ppt-presenter-preview next"></div></article></section><section class="html-ppt-presenter-notes"><div><span class="counter"></span><strong class="headline"></strong></div><p></p></section><footer><button data-action="previous">Previous</button><button data-action="next">Next</button><button data-action="jump">Go to slide</button><button data-action="timer">Reset timer</button></footer>';
+      ui.querySelector('header strong').textContent = this.manifest?.title || document.title;
       ui.addEventListener('click', (event) => {
         const action = event.target.closest('[data-action]')?.dataset.action;
         if (action === 'previous') this.command(this.index - 1);
         if (action === 'next') this.command(this.index + 1);
         if (action === 'jump') this.jump();
-        if (action === 'timer') { this.startedAt = performance.now(); this.updateTimer(); }
+        if (action === 'timer') {
+          this.startedAt = performance.now();
+          this.updateTimer();
+        }
       });
       document.body.appendChild(ui);
       this.ui = ui;
       this.renderPresenter();
       this.timer = window.setInterval(() => this.updateTimer(), 250);
+      this.heartbeat = window.setInterval(() => this.send({ type: 'hello' }), 2000);
       this.send({ type: 'hello' });
     }
     renderPresenter() {
@@ -221,7 +282,10 @@
     }
     preview(container, index) {
       container.replaceChildren();
-      if (index >= this.slides.length) { container.textContent = 'End of deck'; return; }
+      if (index >= this.slides.length) {
+        container.textContent = 'End of deck';
+        return;
+      }
       const canvas = document.createElement('div');
       canvas.className = 'html-ppt-preview-canvas';
       canvas.appendChild(this.clone(index));
@@ -234,8 +298,13 @@
       clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
       return clone;
     }
-    domHeadline(index) { return this.slides[index]?.querySelector('h1,h2,h3')?.textContent?.replace(/\s+/g, ' ').trim() || `Slide ${index + 1}`; }
-    headline(index) { const id = this.slides[index]?.dataset.slideId; return this.byId.get(id)?.headline || this.domHeadline(index); }
+    domHeadline(index) {
+      return this.slides[index]?.querySelector('h1,h2,h3')?.textContent?.replace(/\s+/g, ' ').trim() || `Slide ${index + 1}`;
+    }
+    headline(index) {
+      const id = this.slides[index]?.dataset.slideId;
+      return this.byId.get(id)?.headline || this.domHeadline(index);
+    }
     notes(index) {
       const id = this.slides[index]?.dataset.slideId;
       const raw = this.byId.get(id)?.notes;

@@ -1,0 +1,17 @@
+:root {
+  --theme-stage: #0018a8;
+  --theme-paper: #f5f3ed;
+  --theme-ink: #0a0a0b;
+  --theme-muted: #5f6470;
+  --theme-line: #9ea4b0;
+  --theme-accent: #0018a8;
+  --theme-accent-2: #dfff00;
+  --theme-accent-3: #ff5a2f;
+  --theme-display: Arial, Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-body: Arial, Helvetica, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --theme-cjk-display: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-cjk-body: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-cjk-meta: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --theme-gutter: 104px;
+}

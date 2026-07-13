@@ -13,15 +13,15 @@ A cross-agent skill for creating editable, fixed-stage HTML presentations.
 
 - Generate decks from topics, notes, documents, images, or existing presentations
 - Initialize a maintainable development project with one command
-- Three-direction visual style discovery
 - Fixed 1920×1080 slide canvas scaled to any screen
 - Keyboard, wheel, swipe, and hash navigation
 - Browser text editing and image replacement
 - Local autosave and edited-HTML download
 - Bundle runtime files and local media into one portable HTML file
 - Static validation, rendered QA screenshots, and PDF export
-- Automated structural, bundling, runtime, and editor regression tests
-- Chinese and mixed CJK typography rules
+- Automated structural, bundling, runtime, editor, theme, and CJK regression tests
+- Three core themes plus two optional guizang-inspired clean-room backup themes
+- Implemented Chinese and mixed CJK typography rules
 - Reusable layout and image-slot contracts
 - A tested 12-page Chinese regression deck under [`examples/ai-ad-workflow`](./examples/ai-ad-workflow/)
 
@@ -59,9 +59,7 @@ ln -s /absolute/path/to/skill/ppt .claude/skills/ppt
 
 Invoke it as `/ppt`, or allow Claude Code to load it automatically.
 
-## Create a deck project
-
-The development project keeps runtime code separate so there is one canonical source for playback and editing behavior.
+## Create a neutral deck project
 
 ```bash
 cd skill/ppt
@@ -72,21 +70,80 @@ node scripts/create-deck.mjs \
   --output /absolute/path/to/projects/ai-trends
 ```
 
-Generated structure:
+The command refuses to write into a non-empty output directory unless `--force` is supplied. `--force` overwrites only generated files and does not delete unrelated files.
+
+## Production themes
+
+List installed themes and their tier:
+
+```bash
+node scripts/create-deck.mjs --list-themes
+```
+
+Core themes:
+
+| ID | Best for |
+|---|---|
+| `swiss-grid` | product, data, design, and technology |
+| `editorial-ink` | research, industry observation, culture, and narrative |
+| `technical-field` | AI systems, architecture, engineering, and technical explanation |
+
+Optional backup themes:
+
+| ID | Best for |
+|---|---|
+| `guizang-magazine` | explicit electronic-magazine / electronic-ink requests |
+| `guizang-swiss` | explicit guizang Swiss-international requests |
+
+The backup themes are independent clean-room implementations. No AGPL template, script, shader, or asset from `guizang-ppt-skill` is copied.
+
+Create a themed project:
+
+```bash
+node scripts/create-deck.mjs \
+  --name industry-review \
+  --title "行业趋势观察" \
+  --lang zh-CN \
+  --theme editorial-ink \
+  --output /absolute/path/to/projects/industry-review
+```
+
+Generated themed structure:
 
 ```text
-ai-trends/
+industry-review/
 ├── index.html
 ├── deck.json
 ├── README.md
 ├── images/
-└── runtime/
-    ├── viewport-base.css
-    ├── deck-runtime.js
-    └── deck-editor.js
+├── runtime/
+│   ├── viewport-base.css
+│   ├── deck-runtime.js
+│   └── deck-editor.js
+└── theme/
+    ├── theme.json
+    ├── tokens.css
+    ├── layouts.css
+    └── cjk.css
 ```
 
-The command refuses to write into a non-empty output directory unless `--force` is supplied. `--force` overwrites only generated files and does not delete unrelated files.
+The selected theme and shared Chinese typography layer are copied into the project, so it remains independent of the installed Skill.
+
+## Chinese typography implementation
+
+Every theme loads `assets/themes/shared/cjk.css`. Generated projects receive the same rules as `theme/cjk.css`.
+
+The implemented layer includes:
+
+- Noto / Source Han Chinese serif and sans stacks with system fallbacks
+- separate Chinese display, body, and metadata roles
+- restrained Chinese title tracking instead of Latin-style aggressive negative tracking
+- display, title, and body line-height defaults
+- strict Chinese line breaking and normal word breaking
+- punctuation containment and mixed-script spacing support
+- `.cjk-nowrap`, `[data-nowrap]`, and `.keep-unit` utilities
+
+See [`references/cjk-typography.md`](./references/cjk-typography.md) for the complete contract.
 
 ## Validate and bundle
 
@@ -100,7 +157,7 @@ node scripts/validate-deck.mjs /absolute/path/to/dist/ai-trends.html
 
 `bundle-html.mjs` embeds:
 
-- local stylesheets
+- local stylesheets, including theme and CJK CSS
 - local JavaScript
 - local images and SVG files
 - local fonts referenced through CSS `url()`
@@ -126,6 +183,13 @@ node scripts/qa-deck.mjs path/to/deck.html --screenshots path/to/qa
 node scripts/export-pdf.mjs path/to/deck.html output.pdf
 ```
 
+Validate and render every installed theme:
+
+```bash
+npm run themes:validate
+npm run themes:qa
+```
+
 ## Real-world regression example
 
 The example deck at [`examples/ai-ad-workflow`](./examples/ai-ad-workflow/) contains 12 Chinese slides and two local SVG assets. It covers cover, statement, section, data hero, comparison, image split, three-column, evidence grid, process, quote, timeline, and closing layouts.
@@ -148,7 +212,7 @@ The committed QA record confirms 12 rendered slides, zero overflow or out-of-bou
 
 ## Automated tests
 
-The test suite uses Node's built-in test runner. Core tests do not require a browser:
+Core tests do not require a browser:
 
 ```bash
 npm run test:core
@@ -161,8 +225,11 @@ Core coverage includes:
 - rejecting missing local assets
 - rejecting multiple initially active slides
 - embedding runtime files and SVG assets into one HTML document
-- validating the bundled output
+- validating bundled output
 - refusing destructive in-place bundling
+- validating all core and backup themes
+- confirming the CJK font, tracking, line-height, line-breaking, punctuation, and no-wrap contracts
+- generating independent projects containing `theme/cjk.css`
 
 Install Playwright and Chromium before running interaction tests:
 

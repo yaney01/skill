@@ -5,42 +5,58 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, '..');
+const themesRoot = path.join(skillRoot, 'assets', 'themes');
+const sharedCjkPath = path.join(themesRoot, 'shared', 'cjk.css');
+
+function loadThemes() {
+  if (!fs.existsSync(themesRoot)) return new Map();
+  if (!fs.existsSync(sharedCjkPath)) throw new Error(`Missing shared CJK theme asset: ${sharedCjkPath}`);
+  const themes = new Map();
+  for (const entry of fs.readdirSync(themesRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === 'shared') continue;
+    const directory = path.join(themesRoot, entry.name);
+    const metadataPath = path.join(directory, 'theme.json');
+    const previewPath = path.join(directory, 'preview.html');
+    const tokenPath = path.join(directory, 'tokens.css');
+    const layoutPath = path.join(directory, 'layouts.css');
+    if (![metadataPath, previewPath, tokenPath, layoutPath].every((file) => fs.existsSync(file))) continue;
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    if (!metadata.id || metadata.id !== entry.name) throw new Error(`Theme metadata ID must match its directory: ${entry.name}`);
+    themes.set(metadata.id, { directory, metadata, previewPath, tokenPath, layoutPath, metadataPath, cjkPath: sharedCjkPath });
+  }
+  return themes;
+}
 
 function usage(exitCode = 0) {
   const text = `Usage:
   node scripts/create-deck.mjs --name <deck-name> [options]
+  node scripts/create-deck.mjs --list-themes
 
 Options:
   --title <title>       Presentation title. Defaults to the name.
   --lang <language>     HTML language tag. Defaults to zh-CN.
+  --theme <theme-id>    Use an installed production theme.
   --output <directory>  Output directory. Defaults to ./<deck-name>.
   --force               Overwrite generated files in an existing directory.
-  --help                 Show this help message.
+  --list-themes         List installed production themes.
+  --help                Show this help message.
 `;
   (exitCode === 0 ? console.log : console.error)(text.trim());
   process.exit(exitCode);
 }
 
 function parseArgs(argv) {
-  const options = { lang: 'zh-CN', force: false };
+  const options = { lang: 'zh-CN', force: false, listThemes: false };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === '--help' || arg === '-h') usage(0);
-    if (arg === '--force') {
-      options.force = true;
-      continue;
-    }
-    if (!arg.startsWith('--')) {
-      throw new Error(`Unexpected argument: ${arg}`);
-    }
+    if (arg === '--force') { options.force = true; continue; }
+    if (arg === '--list-themes') { options.listThemes = true; continue; }
+    if (!arg.startsWith('--')) throw new Error(`Unexpected argument: ${arg}`);
     const key = arg.slice(2);
-    if (!['name', 'title', 'lang', 'output'].includes(key)) {
-      throw new Error(`Unknown option: ${arg}`);
-    }
+    if (!['name', 'title', 'lang', 'theme', 'output'].includes(key)) throw new Error(`Unknown option: ${arg}`);
     const value = argv[index + 1];
-    if (!value || value.startsWith('--')) {
-      throw new Error(`${arg} requires a value.`);
-    }
+    if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value.`);
     options[key] = value;
     index += 1;
   }
@@ -48,22 +64,12 @@ function parseArgs(argv) {
 }
 
 function slugify(value) {
-  const slug = value
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 80);
+  const slug = value.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 80);
   return slug || 'html-ppt';
 }
 
 function escapeHtml(value) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
 function directoryIsEmpty(directory) {
@@ -82,7 +88,18 @@ function copyRuntime(outputDirectory) {
   }
 }
 
-function buildProjectReadme({ title, deckId }) {
+function copyTheme(theme, outputDirectory) {
+  if (!theme) return;
+  const targetDirectory = path.join(outputDirectory, 'theme');
+  fs.mkdirSync(targetDirectory, { recursive: true });
+  fs.copyFileSync(theme.tokenPath, path.join(targetDirectory, 'tokens.css'));
+  fs.copyFileSync(theme.layoutPath, path.join(targetDirectory, 'layouts.css'));
+  fs.copyFileSync(theme.cjkPath, path.join(targetDirectory, 'cjk.css'));
+  fs.copyFileSync(theme.metadataPath, path.join(targetDirectory, 'theme.json'));
+}
+
+function buildProjectReadme({ title, deckId, theme }) {
+  const themeLine = theme ? `- \`theme/\` — copied ${theme.metadata.name} theme, including shared CJK typography rules` : '- theme — not assigned; start from the neutral starter';
   return `# ${title}
 
 HTML PPT project generated by the \`ppt\` Agent Skill.
@@ -93,6 +110,7 @@ HTML PPT project generated by the \`ppt\` Agent Skill.
 - \`runtime/\` — fixed-stage player and browser editor
 - \`images/\` — local presentation assets
 - \`deck.json\` — project metadata
+${themeLine}
 
 ## Open
 
@@ -107,21 +125,57 @@ node scripts/validate-deck.mjs /absolute/path/to/${deckId}/index.html
 node scripts/bundle-html.mjs /absolute/path/to/${deckId}/index.html /absolute/path/to/${deckId}.html
 \`\`\`
 
-The bundled file contains local runtime files and local images as one portable HTML document.
+The bundled file contains local runtime files, theme CSS, CJK typography rules, and local images as one portable HTML document.
 `;
 }
 
-let options;
-try {
-  options = parseArgs(process.argv.slice(2));
-} catch (error) {
-  console.error(error.message);
-  usage(2);
+function prepareHtml(source, { lang, title, deckId, themed }) {
+  let html = fs.readFileSync(source, 'utf8');
+  html = html
+    .replace(/<html lang="[^"]*">/i, `<html lang="${escapeHtml(lang)}">`)
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`)
+    .replace(/data-deck-id="[^"]+"/i, `data-deck-id="${escapeHtml(deckId)}"`)
+    .replaceAll('../../runtime/', 'runtime/')
+    .replaceAll('../runtime/', 'runtime/');
+
+  if (themed) {
+    html = html
+      .replace('href="tokens.css"', 'href="theme/tokens.css"')
+      .replace('href="layouts.css"', 'href="theme/layouts.css"')
+      .replace('href="../shared/cjk.css"', 'href="theme/cjk.css"');
+  }
+
+  const titlePattern = /(<h1\b[^>]*data-role="deck-title"[^>]*>)[\s\S]*?(<\/h1>)/i;
+  if (titlePattern.test(html)) html = html.replace(titlePattern, `$1${escapeHtml(title)}$2`);
+  else html = html.replace('>A browser-editable deck</h1>', `>${escapeHtml(title)}</h1>`);
+  return html;
 }
 
-if (!options.name) {
-  console.error('--name is required.');
-  usage(2);
+let options;
+try { options = parseArgs(process.argv.slice(2)); }
+catch (error) { console.error(error.message); usage(2); }
+
+let themes;
+try { themes = loadThemes(); }
+catch (error) { console.error(error.message); process.exit(1); }
+
+if (options.listThemes) {
+  if (themes.size === 0) console.log('No production themes are installed.');
+  else {
+    for (const [id, theme] of themes) {
+      console.log(`${id}\t${theme.metadata.name}\t${theme.metadata.tier || 'core'}\t${theme.metadata.summary}`);
+    }
+  }
+  process.exit(0);
+}
+
+if (!options.name) { console.error('--name is required.'); usage(2); }
+
+const theme = options.theme ? themes.get(options.theme) : null;
+if (options.theme && !theme) {
+  console.error(`Unknown theme: ${options.theme}`);
+  console.error(`Available themes: ${[...themes.keys()].join(', ') || 'none'}`);
+  process.exit(1);
 }
 
 const title = options.title || options.name;
@@ -134,39 +188,33 @@ if (!directoryIsEmpty(outputDirectory) && !options.force) {
   process.exit(1);
 }
 
-const templatePath = path.join(skillRoot, 'assets', 'templates', 'starter.html');
-if (!fs.existsSync(templatePath)) {
-  console.error(`Starter template not found: ${templatePath}`);
-  process.exit(1);
-}
+const templatePath = theme ? theme.previewPath : path.join(skillRoot, 'assets', 'templates', 'starter.html');
+if (!fs.existsSync(templatePath)) { console.error(`Template not found: ${templatePath}`); process.exit(1); }
 
 fs.mkdirSync(outputDirectory, { recursive: true });
 fs.mkdirSync(path.join(outputDirectory, 'images'), { recursive: true });
 copyRuntime(outputDirectory);
+copyTheme(theme, outputDirectory);
 
-let html = fs.readFileSync(templatePath, 'utf8');
-html = html
-  .replace('<html lang="en">', `<html lang="${escapeHtml(options.lang)}">`)
-  .replace('<title>HTML PPT Starter</title>', `<title>${escapeHtml(title)}</title>`)
-  .replace('data-deck-id="starter-deck"', `data-deck-id="${escapeHtml(deckId)}"`)
-  .replace('>A browser-editable deck</h1>', `>${escapeHtml(title)}</h1>`)
-  .replaceAll('../runtime/', 'runtime/');
-
+const html = prepareHtml(templatePath, { lang: options.lang, title, deckId, themed: Boolean(theme) });
 const metadata = {
   id: deckId,
   title,
   language: options.lang,
   density: 'speaker-led',
-  style: 'unassigned',
+  style: theme?.metadata.id || 'unassigned',
+  themeName: theme?.metadata.name || null,
+  themeTier: theme?.metadata.tier || null,
   createdAt: new Date().toISOString(),
   generator: 'html-ppt-agent-skill'
 };
 
 fs.writeFileSync(path.join(outputDirectory, 'index.html'), html, 'utf8');
 fs.writeFileSync(path.join(outputDirectory, 'deck.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
-fs.writeFileSync(path.join(outputDirectory, 'README.md'), buildProjectReadme({ title, deckId }), 'utf8');
+fs.writeFileSync(path.join(outputDirectory, 'README.md'), buildProjectReadme({ title, deckId, theme }), 'utf8');
 fs.writeFileSync(path.join(outputDirectory, 'images', '.gitkeep'), '', 'utf8');
 
 console.log(`Created HTML PPT project: ${outputDirectory}`);
 console.log(`Deck ID: ${deckId}`);
-console.log('Next: edit index.html, validate it, then bundle it into a single HTML file.');
+console.log(`Theme: ${theme?.metadata.id || 'unassigned'}`);
+console.log('Next: replace preview content, validate the deck, then bundle it into a single HTML file.');

@@ -1,18 +1,18 @@
 :root {
-  --theme-stage: #111318;
-  --theme-paper: #f4f2ec;
-  --theme-ink: #111318;
-  --theme-muted: #626873;
-  --theme-line: #c9c7c0;
-  --theme-accent: #2455ff;
-  --theme-accent-2: #ff5b35;
-  --theme-white: #ffffff;
+  --theme-stage: #05080d;
+  --theme-paper: #0a0e15;
+  --theme-panel: #111824;
+  --theme-ink: #f3f7fb;
+  --theme-muted: #95a1b2;
+  --theme-line: #2b3748;
+  --theme-accent: #b8ff39;
+  --theme-accent-2: #42d9ff;
+  --theme-danger: #ff5a67;
   --theme-display: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
   --theme-body: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
   --theme-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --theme-cjk-display: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
   --theme-cjk-body: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
   --theme-cjk-meta: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --theme-gutter: 108px;
-  --theme-unit: 24px;
+  --theme-gutter: 100px;
 }

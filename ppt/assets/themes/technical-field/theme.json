@@ -1,0 +1,19 @@
+{
+  "id": "technical-field",
+  "name": "Technical Field",
+  "summary": "Dark engineered layouts for AI systems, architecture, and technical explainers.",
+  "layouts": [
+    "cover",
+    "section",
+    "statement",
+    "split",
+    "grid",
+    "closing"
+  ],
+  "stage": "1920x1080",
+  "languageSupport": [
+    "zh-CN",
+    "en"
+  ],
+  "version": 1
+}

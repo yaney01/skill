@@ -3,18 +3,18 @@ body { font-family: var(--theme-body); color: var(--theme-ink); }
 .theme-canvas { position: relative; width: 100%; height: 100%; padding: 74px var(--theme-gutter) 78px; overflow: hidden; }
 .theme-canvas::after { content:""; position:absolute; left:var(--theme-gutter); right:var(--theme-gutter); bottom:58px; border-bottom:1px solid var(--theme-line); }
 .theme-canvas > * { position: relative; z-index: 1; }
-.theme-masthead { display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--theme-ink); font:700 17px/1 var(--theme-body); letter-spacing:.14em; text-transform:uppercase; }
-.theme-kicker { font: 700 18px/1 var(--theme-body); letter-spacing: .13em; text-transform: uppercase; color: var(--theme-accent); }
+.theme-masthead { display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--theme-ink); font:700 20px/1 var(--theme-body); letter-spacing:.14em; text-transform:uppercase; }
+.theme-kicker { font: 700 20px/1 var(--theme-body); letter-spacing: .13em; text-transform: uppercase; color: var(--theme-accent); }
 .theme-display { margin:0; font: 700 106px/1.02 var(--theme-display); letter-spacing: -.045em; }
 .theme-title { margin:0; font: 700 68px/1.08 var(--theme-display); letter-spacing: -.025em; }
 .theme-lead { margin:0; font: 500 29px/1.62 var(--theme-body); color: var(--theme-muted); }
-.theme-folio { position:absolute; right:var(--theme-gutter); bottom:32px; font:700 17px/1 var(--theme-body); }
+.theme-folio { position:absolute; right:var(--theme-gutter); bottom:32px; font:700 20px/1 var(--theme-body); }
 .theme-cover { height: 850px; display:grid; grid-template-columns: 1.18fr .82fr; gap:86px; align-items:center; }
 .theme-cover__copy { padding-right:30px; }
 .theme-cover__copy .theme-display { margin:36px 0 38px; }
 .theme-cover__portrait { height:690px; border-left:1px solid var(--theme-ink); padding-left:46px; display:grid; grid-template-rows:1fr auto; gap:28px; }
 .theme-cover__image { background: linear-gradient(145deg, #2d4038 0 45%, #d3c5af 45% 62%, #a83e31 62%); position:relative; }
-.theme-cover__image::after { content:"OBSERVATION / 01"; position:absolute; left:24px; bottom:22px; color:white; font:700 16px/1 var(--theme-body); letter-spacing:.14em; }
+.theme-cover__image::after { content:"OBSERVATION / 01"; position:absolute; left:24px; bottom:22px; color:white; font:700 20px/1 var(--theme-body); letter-spacing:.14em; }
 .theme-cover__caption { font:500 22px/1.45 var(--theme-body); color:var(--theme-muted); }
 .theme-section { height: 850px; display:grid; grid-template-columns: 360px 1fr; gap:80px; align-items:center; }
 .theme-section__number { font: italic 150px/.8 var(--theme-serif); color:var(--theme-accent); }

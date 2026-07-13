@@ -3,10 +3,7 @@ name: PPT phase five visual QA verification
 on:
   push:
     branches:
-      - agent/ppt-phase-five-visual-qa
-  pull_request:
-    branches:
-      - main
+      - agent/ppt-phase-five-cleanup
   workflow_dispatch:
 
 jobs:
@@ -24,7 +21,7 @@ jobs:
           cache: npm
           cache-dependency-path: ppt/package.json
       - run: npm install
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - name: Syntax check new scripts
         run: |
           node --check scripts/lib/visual-contract.mjs
@@ -44,7 +41,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ppt-phase-five-output
+          name: ppt-phase-five-final-output
           path: ppt/phase-five-output.txt
           if-no-files-found: error
       - name: Build real example contact sheet

@@ -6,7 +6,7 @@ A cross-agent skill for creating editable, fixed-stage HTML presentations.
 - **Compatible environment:** Claude Code
 - **Output:** browser-editable HTML, not native PowerPoint
 - **Runtime:** zero dependencies
-- **Tooling:** Node.js 20+; Playwright is required only for rendered QA and PDF export
+- **Tooling:** Node.js 20+; Playwright is required for rendered QA, PDF export, and browser interaction tests
 - **Collaboration:** intentionally out of scope; there is no account system, backend, database, or real-time multi-user editing
 
 ## Capabilities
@@ -20,6 +20,7 @@ A cross-agent skill for creating editable, fixed-stage HTML presentations.
 - Local autosave and edited-HTML download
 - Bundle runtime files and local media into one portable HTML file
 - Static validation, rendered QA screenshots, and PDF export
+- Automated structural, bundling, runtime, and editor regression tests
 - Chinese and mixed CJK typography rules
 - Reusable layout and image-slot contracts
 - A tested 12-page Chinese regression deck under [`examples/ai-ad-workflow`](./examples/ai-ad-workflow/)
@@ -144,6 +145,51 @@ npm run example:qa
 ```
 
 The committed QA record confirms 12 rendered slides, zero overflow or out-of-bounds errors, zero broken images, zero console errors, working Arrow Right navigation, and working `E` edit-mode activation. Generated bundles and PNG screenshots are ignored and can be recreated locally.
+
+## Automated tests
+
+The test suite uses Node's built-in test runner. Core tests do not require a browser:
+
+```bash
+npm run test:core
+```
+
+Core coverage includes:
+
+- validating the real Chinese example
+- rejecting duplicate editable IDs
+- rejecting missing local assets
+- rejecting multiple initially active slides
+- embedding runtime files and SVG assets into one HTML document
+- validating the bundled output
+- refusing destructive in-place bundling
+
+Install Playwright and Chromium before running interaction tests:
+
+```bash
+npm install
+npx playwright install chromium
+npm run test:browser
+```
+
+Browser coverage includes:
+
+- fixed 1920×1080 stage behavior
+- exactly one active slide
+- keyboard, hash, and wheel navigation
+- whole-stage mobile scaling without reflow
+- edit-mode activation and exit
+- text autosave and reload restoration
+- image replacement with embedded Data URLs
+- downloading an edited self-contained HTML file
+
+Run the complete regression pipeline:
+
+```bash
+npm run ci
+```
+
+The `ci` command remains self-contained inside `ppt/`; repository-level workflow configuration is intentionally not required.
 
 ## Editing controls in generated decks
 

@@ -28,7 +28,7 @@ test('Escape overview and G jump navigate the audience deck', async () => {
     page.once('dialog', (dialog) => dialog.accept('7'));
     await page.keyboard.press('g');
     await page.waitForFunction(() => window.htmlPptDeck.index === 6);
-    assert.equal(await page.locator('.slide.active').getAttribute('data-slide-id'), 'slide-07');
+    assert.equal(await page.locator('#deckStage .slide.active').getAttribute('data-slide-id'), 'slide-07');
     await context.close();
   } finally {
     await browser.close();
@@ -52,7 +52,7 @@ test('P opens a synchronized presenter window with notes, previews, timer, and r
 
     await presenter.keyboard.press('ArrowRight');
     await page.waitForFunction(() => window.htmlPptDeck.index === 1);
-    assert.equal(await page.locator('.slide.active').getAttribute('data-slide-id'), 'slide-02');
+    assert.equal(await page.locator('#deckStage .slide.active').getAttribute('data-slide-id'), 'slide-02');
 
     await page.bringToFront();
     await page.keyboard.press('End');

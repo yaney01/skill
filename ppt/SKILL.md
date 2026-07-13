@@ -15,7 +15,7 @@ Create presentation-quality HTML decks that are editable in the browser and deli
 - Include constrained browser editing by default: text editing, image replacement, local autosave, reset, and edited-HTML download.
 - Final delivery must open locally. Core playback and editing must not require a network connection.
 - Preserve semantic HTML, keyboard navigation, touch navigation, and reduced-motion support.
-- A deck is not complete merely because structural and screenshot QA pass. It must also satisfy the production manifest and semantic visual QA.
+- A deck is not complete merely because structural and screenshot QA pass. It must also satisfy the production manifest, synchronized visual work orders, and semantic visual QA.
 - For PPTX, PDF, DOCX, or Markdown conversion, standardize and validate the source before planning the final deck. Do not bypass `source/manifest.json`.
 
 ## Runtime adaptation
@@ -261,6 +261,33 @@ Read:
 - [`references/image-prompts.md`](references/image-prompts.md)
 - [`references/screenshot-framing.md`](references/screenshot-framing.md)
 
+### 8.1 Execute and synchronize visual work orders
+
+<!-- phase-eleven-skill -->
+Every generated project includes `qa/visual-work-orders.json` and `qa/visual-work-orders.md`. Regenerate them after changing slide purpose, layout, visual type, source, role, or slot:
+
+```bash
+node scripts/build-visual-work-orders.mjs project/deck.json \
+  --output project/qa/visual-work-orders.json \
+  --markdown project/qa/visual-work-orders.md \
+  --stage planning \
+  --force
+```
+
+Complete the work orders using the available environment. Generated images, screenshots, supplied files, HTML/SVG diagrams, charts, and intentional typography all remain valid production routes.
+
+Synchronize completed work before delivery validation:
+
+```bash
+node scripts/sync-visual-work-orders.mjs \
+  project/qa/visual-work-orders.json \
+  --deck project/deck.json \
+  --stage delivery \
+  --write
+```
+
+Read [`references/visual-production.md`](references/visual-production.md).
+
 ### 9. Generate the deck
 
 Edit `index.html`. Development HTML references canonical runtime copies in `runtime/`; do not paste duplicate minified runtime code.
@@ -321,6 +348,13 @@ node scripts/validate-deck.mjs /absolute/path/to/project/index.html
 node scripts/validate-manifest.mjs \
   /absolute/path/to/project/deck.json \
   --html /absolute/path/to/project/index.html \
+  --stage delivery \
+  --strict
+
+node scripts/validate-visual-work-orders.mjs \
+  /absolute/path/to/project/qa/visual-work-orders.json \
+  --deck /absolute/path/to/project/deck.json \
+  --stage delivery \
   --strict
 ```
 
@@ -425,6 +459,8 @@ Load only what the task requires:
 | `schemas/source.schema.json` | Standardized source-manifest contract |
 | `schemas/deck.schema.json` | Final production manifest and source-mapping contract |
 | `references/visual-planning.md` | Per-slide visual decisions and coverage targets |
+| `references/visual-production.md` | Work-order generation, fulfillment, synchronization, and delivery checks |
+| `schemas/visual-work-orders.schema.json` | Visual production work-order contract |
 | `references/image-prompts.md` | Generated image contracts and exclusions |
 | `references/screenshot-framing.md` | Pixel-faithful screenshot treatment |
 | `references/visual-quality-checklist.md` | P0/P1/P2 semantic visual review |

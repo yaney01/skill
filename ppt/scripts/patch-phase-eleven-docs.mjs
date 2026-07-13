@@ -45,7 +45,10 @@ function replaceOnce(fileUrl, before, after, label) {
     return false;
   }
   const count = source.split(before).length - 1;
-  if (count !== 1) throw new Error(`${label}: expected one match, found ${count}`);
+  if (count !== 1) {
+    console.log(`${label}: expected one match, found ${count}; skipped`);
+    return false;
+  }
   source = source.replace(before, after);
   write(fileUrl, source);
   console.log(`${label}: applied`);
@@ -223,27 +226,6 @@ changed = replaceOnce(
   '- Maintain an auditable source-page-to-final-slide mapping\n- Fixed 1920×1080 slide canvas scaled to any screen',
   '- Maintain an auditable source-page-to-final-slide mapping\n- Generate per-slide visual production work orders in JSON and Markdown\n- Validate planning and delivery states, including local paths, image ratios, alt text, and deck synchronization\n- Fixed 1920×1080 slide canvas scaled to any screen',
   'README capabilities',
-) || changed;
-
-changed = replaceOnce(
-  createDeck,
-  '- `deck.json` — source mapping, registered layouts, slide map, and visual plan',
-  '- `deck.json` — source mapping, registered layouts, slide map, and synchronized visual plan\n- `qa/visual-work-orders.json` — executable per-slide visual production queue\n- `qa/visual-work-orders.md` — human-readable production handoff',
-  'generated README file list',
-) || changed;
-
-changed = replaceOnce(
-  createDeck,
-  '${next + 1}. Create or frame required assets.\n${next + 2}. Run source, layout, structural, rendered, and visual QA.',
-  '${next + 1}. Review and fulfill `qa/visual-work-orders.json` and `qa/visual-work-orders.md`.\n${next + 2}. Synchronize completed work orders into `deck.json`.\n${next + 3}. Run source, layout, structural, delivery-manifest, work-order, rendered, and visual QA.',
-  'generated README production order',
-) || changed;
-
-changed = replaceOnce(
-  createDeck,
-  'node scripts/validate-manifest.mjs /absolute/path/to/${deckId}/deck.json --html /absolute/path/to/${deckId}/index.html --strict\nnode scripts/qa-deck.mjs',
-  'node scripts/validate-manifest.mjs /absolute/path/to/${deckId}/deck.json --html /absolute/path/to/${deckId}/index.html --stage delivery --strict\nnode scripts/validate-visual-work-orders.mjs /absolute/path/to/${deckId}/qa/visual-work-orders.json --deck /absolute/path/to/${deckId}/deck.json --stage delivery --strict\nnode scripts/qa-deck.mjs',
-  'generated README delivery commands',
 ) || changed;
 
 if (!changed) console.log('No phase-eleven documentation changes required.');

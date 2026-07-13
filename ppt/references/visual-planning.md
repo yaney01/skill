@@ -6,6 +6,11 @@ Visual planning happens before HTML generation. The goal is not to maximize imag
 
 Create or update `deck.json` before authoring the full deck. Use `schemas/deck.schema.json` as the contract.
 
+<!-- phase-eleven-visual-production -->
+Then generate `qa/visual-work-orders.json` and `qa/visual-work-orders.md`. The work orders convert each visual decision into an executable production task and keep planning separate from delivery readiness.
+
+Read [`visual-production.md`](visual-production.md) for the build, validate, synchronize, and delivery contract.
+
 Every slide must declare one visual decision:
 
 - supplied or generated image

@@ -68,3 +68,4 @@ changed = replaceExactly(
 ) || changed;
 
 if (!changed) console.log('No manifest stage changes required.');
+// Trigger marker: phase-eleven-manifest-stage-v1

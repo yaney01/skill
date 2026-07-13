@@ -81,6 +81,15 @@
       ],
       "additionalProperties": true
     },
+    "presenterNotes": {
+      "type": "object",
+      "properties": {
+        "speaker": { "type": "string" },
+        "durationSeconds": { "type": "integer", "minimum": 0 },
+        "private": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
     "slide": {
       "type": "object",
       "required": ["id", "purpose", "layout", "headline", "visual"],
@@ -89,7 +98,12 @@
         "purpose": { "type": "string", "minLength": 1 },
         "layout": { "type": "string", "minLength": 1 },
         "headline": { "type": "string" },
-        "notes": { "type": "string" },
+        "notes": {
+          "oneOf": [
+            { "type": "string" },
+            { "$ref": "#/$defs/presenterNotes" }
+          ]
+        },
         "sourceIds": { "type": "array", "items": { "type": "string" } },
         "visual": { "$ref": "#/$defs/visual" }
       },

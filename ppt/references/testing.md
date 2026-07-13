@@ -1,6 +1,6 @@
 # Automated testing
 
-Use the test suite whenever changing shared PPT infrastructure. A normal deck-content edit does not require the entire suite unless it changes shared runtime, validation, bundling, themes, layouts, source ingestion, visual QA, or editor behavior.
+Use the test suite whenever changing shared PPT infrastructure. A normal deck-content edit does not require the entire suite unless it changes shared runtime, validation, bundling, themes, layouts, source ingestion, visual QA, presenter mode, or editor behavior.
 
 ## Core tests
 
@@ -8,7 +8,7 @@ Use the test suite whenever changing shared PPT infrastructure. A normal deck-co
 npm run test:core
 ```
 
-These tests use Node's built-in test runner and require no browser. They validate the real Chinese regression deck, validator failure modes, single-file bundling, local SVG embedding, bundled-output validation, source ingestion, registered layouts, task contracts, and protection against in-place overwrites.
+These tests use Node's built-in test runner and require no browser. They validate the real Chinese regression deck, validator failure modes, single-file bundling, embedded deck manifests, local SVG embedding, bundled-output validation, source ingestion, registered layouts, task contracts, and protection against in-place overwrites.
 
 ## Browser tests
 
@@ -18,7 +18,31 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-These tests verify the fixed 1920×1080 stage, one-active-slide invariant, keyboard/hash/wheel navigation, mobile whole-stage scaling, edit-mode hooks, text persistence, image replacement, edited-HTML download behavior, and browser-driven visual QA.
+These tests verify:
+
+- fixed 1920×1080 stage behavior
+- one-active-slide invariant
+- keyboard, hash, wheel, and touch navigation
+- mobile whole-stage scaling
+- slide overview and numbered jump
+- presenter popup creation
+- current and next slide previews
+- speaker-note loading from the embedded manifest
+- audience-to-presenter and presenter-to-audience synchronization
+- presenter refresh reconnection
+- elapsed timer rendering
+- edit-mode hooks and text persistence
+- image replacement
+- edited-HTML download without presenter or overview clones
+- browser-driven semantic visual QA
+
+Run presenter tests alone:
+
+```bash
+npm run test:presenter
+```
+
+Read [`presenter-mode.md`](presenter-mode.md).
 
 ## Task-level regression
 
@@ -66,7 +90,7 @@ Run complete regression before merging changes to:
 - `scripts/qa-deck.mjs`
 - `scripts/qa-visual.mjs`
 - `scripts/run-task-regression.mjs`
-- source, layout, task, or visual contracts
+- source, layout, task, presenter, or visual contracts
 - the real regression example
 
 Fix the implementation rather than weakening a test unless the public contract intentionally changed. When the contract changes, update the tests, README, Skill instructions, and relevant reference documentation together.

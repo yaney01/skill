@@ -10,6 +10,7 @@ function usage(code = 0) {
 
 Options:
   --html <deck.html>   Cross-check slide IDs, layouts, and required visuals against HTML.
+  --stage <stage>      planning or delivery. Defaults to delivery.
   --json <report.json> Write the complete validation report.
   --strict             Treat warnings as failures.
   --help               Show this help message.`;
@@ -36,6 +37,11 @@ const manifestPath = path.resolve(manifestFile);
 const htmlOption = option('--html');
 const reportOption = option('--json');
 const strict = args.includes('--strict');
+const stage = option('--stage') || 'delivery';
+if (!['planning', 'delivery'].includes(stage)) {
+  console.error(`Unknown stage: ${stage}. Use planning or delivery.`);
+  process.exit(2);
+}
 if (!fs.existsSync(manifestPath)) {
   console.error(`Manifest not found: ${manifestPath}`);
   process.exit(2);
@@ -58,7 +64,7 @@ if (htmlOption) {
   html = fs.readFileSync(htmlPath, 'utf8');
 }
 
-const result = validateManifestObject(manifest, { manifestPath, html, htmlPath, strict });
+const result = validateManifestObject(manifest, { manifestPath, html, htmlPath, strict, stage });
 const layoutResult = validateRegisteredLayouts(manifest, manifestPath);
 result.findings.push(...layoutResult.findings);
 for (const finding of result.findings) {
@@ -68,6 +74,7 @@ for (const finding of result.findings) {
 }
 
 console.log('Manifest validation complete');
+console.log(`Stage: ${stage}`);
 console.log(`Slides: ${result.summary.slides}`);
 console.log(`Registered layouts: ${layoutResult.registered || 'not assigned'}`);
 console.log(`Visual slides: ${result.summary.visualSlides}`);
@@ -81,6 +88,7 @@ const report = {
   manifest: manifestPath,
   html: htmlPath,
   strict,
+  stage,
   layoutRegistry: manifest.layoutRegistry || null,
   registeredLayouts: layoutResult.registered,
   summary: result.summary,

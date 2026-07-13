@@ -141,6 +141,38 @@ For speaker-led work, start with:
 
 Read [`visual-planning.md`](visual-planning.md) before authoring the full HTML.
 
+## 6.1 Visual production work orders
+
+<!-- phase-eleven-workflow -->
+After the per-slide visual decisions are stable, generate an executable work order for every slide:
+
+```bash
+node scripts/validate-manifest.mjs project/deck.json --stage planning
+node scripts/build-visual-work-orders.mjs project/deck.json \
+  --output project/qa/visual-work-orders.json \
+  --markdown project/qa/visual-work-orders.md \
+  --stage planning \
+  --force
+node scripts/validate-visual-work-orders.mjs \
+  project/qa/visual-work-orders.json \
+  --deck project/deck.json \
+  --stage planning
+```
+
+Use the work orders to generate images, capture screenshots, review supplied assets, and build precise HTML/SVG/chart visuals. When production is complete, synchronize approved paths, alt text, focus, prompts, and statuses into `deck.json`:
+
+```bash
+node scripts/sync-visual-work-orders.mjs \
+  project/qa/visual-work-orders.json \
+  --deck project/deck.json \
+  --stage delivery \
+  --write
+```
+
+Final delivery requires both manifest and work-order validation in `delivery` mode. Planning mode may report incomplete required visuals as warnings; delivery mode blocks them.
+
+Read [`visual-production.md`](visual-production.md).
+
 ## 7. Style discovery
 
 If direction is open, generate three title-slide previews using real title/subtitle/company/date content:
@@ -197,7 +229,8 @@ Run separate source, mechanical, and visual checks:
 ```bash
 node scripts/validate-source.mjs project/source/manifest.json --source original.pptx --strict
 node scripts/validate-deck.mjs project/index.html
-node scripts/validate-manifest.mjs project/deck.json --html project/index.html
+node scripts/validate-manifest.mjs project/deck.json --html project/index.html --stage delivery --strict
+node scripts/validate-visual-work-orders.mjs project/qa/visual-work-orders.json --deck project/deck.json --stage delivery --strict
 node scripts/qa-deck.mjs project/index.html --screenshots project/qa/screenshots
 node scripts/qa-visual.mjs project/index.html --manifest project/deck.json --json project/qa/visual-report.json
 node scripts/build-contact-sheet.mjs project/index.html project/qa/contact-sheet.png

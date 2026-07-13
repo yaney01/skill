@@ -17,6 +17,8 @@ A cross-agent skill for creating and converting editable, fixed-stage HTML prese
 - Create a source-aware project with one command
 - Preserve source order, images, notes, tables, chart caches, provenance, and fidelity rules
 - Maintain an auditable source-page-to-final-slide mapping
+- Generate per-slide visual production work orders in JSON and Markdown
+- Validate planning and delivery states, including local paths, image ratios, alt text, and deck synchronization
 - Fixed 1920×1080 slide canvas scaled to any screen
 - Keyboard, wheel, swipe, and hash navigation
 - Versioned constrained browser editing with undo/redo and scoped reset
@@ -236,6 +238,41 @@ The implemented layer includes:
 - `.cjk-nowrap`, `[data-nowrap]`, and `.keep-unit` utilities
 
 See [`references/cjk-typography.md`](./references/cjk-typography.md).
+
+## Visual production work orders
+
+<!-- phase-eleven-readme -->
+New projects automatically include:
+
+```text
+qa/
+├── visual-work-orders.json
+└── visual-work-orders.md
+```
+
+Use planning mode while producing assets and delivery mode before bundling:
+
+```bash
+node scripts/build-visual-work-orders.mjs project/deck.json \
+  --output project/qa/visual-work-orders.json \
+  --markdown project/qa/visual-work-orders.md \
+  --stage planning \
+  --force
+
+node scripts/sync-visual-work-orders.mjs project/qa/visual-work-orders.json \
+  --deck project/deck.json \
+  --stage delivery \
+  --write
+
+node scripts/validate-visual-work-orders.mjs project/qa/visual-work-orders.json \
+  --deck project/deck.json \
+  --stage delivery \
+  --strict
+```
+
+Delivery validation checks required status, local path containment, file existence, image ratio, alt text, generated prompts, and synchronization with `deck.json`.
+
+See [`references/visual-production.md`](./references/visual-production.md).
 
 ## Validate the production chain
 

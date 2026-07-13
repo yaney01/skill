@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yaney01/skill/ppt/schemas/visual-work-orders.schema.json",
+  "title": "HTML PPT visual production work orders",
+  "type": "object",
+  "required": ["planVersion", "stage", "deck", "generatedAt", "summary", "items"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "planVersion": { "const": 1 },
+    "stage": { "enum": ["planning", "delivery"] },
+    "deck": {
+      "type": "object",
+      "required": ["id", "title", "language", "manifest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string" },
+        "language": { "type": "string" },
+        "density": { "type": "string" },
+        "style": { "type": "string" },
+        "themeName": { "type": ["string", "null"] },
+        "manifest": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "summary": {
+      "type": "object",
+      "required": ["total", "required", "ready", "planned", "missing", "notNeeded", "fileDeliveries", "domDeliveries", "typographyDeliveries", "deliveryReady"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "required": { "type": "integer", "minimum": 0 },
+        "ready": { "type": "integer", "minimum": 0 },
+        "planned": { "type": "integer", "minimum": 0 },
+        "missing": { "type": "integer", "minimum": 0 },
+        "notNeeded": { "type": "integer", "minimum": 0 },
+        "fileDeliveries": { "type": "integer", "minimum": 0 },
+        "domDeliveries": { "type": "integer", "minimum": 0 },
+        "typographyDeliveries": { "type": "integer", "minimum": 0 },
+        "deliveryReady": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/item" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "item": {
+      "type": "object",
+      "required": ["id", "slideId", "order", "headline", "purpose", "layout", "type", "role", "source", "required", "status", "delivery", "brief", "instructions"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" },
+        "slideId": { "type": "string", "minLength": 1 },
+        "order": { "type": "integer", "minimum": 1 },
+        "headline": { "type": "string" },
+        "purpose": { "type": "string" },
+        "layout": { "type": "string" },
+        "type": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "status": { "enum": ["planned", "ready", "missing", "not-needed"] },
+        "delivery": { "enum": ["file", "dom", "typography", "none"] },
+        "slot": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?\\s*[:x/]\\s*[0-9]+(?:\\.[0-9]+)?$" },
+        "path": { "type": "string" },
+        "alt": { "type": "string" },
+        "focus": { "type": "string" },
+        "brief": { "type": "string" },
+        "prompt": { "type": "string" },
+        "exclusions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "instructions": { "type": "string" },
+        "notes": { "type": "string" },
+        "credit": { "type": "string" },
+        "license": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

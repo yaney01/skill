@@ -1,0 +1,43 @@
+body { font-family: var(--theme-body); color: var(--theme-ink); }
+.slide { background: var(--theme-paper); }
+.theme-canvas { position: relative; width: 100%; height: 100%; padding: 74px var(--theme-gutter) 78px; overflow: hidden; }
+.theme-canvas::after { content:""; position:absolute; left:var(--theme-gutter); right:var(--theme-gutter); bottom:58px; border-bottom:1px solid var(--theme-line); }
+.theme-canvas > * { position: relative; z-index: 1; }
+.theme-masthead { display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:1px solid var(--theme-ink); font:700 17px/1 var(--theme-body); letter-spacing:.14em; text-transform:uppercase; }
+.theme-kicker { font: 700 18px/1 var(--theme-body); letter-spacing: .13em; text-transform: uppercase; color: var(--theme-accent); }
+.theme-display { margin:0; font: 700 106px/1.02 var(--theme-display); letter-spacing: -.045em; }
+.theme-title { margin:0; font: 700 68px/1.08 var(--theme-display); letter-spacing: -.025em; }
+.theme-lead { margin:0; font: 500 29px/1.62 var(--theme-body); color: var(--theme-muted); }
+.theme-folio { position:absolute; right:var(--theme-gutter); bottom:32px; font:700 17px/1 var(--theme-body); }
+.theme-cover { height: 850px; display:grid; grid-template-columns: 1.18fr .82fr; gap:86px; align-items:center; }
+.theme-cover__copy { padding-right:30px; }
+.theme-cover__copy .theme-display { margin:36px 0 38px; }
+.theme-cover__portrait { height:690px; border-left:1px solid var(--theme-ink); padding-left:46px; display:grid; grid-template-rows:1fr auto; gap:28px; }
+.theme-cover__image { background: linear-gradient(145deg, #2d4038 0 45%, #d3c5af 45% 62%, #a83e31 62%); position:relative; }
+.theme-cover__image::after { content:"OBSERVATION / 01"; position:absolute; left:24px; bottom:22px; color:white; font:700 16px/1 var(--theme-body); letter-spacing:.14em; }
+.theme-cover__caption { font:500 22px/1.45 var(--theme-body); color:var(--theme-muted); }
+.theme-section { height: 850px; display:grid; grid-template-columns: 360px 1fr; gap:80px; align-items:center; }
+.theme-section__number { font: italic 150px/.8 var(--theme-serif); color:var(--theme-accent); }
+.theme-section__copy { border-left:1px solid var(--theme-ink); padding-left:64px; }
+.theme-section__copy .theme-title { max-width:1100px; margin:28px 0; }
+.theme-statement { height:850px; display:grid; grid-template-columns:220px 1fr; gap:44px; align-items:center; }
+.theme-statement__mark { align-self:start; margin-top:120px; font:700 240px/.7 var(--theme-serif); color:var(--theme-accent); }
+.theme-statement__claim { margin:0; max-width:1340px; font:700 78px/1.17 var(--theme-display); letter-spacing:-.025em; }
+.theme-statement__note { margin-top:38px; font:italic 28px/1.45 var(--theme-serif); color:var(--theme-muted); }
+.theme-split { height:850px; display:grid; grid-template-columns: 1fr 1.08fr; gap:74px; align-items:center; }
+.theme-split__copy { columns:1; }
+.theme-split__copy .theme-title { margin:26px 0 30px; }
+.theme-split__visual { height:650px; display:grid; grid-template-columns: 1fr 1fr; gap:16px; padding:16px; border:1px solid var(--theme-ink); background:#e8decd; }
+.theme-split__visual span:first-child { background:#26372f; grid-row:span 2; }
+.theme-split__visual span:nth-child(2) { background:#b23a2b; }
+.theme-split__visual span:nth-child(3) { background:#c8b79e; }
+.theme-grid { margin-top:52px; display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--theme-ink); border-left:1px solid var(--theme-ink); }
+.theme-card { min-height:300px; padding:30px 36px; border-right:1px solid var(--theme-ink); border-bottom:1px solid var(--theme-ink); }
+.theme-card__num { font:italic 28px/1 var(--theme-serif); color:var(--theme-accent); }
+.theme-card h3 { margin:34px 0 16px; font:700 34px/1.15 var(--theme-display); }
+.theme-card p { margin:0; max-width:620px; font:500 23px/1.55 var(--theme-body); color:var(--theme-muted); }
+.theme-closing { background:#24332c; color:#f7f0e4; }
+.theme-closing .theme-canvas::after { border-color:#738177; }
+.theme-closing__layout { height:850px; display:grid; place-items:center; text-align:center; }
+.theme-closing__layout .theme-display { max-width:1440px; }
+.theme-closing__line { width:120px; height:3px; margin:42px auto; background:var(--theme-accent); }

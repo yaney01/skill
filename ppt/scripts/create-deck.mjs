@@ -39,9 +39,8 @@ Options:
   --output <directory>  Output directory. Defaults to ./<deck-name>.
   --force               Overwrite generated files in an existing directory.
   --list-themes         List installed production themes.
-  --help                Show this help message.
-`;
-  (exitCode === 0 ? console.log : console.error)(text.trim());
+  --help                Show this help message.`;
+  (exitCode === 0 ? console.log : console.error)(text);
   process.exit(exitCode);
 }
 
@@ -72,6 +71,10 @@ function escapeHtml(value) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
+function stripHtml(value = '') {
+  return value.replace(/<br\s*\/?\s*>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/\s+/g, ' ').trim();
+}
+
 function directoryIsEmpty(directory) {
   return !fs.existsSync(directory) || fs.readdirSync(directory).length === 0;
 }
@@ -98,6 +101,69 @@ function copyTheme(theme, outputDirectory) {
   fs.copyFileSync(theme.metadataPath, path.join(targetDirectory, 'theme.json'));
 }
 
+function inferPurpose(layout) {
+  if (/cover/i.test(layout)) return 'hook';
+  if (/section/i.test(layout)) return 'section-reset';
+  if (/statement|quote/i.test(layout)) return 'key-claim';
+  if (/comparison/i.test(layout)) return 'compare';
+  if (/process|workflow|system|timeline/i.test(layout)) return 'explain';
+  if (/closing/i.test(layout)) return 'close';
+  return 'content';
+}
+
+function inferVisual(body, layout) {
+  const declared = body.match(/data-visual-type\s*=\s*["']([^"']+)["']/i)?.[1];
+  const required = /data-visual-required\s*=\s*["']true["']/i.test(body);
+  const image = body.match(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/i);
+  const alt = image?.[0].match(/\balt\s*=\s*["']([^"']*)["']/i)?.[1] || '';
+  const slot = image?.[0].match(/data-image-slot\s*=\s*["']([^"']+)["']/i)?.[1] || undefined;
+  if (image) {
+    const src = image[1];
+    const screenshot = /screenshot|dashboard|ui|界面|截图/i.test(`${layout} ${alt} ${body.slice(0, 500)}`);
+    return {
+      type: screenshot ? 'product-screenshot' : 'image',
+      required,
+      status: 'ready',
+      source: screenshot ? 'screenshot' : 'supplied',
+      role: screenshot ? 'evidence' : 'context',
+      ...(slot ? { slot } : {}),
+      ...(!/^(?:data:|https?:|\/\/)/i.test(src) ? { path: src } : {}),
+      ...(alt ? { alt } : {}),
+    };
+  }
+  if (declared) {
+    const source = /chart/i.test(declared) ? 'chart' : /diagram|timeline|comparison|visualization/i.test(declared) ? 'html' : 'css';
+    const role = /comparison/i.test(declared) ? 'comparison' : /typographic|intentional-text/i.test(declared) ? 'typography' : 'explanation';
+    return { type: declared, required, status: 'ready', source, role };
+  }
+  if (/<svg\b/i.test(body)) return { type: /workflow|process/i.test(layout) ? 'workflow-diagram' : 'system-diagram', required, status: 'ready', source: 'svg', role: 'explanation' };
+  if (/timeline/i.test(layout)) return { type: 'timeline', required, status: 'ready', source: 'html', role: 'explanation' };
+  if (/comparison/i.test(layout)) return { type: 'comparison-diagram', required, status: 'ready', source: 'html', role: 'comparison' };
+  if (/process|workflow/i.test(layout)) return { type: 'workflow-diagram', required, status: 'ready', source: 'html', role: 'explanation' };
+  if (/chart/i.test(layout)) return { type: 'data-chart', required, status: 'ready', source: 'chart', role: 'evidence' };
+  if (/visual|diagram|system|evidence|grid|column|metric|data-hero/i.test(`${layout} ${body}`)) return { type: 'html-visualization', required, status: 'ready', source: 'html', role: 'explanation' };
+  if (/cover|section|statement|quote|closing/i.test(layout)) return { type: /statement|quote/i.test(layout) ? 'intentional-text' : 'typographic', required: false, status: 'ready', source: 'css', role: 'typography' };
+  return { type: 'none', required: false, status: 'not-needed', source: 'none', role: 'typography' };
+}
+
+function extractSlideManifest(html) {
+  const matches = [...html.matchAll(/<section\b([^>]*\bclass\s*=\s*["'][^"']*\bslide\b[^"']*["'][^>]*)>([\s\S]*?)<\/section>/gi)];
+  return matches.map((match, index) => {
+    const attrs = match[1];
+    const body = match[2];
+    const id = attrs.match(/data-slide-id\s*=\s*["']([^"']+)["']/i)?.[1] || `slide-${String(index + 1).padStart(2, '0')}`;
+    const layout = attrs.match(/data-layout\s*=\s*["']([^"']+)["']/i)?.[1] || 'unassigned';
+    const headline = stripHtml(body.match(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/i)?.[1] || '');
+    return {
+      id,
+      purpose: inferPurpose(layout),
+      layout,
+      headline,
+      visual: inferVisual(`${attrs} ${body}`, layout),
+    };
+  });
+}
+
 function buildProjectReadme({ title, deckId, theme }) {
   const themeLine = theme ? `- \`theme/\` — copied ${theme.metadata.name} theme, including shared CJK typography rules` : '- theme — not assigned; start from the neutral starter';
   return `# ${title}
@@ -109,19 +175,30 @@ HTML PPT project generated by the \`ppt\` Agent Skill.
 - \`index.html\` — editable development deck
 - \`runtime/\` — fixed-stage player and browser editor
 - \`images/\` — local presentation assets
-- \`deck.json\` — project metadata
+- \`deck.json\` — production manifest, slide map, and visual plan
 ${themeLine}
+
+## Production order
+
+1. Edit \`deck.json\` before building the full deck. Assign every slide a purpose, layout, and visual decision.
+2. Create or frame the required assets in \`images/\`.
+3. Build the HTML and mark required visuals ready only when they exist.
+4. Run structural, rendered, and visual QA.
 
 ## Open
 
 Open \`index.html\` directly in a browser. Press \`E\` to edit text or replace marked images.
 
-## Validate and bundle
+## Validate, review, and bundle
 
 From the installed \`ppt\` Skill directory:
 
 \`\`\`bash
 node scripts/validate-deck.mjs /absolute/path/to/${deckId}/index.html
+node scripts/validate-manifest.mjs /absolute/path/to/${deckId}/deck.json --html /absolute/path/to/${deckId}/index.html
+node scripts/qa-deck.mjs /absolute/path/to/${deckId}/index.html --screenshots /absolute/path/to/${deckId}/qa/screenshots
+node scripts/qa-visual.mjs /absolute/path/to/${deckId}/index.html --manifest /absolute/path/to/${deckId}/deck.json --json /absolute/path/to/${deckId}/qa/visual-report.json
+node scripts/build-contact-sheet.mjs /absolute/path/to/${deckId}/index.html /absolute/path/to/${deckId}/qa/contact-sheet.png
 node scripts/bundle-html.mjs /absolute/path/to/${deckId}/index.html /absolute/path/to/${deckId}.html
 \`\`\`
 
@@ -161,11 +238,7 @@ catch (error) { console.error(error.message); process.exit(1); }
 
 if (options.listThemes) {
   if (themes.size === 0) console.log('No production themes are installed.');
-  else {
-    for (const [id, theme] of themes) {
-      console.log(`${id}\t${theme.metadata.name}\t${theme.metadata.tier || 'core'}\t${theme.metadata.summary}`);
-    }
-  }
+  else for (const [id, theme] of themes) console.log(`${id}\t${theme.metadata.name}\t${theme.metadata.tier || 'core'}\t${theme.metadata.summary}`);
   process.exit(0);
 }
 
@@ -198,6 +271,8 @@ copyTheme(theme, outputDirectory);
 
 const html = prepareHtml(templatePath, { lang: options.lang, title, deckId, themed: Boolean(theme) });
 const metadata = {
+  $schema: 'https://github.com/yaney01/skill/blob/main/ppt/schemas/deck.schema.json',
+  manifestVersion: 2,
   id: deckId,
   title,
   language: options.lang,
@@ -205,8 +280,15 @@ const metadata = {
   style: theme?.metadata.id || 'unassigned',
   themeName: theme?.metadata.name || null,
   themeTier: theme?.metadata.tier || null,
+  visualStrategy: {
+    mode: 'mixed',
+    targetCoverage: 0.5,
+    targetEvidenceCoverage: 0.3,
+    maxConsecutiveTextOnly: 2,
+  },
+  slides: extractSlideManifest(html),
   createdAt: new Date().toISOString(),
-  generator: 'html-ppt-agent-skill'
+  generator: 'html-ppt-agent-skill',
 };
 
 fs.writeFileSync(path.join(outputDirectory, 'index.html'), html, 'utf8');
@@ -217,4 +299,5 @@ fs.writeFileSync(path.join(outputDirectory, 'images', '.gitkeep'), '', 'utf8');
 console.log(`Created HTML PPT project: ${outputDirectory}`);
 console.log(`Deck ID: ${deckId}`);
 console.log(`Theme: ${theme?.metadata.id || 'unassigned'}`);
-console.log('Next: replace preview content, validate the deck, then bundle it into a single HTML file.');
+console.log(`Manifest slides: ${metadata.slides.length}`);
+console.log('Next: complete the visual plan in deck.json before authoring the full deck.');

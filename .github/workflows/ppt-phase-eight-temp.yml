@@ -3,7 +3,7 @@ name: PPT phase eight task regression verification
 on:
   push:
     branches:
-      - agent/ppt-phase-eight-task-regression
+      - agent/ppt-phase-eight-task-regression-fix
   pull_request:
     branches:
       - main
@@ -37,8 +37,12 @@ jobs:
           python3 -m json.tool tests/tasks/cases.json >/dev/null
       - name: Validate task contracts
         run: npm run tasks:validate
-      - name: Run complete core and browser regression
-        run: npm run test
+      - name: Run task regression unit tests
+        run: npm run test:tasks
+      - name: Run existing core regression
+        run: node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs
+      - name: Run browser regression
+        run: npm run test:browser
       - name: Run all task contracts
         run: npm run tasks:run
       - name: Run all rendered task pipelines

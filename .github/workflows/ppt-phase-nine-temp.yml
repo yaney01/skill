@@ -3,11 +3,11 @@ name: PPT phase nine presenter mode verification
 on:
   pull_request:
     branches:
-      - agent/ppt-phase-nine-diagnostic-base-2
+      - agent/ppt-phase-nine-diagnostic-base-3
   workflow_dispatch:
 
 jobs:
-  editor-diagnostics:
+  editor-combined:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -20,26 +20,5 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npx playwright install chromium
-      - name: Text persistence
-        id: text
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="text edits persist" tests/editor.test.mjs
-      - name: Image replacement
-        id: image
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="image replacement" tests/editor.test.mjs
-      - name: Edited HTML download
-        id: download
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="Ctrl.S downloads" tests/editor.test.mjs
-      - name: Fail on editor diagnostic failure
-        if: always()
-        env:
-          TEXT: ${{ steps.text.outcome }}
-          IMAGE: ${{ steps.image.outcome }}
-          DOWNLOAD: ${{ steps.download.outcome }}
-        run: |
-          printf 'text=%s image=%s download=%s\n' "$TEXT" "$IMAGE" "$DOWNLOAD"
-          test "$TEXT" = success
-          test "$IMAGE" = success
-          test "$DOWNLOAD" = success
+      - name: Run complete editor regression
+        run: node --test --test-concurrency=1 tests/editor.test.mjs

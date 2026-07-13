@@ -20,6 +20,7 @@
       "purpose": "hook",
       "layout": "cover",
       "headline": "AI 广告生产的新工作流",
+      "notes": { "speaker": "先说明这不是一次单纯的 AI 出图分享，而是一次生产系统升级。", "durationSeconds": 35, "private": true },
       "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
     },
     {
@@ -27,6 +28,7 @@
       "purpose": "key-claim",
       "layout": "statement",
       "headline": "效率问题，不是生成得不够快，而是决策链仍然是手工的。",
+      "notes": { "speaker": "这里停顿一下。生成速度已经提升，但需求解释、审核和返工仍然串行。", "durationSeconds": 45, "private": true },
       "visual": { "type": "intentional-text", "required": false, "status": "ready", "source": "css", "role": "typography" }
     },
     {
@@ -34,6 +36,7 @@
       "purpose": "section-reset",
       "layout": "section",
       "headline": "旧流程的瓶颈藏在交接处",
+      "notes": { "speaker": "接下来从工作流交接的角度拆解问题，而不是继续讨论模型能力。", "durationSeconds": 25, "private": true },
       "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
     },
     {
@@ -41,6 +44,7 @@
       "purpose": "target",
       "layout": "data-hero",
       "headline": "压缩的不是设计时间，而是等待与返工",
+      "notes": { "speaker": "3 小时是示例目标。重点是缩短从需求到可验证结果的总周期。", "durationSeconds": 50, "private": true },
       "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
     },
     {
@@ -48,6 +52,7 @@
       "purpose": "compare",
       "layout": "comparison",
       "headline": "从串行交接，改成同一上下文中的并行协作",
+      "notes": { "speaker": "对比两边时强调：变化不只是加入 AI，而是让规则和审核提前进入流程。", "durationSeconds": 75, "private": true },
       "visual": { "type": "comparison-diagram", "required": true, "status": "ready", "source": "html", "role": "comparison", "slot": "16:9" }
     },
     {
@@ -55,6 +60,7 @@
       "purpose": "explain",
       "layout": "image-right",
       "headline": "一条可观测的创意生产链",
+      "notes": { "speaker": "逐个指出输入、输出和验收条件。Agent 执行，人定义判断标准。", "durationSeconds": 70, "private": true },
       "visual": { "type": "workflow-diagram", "required": true, "status": "ready", "source": "supplied", "role": "explanation", "slot": "16:9", "path": "images/workflow-map.svg", "alt": "AI 广告生产工作流示意图" }
     },
     {
@@ -62,6 +68,7 @@
       "purpose": "explain",
       "layout": "three-column",
       "headline": "把一个万能 Agent 拆成三个清晰角色",
+      "notes": { "speaker": "三个角色可以由同一模型承担，但职责、输入和验收条件必须分开。", "durationSeconds": 65, "private": true },
       "visual": { "type": "html-visualization", "required": true, "status": "ready", "source": "html", "role": "explanation" }
     },
     {
@@ -69,6 +76,7 @@
       "purpose": "evidence",
       "layout": "evidence-grid",
       "headline": "让质量要求变成可检查的证据",
+      "notes": { "speaker": "说明每一类证据如何进入 QA，而不是只靠设计师主观判断。", "durationSeconds": 70, "private": true },
       "visual": { "type": "html-visualization", "required": true, "status": "ready", "source": "html", "role": "evidence" }
     },
     {
@@ -76,6 +84,7 @@
       "purpose": "explain",
       "layout": "process",
       "headline": "把生成、验证和修正连成闭环",
+      "notes": { "speaker": "强调失败只重做局部环节，避免每次从头生成整套素材。", "durationSeconds": 55, "private": true },
       "visual": { "type": "workflow-diagram", "required": true, "status": "ready", "source": "html", "role": "explanation" }
     },
     {
@@ -83,6 +92,7 @@
       "purpose": "key-claim",
       "layout": "quote",
       "headline": "AI 不替代判断，而是让判断更早进入流程。",
+      "notes": { "speaker": "这句话是整场分享的原则页，读完后停顿两秒。", "durationSeconds": 35, "private": true },
       "visual": { "type": "intentional-text", "required": false, "status": "ready", "source": "css", "role": "typography" }
     },
     {
@@ -90,6 +100,7 @@
       "purpose": "plan",
       "layout": "timeline",
       "headline": "用四个阶段建立团队级工作流",
+      "notes": { "speaker": "不要一次重做全部流程，从一个高频、规则明确的场景开始。", "durationSeconds": 70, "private": true },
       "visual": { "type": "timeline", "required": true, "status": "ready", "source": "html", "role": "explanation" }
     },
     {
@@ -97,6 +108,7 @@
       "purpose": "close",
       "layout": "closing",
       "headline": "从一次成功，走向可复用的系统。",
+      "notes": { "speaker": "收束到四项行动，并提出选择一个试点任务作为下一步。", "durationSeconds": 45, "private": true },
       "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
     }
   ]

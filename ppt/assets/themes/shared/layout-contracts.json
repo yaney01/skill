@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "manifestVersion": 1,
+  "layouts": {
+    "cover": {
+      "name": "Cover",
+      "purpose": "title-and-positioning",
+      "variants": ["standard", "visual-thesis"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "title", "type": "text", "required": true, "maxCharsZh": 26},
+        {"id": "subtitle", "type": "text", "required": false, "maxCharsZh": 60},
+        {"id": "meta", "type": "text", "required": false, "maxItems": 2}
+      ],
+      "imageSlots": ["21:9", "16:9"]
+    },
+    "section": {
+      "name": "Section",
+      "purpose": "chapter-transition",
+      "variants": ["numbered", "labelled"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "title", "type": "text", "required": true, "maxCharsZh": 24},
+        {"id": "label", "type": "text", "required": false, "maxCharsZh": 18}
+      ],
+      "imageSlots": []
+    },
+    "statement": {
+      "name": "Statement",
+      "purpose": "key-claim",
+      "variants": ["claim", "number"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "claim", "type": "text", "required": true, "maxCharsZh": 42},
+        {"id": "support", "type": "text", "required": false, "maxCharsZh": 50}
+      ],
+      "imageSlots": []
+    },
+    "split": {
+      "name": "Split",
+      "purpose": "explanation-plus-visual",
+      "variants": ["5-7", "6-6", "7-5"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "copy", "type": "text", "required": true, "maxBullets": 5},
+        {"id": "visual", "type": "visual", "required": true}
+      ],
+      "imageSlots": ["16:10", "3:2", "4:3"]
+    },
+    "image-focus": {
+      "name": "Image Focus",
+      "purpose": "visual-evidence",
+      "variants": ["wide", "full-bleed", "portrait-pair"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "visual", "type": "visual", "required": true},
+        {"id": "caption", "type": "text", "required": false, "maxCharsZh": 48}
+      ],
+      "imageSlots": ["21:9", "16:10", "16:9", "4:3", "3:2"]
+    },
+    "three-up": {
+      "name": "Three Up",
+      "purpose": "parallel-three-items",
+      "variants": ["equal", "weighted"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "items", "type": "collection", "required": true, "minItems": 3, "maxItems": 3, "maxCharsZhPerItem": 45}
+      ],
+      "imageSlots": ["1:1", "4:3"]
+    },
+    "four-grid": {
+      "name": "Four Grid",
+      "purpose": "parallel-four-items",
+      "variants": ["equal", "priority"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "items", "type": "collection", "required": true, "minItems": 4, "maxItems": 4, "maxCharsZhPerItem": 30}
+      ],
+      "imageSlots": ["1:1", "4:3"]
+    },
+    "metrics": {
+      "name": "Metrics",
+      "purpose": "kpi-summary",
+      "variants": ["single", "triple", "quad"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "metrics", "type": "collection", "required": true, "minItems": 1, "maxItems": 4}
+      ],
+      "imageSlots": []
+    },
+    "comparison": {
+      "name": "Comparison",
+      "purpose": "before-after-or-options",
+      "variants": ["duo", "before-after"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "left", "type": "content", "required": true, "maxItems": 5},
+        {"id": "right", "type": "content", "required": true, "maxItems": 5},
+        {"id": "criteria", "type": "text", "required": false, "maxItems": 5}
+      ],
+      "imageSlots": ["4:3", "1:1"]
+    },
+    "timeline": {
+      "name": "Timeline",
+      "purpose": "chronological-change",
+      "variants": ["horizontal", "phased"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "milestones", "type": "collection", "required": true, "minItems": 3, "maxItems": 7}
+      ],
+      "imageSlots": []
+    },
+    "process": {
+      "name": "Process",
+      "purpose": "workflow-sequence",
+      "variants": ["linear", "loop", "gated"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "steps", "type": "collection", "required": true, "minItems": 3, "maxItems": 6}
+      ],
+      "imageSlots": []
+    },
+    "chart": {
+      "name": "Chart",
+      "purpose": "quantitative-evidence",
+      "variants": ["bar", "line", "single-series"],
+      "visualPolicy": "required",
+      "slots": [
+        {"id": "conclusion", "type": "text", "required": true, "maxCharsZh": 36},
+        {"id": "plot", "type": "chart", "required": true},
+        {"id": "source", "type": "text", "required": true, "maxCharsZh": 60}
+      ],
+      "imageSlots": []
+    },
+    "quote": {
+      "name": "Quote",
+      "purpose": "testimony-or-principle",
+      "variants": ["text", "portrait"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "quote", "type": "text", "required": true, "maxCharsZh": 70},
+        {"id": "attribution", "type": "text", "required": true, "maxCharsZh": 30},
+        {"id": "portrait", "type": "visual", "required": false}
+      ],
+      "imageSlots": ["1:1"]
+    },
+    "closing": {
+      "name": "Closing",
+      "purpose": "synthesis-or-action",
+      "variants": ["takeaway", "decision", "contact"],
+      "visualPolicy": "optional",
+      "slots": [
+        {"id": "takeaway", "type": "text", "required": true, "maxCharsZh": 36},
+        {"id": "action", "type": "text", "required": false, "maxCharsZh": 24}
+      ],
+      "imageSlots": []
+    }
+  }
+}

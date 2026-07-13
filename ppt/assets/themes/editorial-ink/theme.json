@@ -2,18 +2,25 @@
   "id": "editorial-ink",
   "name": "Editorial Ink",
   "summary": "Warm editorial layouts for research, narrative, culture, and premium industry analysis.",
+  "tier": "core",
+  "layoutManifest": "layout-manifest.json",
   "layouts": [
     "cover",
     "section",
     "statement",
     "split",
-    "grid",
+    "image-focus",
+    "three-up",
+    "four-grid",
+    "metrics",
+    "comparison",
+    "timeline",
+    "process",
+    "chart",
+    "quote",
     "closing"
   ],
   "stage": "1920x1080",
-  "languageSupport": [
-    "zh-CN",
-    "en"
-  ],
-  "version": 1
+  "languageSupport": ["zh-CN", "en"],
+  "version": 2
 }

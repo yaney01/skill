@@ -35,7 +35,7 @@ test('Escape overview and G jump navigate the audience deck', async () => {
   }
 });
 
-test('P opens a synchronized presenter window with notes, previews, and timer', async () => {
+test('P opens a synchronized presenter window with notes, previews, timer, and refresh recovery', async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     const { context, page } = await openBundledAudience(browser);
@@ -58,6 +58,11 @@ test('P opens a synchronized presenter window with notes, previews, and timer', 
     await page.keyboard.press('End');
     await presenter.waitForFunction(() => window.htmlPptPresenter.index === 11);
     assert.match(await presenter.locator('.html-ppt-presenter-notes p').innerText(), /四项行动/);
+    assert.equal(await presenter.locator('.html-ppt-presenter-notes .counter').innerText(), '12 / 12');
+
+    await presenter.reload({ waitUntil: 'load' });
+    await presenter.waitForFunction(() => Boolean(window.htmlPptPresenter?.ui));
+    await presenter.waitForFunction(() => window.htmlPptPresenter.index === 11, null, { timeout: 7000 });
     assert.equal(await presenter.locator('.html-ppt-presenter-notes .counter').innerText(), '12 / 12');
 
     await presenter.close();

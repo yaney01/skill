@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
+import { validateRegisteredLayouts } from './lib/layout-registry.mjs';
 import { readJson, validateManifestObject } from './lib/visual-contract.mjs';
 
 function usage(code = 0) {
@@ -20,7 +21,6 @@ const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h')) usage(0);
 const manifestFile = args[0];
 if (!manifestFile || manifestFile.startsWith('--')) usage(2);
-
 function option(name) {
   const index = args.indexOf(name);
   if (index < 0) return null;
@@ -36,16 +36,13 @@ const manifestPath = path.resolve(manifestFile);
 const htmlOption = option('--html');
 const reportOption = option('--json');
 const strict = args.includes('--strict');
-
 if (!fs.existsSync(manifestPath)) {
   console.error(`Manifest not found: ${manifestPath}`);
   process.exit(2);
 }
-
 let manifest;
-try {
-  manifest = readJson(manifestPath);
-} catch (error) {
+try { manifest = readJson(manifestPath); }
+catch (error) {
   console.error(`Invalid JSON: ${error.message}`);
   process.exit(1);
 }
@@ -62,6 +59,8 @@ if (htmlOption) {
 }
 
 const result = validateManifestObject(manifest, { manifestPath, html, htmlPath, strict });
+const layoutResult = validateRegisteredLayouts(manifest, manifestPath);
+result.findings.push(...layoutResult.findings);
 for (const finding of result.findings) {
   const prefix = finding.level === 'error' ? 'ERROR' : 'WARN';
   const slide = finding.slide ? ` [${finding.slide}]` : '';
@@ -70,6 +69,7 @@ for (const finding of result.findings) {
 
 console.log('Manifest validation complete');
 console.log(`Slides: ${result.summary.slides}`);
+console.log(`Registered layouts: ${layoutResult.registered || 'not assigned'}`);
 console.log(`Visual slides: ${result.summary.visualSlides}`);
 console.log(`Evidence visual slides: ${result.summary.evidenceSlides}`);
 console.log(`Text-only slides: ${result.summary.textOnlySlides}`);
@@ -81,6 +81,8 @@ const report = {
   manifest: manifestPath,
   html: htmlPath,
   strict,
+  layoutRegistry: manifest.layoutRegistry || null,
+  registeredLayouts: layoutResult.registered,
   summary: result.summary,
   findings: result.findings,
 };

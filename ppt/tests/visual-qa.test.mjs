@@ -42,7 +42,7 @@ test('visual QA blocks a speaker-led run of plain text slides', () => {
 test('visual QA recognizes evidence semantics declared on the slide root', () => {
   const directory = temporaryDirectory('html-ppt-visual-qa-root-semantics-');
   const report = path.join(directory, 'report.json');
-  const html = `<!doctype html><html><style>.slide{width:1920px;height:1080px;position:absolute;visibility:hidden}.slide.active,.slide.visible{visibility:visible}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}.card{min-height:240px;border:2px solid #111}</style><body><main><section class="slide active visible" data-slide-id="slide-01" data-layout="three-up" data-visual-required="true" data-visual-type="html-visualization" data-visual-role="explanation"><h2>三个问题</h2><div class="grid"><div class="card">重复生产</div><div class="card">质量波动</div><div class="card">反馈失真</div></div></section></main></body></html>`;
+  const html = `<!doctype html><html><style>.slide{width:1920px;height:1080px;position:absolute;visibility:hidden}.slide.active,.slide.visible{visibility:visible}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}.card{min-height:240px;border:2px solid #111}</style><body><main><section class="slide active visible" data-slide-id="slide-01" data-layout="three-up" data-visual-required="true" data-visual-type="html-visualization" data-visual-role="explanation"><h2>三个问题</h2><div class="grid"><div class="card">重复生产</div><div class="card">质量波动</div><div class="card">反馈失真</div></div></section><section class="slide" data-slide-id="slide-02" data-layout="four-grid" data-visual-required="true" data-visual-type="html-visualization" data-visual-role="explanation"><h2>四项能力</h2><div class="grid"><div class="card">治理</div><div class="card">生产</div><div class="card">衡量</div><div class="card">学习</div></div></section></main></body></html>`;
   const manifest = {
     manifestVersion: 2,
     id: 'root-visual-semantics',
@@ -50,13 +50,22 @@ test('visual QA recognizes evidence semantics declared on the slide root', () =>
     language: 'zh-CN',
     density: 'speaker-led',
     visualStrategy: { mode: 'diagram-first', targetCoverage: 1, targetEvidenceCoverage: 1, maxConsecutiveTextOnly: 0 },
-    slides: [{
-      id: 'slide-01',
-      purpose: 'explain',
-      layout: 'three-up',
-      headline: '三个问题',
-      visual: { type: 'html-visualization', required: true, status: 'ready', source: 'html', role: 'explanation' },
-    }],
+    slides: [
+      {
+        id: 'slide-01',
+        purpose: 'explain',
+        layout: 'three-up',
+        headline: '三个问题',
+        visual: { type: 'html-visualization', required: true, status: 'ready', source: 'html', role: 'explanation' },
+      },
+      {
+        id: 'slide-02',
+        purpose: 'explain',
+        layout: 'four-grid',
+        headline: '四项能力',
+        visual: { type: 'html-visualization', required: true, status: 'ready', source: 'html', role: 'explanation' },
+      },
+    ],
   };
   const htmlFile = path.join(directory, 'index.html');
   const manifestFile = path.join(directory, 'deck.json');
@@ -65,8 +74,8 @@ test('visual QA recognizes evidence semantics declared on the slide root', () =>
   const result = runNode(['scripts/qa-visual.mjs', htmlFile, '--manifest', manifestFile, '--json', report, '--strict']);
   assert.equal(result.status, 0, combinedOutput(result));
   const data = JSON.parse(fs.readFileSync(report, 'utf8'));
-  assert.equal(data.summary.visualSlides, 1);
-  assert.equal(data.summary.evidenceVisualSlides, 1);
+  assert.equal(data.summary.visualSlides, 2);
+  assert.equal(data.summary.evidenceVisualSlides, 2);
   assert.equal(data.findings.length, 0);
 });
 

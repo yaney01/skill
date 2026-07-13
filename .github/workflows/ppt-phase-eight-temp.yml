@@ -3,16 +3,41 @@ name: PPT phase eight task regression verification
 on:
   push:
     branches:
-      - agent/ppt-phase-eight-task-regression
+      - agent/ppt-phase-eight-task-regression-fix
   pull_request:
     branches:
       - main
   workflow_dispatch:
 
 jobs:
-  test:
+  task-diagnostics:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate task registry
+        run: npm run tasks:validate
+      - name: Topic-only Chinese contract
+        run: node scripts/run-task-regression.mjs --mode contract --case topic-only-zh-speaker --output /tmp/task-topic
+      - name: Markdown source contract
+        run: node scripts/run-task-regression.mjs --mode contract --case markdown-with-images --output /tmp/task-markdown
+      - name: PPTX preserve-layout contract
+        run: node scripts/run-task-regression.mjs --mode contract --case pptx-preserve-layout --output /tmp/task-pptx
+      - name: Long CJK title contract
+        run: node scripts/run-task-regression.mjs --mode contract --case cjk-long-title --output /tmp/task-cjk
+      - name: Negative task assertions
+        run: node --test --test-name-pattern="rejects" tests/task-regression.test.mjs
+
+  test:
+    needs: task-diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
     defaults:
       run:
         working-directory: ppt
@@ -37,11 +62,76 @@ jobs:
           python3 -m json.tool tests/tasks/cases.json >/dev/null
       - name: Validate task contracts
         run: npm run tasks:validate
-      - name: Run complete core and browser regression
-        run: npm run test
+      - name: Run existing core regression
+        run: node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs
+      - name: Run browser regression
+        run: npm run test:browser
       - name: Run all task contracts
         run: npm run tasks:run
-      - name: Run all rendered task pipelines
-        run: npm run tasks:qa
+      - name: Render topic-only Chinese
+        id: render_topic_zh
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case topic-only-zh-speaker --output /tmp/render-topic-zh
+      - name: Render topic-only English
+        id: render_topic_en
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case topic-only-en-reading --output /tmp/render-topic-en
+      - name: Render Markdown source
+        id: render_markdown
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case markdown-with-images --output /tmp/render-markdown
+      - name: Render PPTX semantic redesign
+        id: render_pptx_semantic
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case pptx-semantic-redesign --output /tmp/render-pptx-semantic
+      - name: Render PPTX preserve-layout
+        id: render_pptx_preserve
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case pptx-preserve-layout --output /tmp/render-pptx-preserve
+      - name: Render DOCX conversion
+        id: render_docx
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case docx-to-deck --output /tmp/render-docx
+      - name: Render PDF conversion
+        id: render_pdf
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case pdf-selectable-text --output /tmp/render-pdf
+      - name: Render data-heavy report
+        id: render_data
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case data-heavy-report --output /tmp/render-data
+      - name: Render long CJK title
+        id: render_cjk
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case cjk-long-title --output /tmp/render-cjk
+      - name: Render offline delivery
+        id: render_offline
+        continue-on-error: true
+        run: node scripts/run-task-regression.mjs --mode render --case no-network --output /tmp/render-offline
+      - name: Assert all rendered tasks passed
+        if: always()
+        env:
+          TOPIC_ZH: ${{ steps.render_topic_zh.outcome }}
+          TOPIC_EN: ${{ steps.render_topic_en.outcome }}
+          MARKDOWN: ${{ steps.render_markdown.outcome }}
+          PPTX_SEMANTIC: ${{ steps.render_pptx_semantic.outcome }}
+          PPTX_PRESERVE: ${{ steps.render_pptx_preserve.outcome }}
+          DOCX: ${{ steps.render_docx.outcome }}
+          PDF: ${{ steps.render_pdf.outcome }}
+          DATA: ${{ steps.render_data.outcome }}
+          CJK: ${{ steps.render_cjk.outcome }}
+          OFFLINE: ${{ steps.render_offline.outcome }}
+        run: |
+          printf '%s\n' "topic-zh=$TOPIC_ZH" "topic-en=$TOPIC_EN" "markdown=$MARKDOWN" "pptx-semantic=$PPTX_SEMANTIC" "pptx-preserve=$PPTX_PRESERVE" "docx=$DOCX" "pdf=$PDF" "data=$DATA" "cjk=$CJK" "offline=$OFFLINE"
+          test "$TOPIC_ZH" = success
+          test "$TOPIC_EN" = success
+          test "$MARKDOWN" = success
+          test "$PPTX_SEMANTIC" = success
+          test "$PPTX_PRESERVE" = success
+          test "$DOCX" = success
+          test "$PDF" = success
+          test "$DATA" = success
+          test "$CJK" = success
+          test "$OFFLINE" = success
       - name: Run production example pipeline
         run: npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html

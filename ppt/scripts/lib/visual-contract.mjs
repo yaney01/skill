@@ -71,13 +71,14 @@ export function extractHtmlSlides(html) {
     const body = html.slice(contentStart, end);
     const attrs = parseAttributes(match[1]);
     const headlineMatch = body.match(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/i);
+    const visualScope = `${match[1]} ${body}`;
     return {
       id: attrs['data-slide-id'] || `slide-${String(index + 1).padStart(2, '0')}`,
       layout: attrs['data-layout'] || 'unassigned',
       attrs,
       body,
       headline: stripHtml(headlineMatch?.[1] || ''),
-      hasVisualMarkup: /<(?:img|svg|canvas|video)\b|data-(?:visual|visual-type|diagram|chart|image-slot)\s*=|class\s*=\s*["'][^"']*(?:diagram|chart|visual|image-shell|timeline|compare|metric|gallery|media|evidence|roles|loop)[^"']*["']/i.test(body),
+      hasVisualMarkup: /<(?:img|svg|canvas|video)\b|data-(?:visual|visual-type|diagram|chart|image-slot)\s*=|class\s*=\s*["'][^"']*(?:diagram|chart|visual|image-shell|timeline|compare|metric|gallery|media|evidence|roles|loop)[^"']*["']/i.test(visualScope),
     };
   });
 }

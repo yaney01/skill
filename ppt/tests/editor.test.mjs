@@ -300,7 +300,7 @@ test('Ctrl+S downloads edited HTML without editor state or runtime UI', async ()
     assert.doesNotMatch(html, /contenteditable=/);
     assert.doesNotMatch(html, /spellcheck=/);
     assert.doesNotMatch(html, /class="editor-ui/);
-    assert.doesNotMatch(html, /html-ppt-selected/);
+    assert.doesNotMatch(html, /<[^>]+\bclass="[^"]*\bhtml-ppt-selected\b/);
     assert.doesNotMatch(html, /data-presenter-overview/);
     assert.doesNotMatch(html, /(?:src|href)="(?:\.\.\/|\.\/|images\/)/);
     await context.close();

@@ -325,8 +325,7 @@
     }
 
     redo() {
-      clearTimeout(this.saveTimer);
-      this.saveTimer = null;
+      this.commit();
       if (this.historyIndex >= this.history.length - 1) return;
       this.applyHistory(this.historyIndex + 1, 'Redone');
     }
@@ -372,12 +371,13 @@
           normalized[id] = { type: 'text', html: imported ? this.sanitizeHtml(edit.html) : edit.html };
         }
         if (edit.type === 'image' && element.dataset.editable === 'image' && typeof edit.src === 'string' && this.safeImageSource(edit.src)) {
-          const fit = ['cover', 'contain', ''].includes(edit.fit) ? edit.fit : '';
-          const focus = typeof edit.focus === 'string' && edit.focus.length <= 64 && !/[;{}]/.test(edit.focus) ? edit.focus : '';
+          const current = this.captureElement(element);
+          const fit = typeof edit.fit === 'string' && ['cover', 'contain', ''].includes(edit.fit) ? edit.fit : current.fit;
+          const focus = typeof edit.focus === 'string' && edit.focus.length <= 64 && !/[;{}]/.test(edit.focus) ? edit.focus : current.focus;
           normalized[id] = {
             type: 'image',
             src: edit.src,
-            alt: typeof edit.alt === 'string' ? edit.alt.slice(0, 2000) : '',
+            alt: typeof edit.alt === 'string' ? edit.alt.slice(0, 2000) : current.alt,
             fit,
             focus,
           };

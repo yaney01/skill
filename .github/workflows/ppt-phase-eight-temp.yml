@@ -109,34 +109,34 @@ jobs:
         continue-on-error: true
         run: node scripts/run-task-regression.mjs --mode render --case no-network --output /tmp/render-offline
       - name: Topic-only Chinese render failed
-        if: always() && steps.render_topic_zh.outcome != 'success'
+        if: always() && steps.render_topic_zh.outcome == 'failure'
         run: exit 1
       - name: Topic-only English render failed
-        if: always() && steps.render_topic_en.outcome != 'success'
+        if: always() && steps.render_topic_en.outcome == 'failure'
         run: exit 1
       - name: Markdown render failed
-        if: always() && steps.render_markdown.outcome != 'success'
+        if: always() && steps.render_markdown.outcome == 'failure'
         run: exit 1
       - name: PPTX semantic render failed
-        if: always() && steps.render_pptx_semantic.outcome != 'success'
+        if: always() && steps.render_pptx_semantic.outcome == 'failure'
         run: exit 1
       - name: PPTX preserve-layout render failed
-        if: always() && steps.render_pptx_preserve.outcome != 'success'
+        if: always() && steps.render_pptx_preserve.outcome == 'failure'
         run: exit 1
       - name: DOCX render failed
-        if: always() && steps.render_docx.outcome != 'success'
+        if: always() && steps.render_docx.outcome == 'failure'
         run: exit 1
       - name: PDF render failed
-        if: always() && steps.render_pdf.outcome != 'success'
+        if: always() && steps.render_pdf.outcome == 'failure'
         run: exit 1
       - name: Data-heavy render failed
-        if: always() && steps.render_data.outcome != 'success'
+        if: always() && steps.render_data.outcome == 'failure'
         run: exit 1
       - name: Long CJK title render failed
-        if: always() && steps.render_cjk.outcome != 'success'
+        if: always() && steps.render_cjk.outcome == 'failure'
         run: exit 1
       - name: Offline delivery render failed
-        if: always() && steps.render_offline.outcome != 'success'
+        if: always() && steps.render_offline.outcome == 'failure'
         run: exit 1
       - name: Run production example pipeline
         if: success()

@@ -108,30 +108,36 @@ jobs:
         id: render_offline
         continue-on-error: true
         run: node scripts/run-task-regression.mjs --mode render --case no-network --output /tmp/render-offline
-      - name: Assert all rendered tasks passed
-        if: always()
-        env:
-          TOPIC_ZH: ${{ steps.render_topic_zh.outcome }}
-          TOPIC_EN: ${{ steps.render_topic_en.outcome }}
-          MARKDOWN: ${{ steps.render_markdown.outcome }}
-          PPTX_SEMANTIC: ${{ steps.render_pptx_semantic.outcome }}
-          PPTX_PRESERVE: ${{ steps.render_pptx_preserve.outcome }}
-          DOCX: ${{ steps.render_docx.outcome }}
-          PDF: ${{ steps.render_pdf.outcome }}
-          DATA: ${{ steps.render_data.outcome }}
-          CJK: ${{ steps.render_cjk.outcome }}
-          OFFLINE: ${{ steps.render_offline.outcome }}
-        run: |
-          printf '%s\n' "topic-zh=$TOPIC_ZH" "topic-en=$TOPIC_EN" "markdown=$MARKDOWN" "pptx-semantic=$PPTX_SEMANTIC" "pptx-preserve=$PPTX_PRESERVE" "docx=$DOCX" "pdf=$PDF" "data=$DATA" "cjk=$CJK" "offline=$OFFLINE"
-          test "$TOPIC_ZH" = success
-          test "$TOPIC_EN" = success
-          test "$MARKDOWN" = success
-          test "$PPTX_SEMANTIC" = success
-          test "$PPTX_PRESERVE" = success
-          test "$DOCX" = success
-          test "$PDF" = success
-          test "$DATA" = success
-          test "$CJK" = success
-          test "$OFFLINE" = success
+      - name: Topic-only Chinese render failed
+        if: always() && steps.render_topic_zh.outcome == 'failure'
+        run: exit 1
+      - name: Topic-only English render failed
+        if: always() && steps.render_topic_en.outcome == 'failure'
+        run: exit 1
+      - name: Markdown render failed
+        if: always() && steps.render_markdown.outcome == 'failure'
+        run: exit 1
+      - name: PPTX semantic render failed
+        if: always() && steps.render_pptx_semantic.outcome == 'failure'
+        run: exit 1
+      - name: PPTX preserve-layout render failed
+        if: always() && steps.render_pptx_preserve.outcome == 'failure'
+        run: exit 1
+      - name: DOCX render failed
+        if: always() && steps.render_docx.outcome == 'failure'
+        run: exit 1
+      - name: PDF render failed
+        if: always() && steps.render_pdf.outcome == 'failure'
+        run: exit 1
+      - name: Data-heavy render failed
+        if: always() && steps.render_data.outcome == 'failure'
+        run: exit 1
+      - name: Long CJK title render failed
+        if: always() && steps.render_cjk.outcome == 'failure'
+        run: exit 1
+      - name: Offline delivery render failed
+        if: always() && steps.render_offline.outcome == 'failure'
+        run: exit 1
       - name: Run production example pipeline
+        if: success()
         run: npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html

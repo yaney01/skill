@@ -1,0 +1,43 @@
+name: PPT phase nine presenter verification
+
+on:
+  push:
+    branches:
+      - agent/ppt-phase-nine-presenter
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package.json
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: npm install
+      - run: npx playwright install chromium
+      - name: Syntax and schema checks
+        run: |
+          node --check assets/runtime/deck-runtime.js
+          node --check scripts/bundle-html.mjs
+          node --check tests/presenter.test.mjs
+          python3 -m json.tool package.json >/dev/null
+          python3 -m json.tool schemas/deck.schema.json >/dev/null
+      - name: Presenter regression
+        run: npm run test:presenter
+      - name: Complete regression
+        run: npm run ci
+      - name: Render all task pipelines
+        run: npm run tasks:qa
+      - name: Verify bundled manifest
+        run: |
+          grep -q 'id="deckManifest"' examples/ai-ad-workflow/dist/ai-ad-workflow.html
+          ! grep -q 'src="deck.json"' examples/ai-ad-workflow/dist/ai-ad-workflow.html

@@ -16,5 +16,7 @@ This skill is an original cross-agent implementation assembled for `yaney01/skil
 ## Clean-room design reference
 
 - [`op7418/guizang-ppt-skill`](https://github.com/op7418/guizang-ppt-skill), also studied through [`yaney01/guizang-ppt-skill`](https://github.com/yaney01/guizang-ppt-skill).
-- It inspired general ideas around Chinese typography discipline, image-slot ratios, editorial/Swiss visual territories, layout rhythm, and checklist-driven QA.
-- No AGPL source code, templates, or assets are copied into this MIT-licensed skill. The corresponding rules and implementation were independently written.
+- It inspired Chinese typography discipline, image-slot ratios, editorial/Swiss visual territories, light/dark layout rhythm, and checklist-driven QA.
+- `assets/themes/shared/cjk.css` independently implements the corresponding Chinese font roles, title/body tracking, line-height, strict line breaking, punctuation containment, mixed-script spacing support, and no-wrap utilities.
+- `assets/themes/guizang-magazine/` and `assets/themes/guizang-swiss/` are optional clean-room backup themes written specifically for this repository.
+- No AGPL source code, templates, scripts, WebGL shaders, or assets are copied into this MIT-licensed skill. Theme markup and CSS were independently written from public design descriptions and general presentation-design principles.

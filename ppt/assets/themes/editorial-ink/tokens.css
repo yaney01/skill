@@ -1,0 +1,13 @@
+:root {
+  --theme-stage: #1e1b18;
+  --theme-paper: #f2eadb;
+  --theme-ink: #221f1b;
+  --theme-muted: #6f675e;
+  --theme-line: #bdb2a1;
+  --theme-accent: #b23a2b;
+  --theme-accent-2: #44594b;
+  --theme-display: Georgia, "Songti SC", "STSong", serif;
+  --theme-body: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --theme-serif: Georgia, "Songti SC", "STSong", serif;
+  --theme-gutter: 122px;
+}

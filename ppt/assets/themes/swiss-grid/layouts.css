@@ -1,0 +1,42 @@
+body { font-family: var(--theme-body); color: var(--theme-ink); }
+.slide { background: var(--theme-paper); }
+.theme-canvas { position: relative; width: 100%; height: 100%; padding: 82px var(--theme-gutter) 78px; overflow: hidden; }
+.theme-canvas::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .55;
+  background-image: linear-gradient(rgb(17 19 24 / .07) 1px, transparent 1px), linear-gradient(90deg, rgb(17 19 24 / .07) 1px, transparent 1px);
+  background-size: 120px 120px;
+}
+.theme-canvas > * { position: relative; z-index: 1; }
+.theme-kicker { font: 700 20px/1 var(--theme-mono); letter-spacing: .13em; text-transform: uppercase; color: var(--theme-accent); }
+.theme-display { margin: 0; font: 800 112px/.93 var(--theme-display); letter-spacing: -.065em; }
+.theme-title { margin: 0; font: 800 72px/.98 var(--theme-display); letter-spacing: -.045em; }
+.theme-lead { margin: 0; font: 500 31px/1.48 var(--theme-body); color: var(--theme-muted); }
+.theme-folio { position: absolute; right: var(--theme-gutter); bottom: 42px; font: 700 18px/1 var(--theme-mono); }
+.theme-rule { height: 12px; width: 210px; background: var(--theme-accent); }
+.theme-cover { display: grid; grid-template-columns: 1.38fr .62fr; gap: 70px; align-items: center; height: 100%; }
+.theme-cover__title { max-width: 1240px; }
+.theme-cover__aside { height: 720px; padding-left: 42px; border-left: 2px solid var(--theme-ink); display: flex; flex-direction: column; justify-content: space-between; }
+.theme-cover__index { font: 800 170px/.8 var(--theme-display); letter-spacing: -.08em; color: var(--theme-accent); }
+.theme-section { height: 100%; display: grid; grid-template-columns: 440px 1fr; align-items: end; padding-bottom: 100px; }
+.theme-section__number { font: 800 330px/.72 var(--theme-display); letter-spacing: -.09em; color: var(--theme-accent); }
+.theme-section__copy { border-top: 6px solid var(--theme-ink); padding-top: 30px; }
+.theme-statement { height: 100%; display: grid; place-items: center; text-align: center; }
+.theme-statement__inner { max-width: 1520px; }
+.theme-statement__claim { margin: 32px 0 40px; font: 800 98px/1.02 var(--theme-display); letter-spacing: -.05em; }
+.theme-split { height: 100%; display: grid; grid-template-columns: 5fr 7fr; gap: 72px; align-items: center; }
+.theme-split__copy { display: grid; gap: 32px; }
+.theme-split__visual { height: 690px; border: 3px solid var(--theme-ink); background: var(--theme-white); padding: 36px; display: grid; grid-template: repeat(3,1fr)/repeat(4,1fr); gap: 18px; box-shadow: 22px 22px 0 var(--theme-accent); }
+.theme-split__visual span { border: 2px solid var(--theme-ink); display: grid; place-items: center; font: 700 22px/1 var(--theme-mono); }
+.theme-split__visual span:nth-child(2), .theme-split__visual span:nth-child(7) { grid-column: span 2; background: var(--theme-accent); color: white; }
+.theme-grid { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.theme-card { min-height: 520px; padding: 34px 30px; border-top: 12px solid var(--theme-accent); background: var(--theme-white); display: flex; flex-direction: column; }
+.theme-card:nth-child(2) { border-color: var(--theme-accent-2); }
+.theme-card:nth-child(3) { background: var(--theme-ink); color: white; }
+.theme-card__num { font: 800 72px/1 var(--theme-display); }
+.theme-card h3 { margin: 90px 0 22px; font: 800 39px/1.08 var(--theme-display); }
+.theme-card p { margin: 0; font: 500 25px/1.48 var(--theme-body); color: var(--theme-muted); }
+.theme-card:nth-child(3) p { color: #b8bec9; }
+.theme-closing { background: var(--theme-ink); color: white; }
+.theme-closing .theme-canvas::before { opacity: .18; background-image: linear-gradient(rgb(255 255 255 / .12) 1px,transparent 1px),linear-gradient(90deg,rgb(255 255 255 / .12) 1px,transparent 1px); }
+.theme-closing__layout { height: 100%; display: grid; grid-template-columns: 1fr 500px; gap: 80px; align-items: center; }
+.theme-closing__block { height: 660px; background: var(--theme-accent); color: white; display: grid; place-items: center; font: 800 180px/.8 var(--theme-display); }

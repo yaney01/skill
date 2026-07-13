@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yaney01/skill/ppt/schemas/deck.schema.json",
+  "title": "HTML PPT production manifest",
+  "type": "object",
+  "required": ["manifestVersion", "id", "title", "language", "density", "visualStrategy", "slides"],
+  "properties": {
+    "manifestVersion": { "type": "integer", "minimum": 2 },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "language": { "type": "string", "minLength": 2 },
+    "density": { "enum": ["speaker-led", "reading-first"] },
+    "style": { "type": "string" },
+    "themeName": { "type": ["string", "null"] },
+    "themeTier": { "type": ["string", "null"] },
+    "purpose": { "type": "string" },
+    "visualStrategy": {
+      "type": "object",
+      "required": ["mode", "targetCoverage", "targetEvidenceCoverage", "maxConsecutiveTextOnly"],
+      "properties": {
+        "mode": {
+          "enum": ["supplied", "generated", "diagram-first", "generated-and-diagram", "mixed", "typography-led"]
+        },
+        "targetCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "targetEvidenceCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maxConsecutiveTextOnly": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/slide" }
+    },
+    "createdAt": { "type": "string" },
+    "generator": { "type": "string" }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "slide": {
+      "type": "object",
+      "required": ["id", "purpose", "layout", "headline", "visual"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
+        "layout": { "type": "string", "minLength": 1 },
+        "headline": { "type": "string" },
+        "notes": { "type": "string" },
+        "visual": { "$ref": "#/$defs/visual" }
+      },
+      "additionalProperties": true
+    },
+    "visual": {
+      "type": "object",
+      "required": ["type", "required", "status", "source", "role"],
+      "properties": {
+        "type": {
+          "enum": [
+            "image",
+            "editorial-illustration",
+            "product-screenshot",
+            "data-chart",
+            "workflow-diagram",
+            "system-diagram",
+            "comparison-diagram",
+            "timeline",
+            "html-visualization",
+            "typographic",
+            "intentional-text",
+            "none"
+          ]
+        },
+        "required": { "type": "boolean" },
+        "status": { "enum": ["planned", "ready", "missing", "not-needed"] },
+        "source": { "enum": ["supplied", "generated", "screenshot", "css", "svg", "html", "chart", "none"] },
+        "role": { "enum": ["evidence", "explanation", "context", "comparison", "decoration", "typography"] },
+        "slot": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?\\s*[:x/]\\s*[0-9]+(?:\\.[0-9]+)?$" },
+        "path": { "type": "string" },
+        "alt": { "type": "string" },
+        "focus": { "type": "string" },
+        "prompt": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "required": { "const": true } } },
+          "then": { "properties": { "status": { "const": "ready" } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "ready" },
+              "source": { "enum": ["supplied", "generated", "screenshot"] }
+            },
+            "required": ["status", "source"]
+          },
+          "then": { "required": ["path"] }
+        }
+      ],
+      "additionalProperties": true
+    }
+  }
+}

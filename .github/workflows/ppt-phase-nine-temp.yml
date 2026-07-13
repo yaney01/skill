@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/ppt-phase-nine-presenter
+  pull_request:
+    branches:
+      - agent/ppt-phase-nine-verification-base
   workflow_dispatch:
 
 jobs:

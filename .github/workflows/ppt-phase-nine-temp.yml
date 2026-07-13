@@ -3,13 +3,13 @@ name: PPT phase nine presenter mode verification
 on:
   pull_request:
     branches:
-      - agent/ppt-phase-nine-diagnostic-base
+      - agent/ppt-phase-nine-diagnostic-base-5
   workflow_dispatch:
 
 jobs:
-  editor-diagnostics:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: ppt
@@ -18,28 +18,34 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package.json
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - run: npm install
       - run: npx playwright install chromium
-      - name: Text persistence
-        id: text
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="text edits persist" tests/editor.test.mjs
-      - name: Image replacement
-        id: image
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="image replacement" tests/editor.test.mjs
-      - name: Edited HTML download
-        id: download
-        continue-on-error: true
-        run: node --test --test-concurrency=1 --test-name-pattern="Ctrl.S downloads" tests/editor.test.mjs
-      - name: Fail on editor diagnostic failure
-        if: always()
-        env:
-          TEXT: ${{ steps.text.outcome }}
-          IMAGE: ${{ steps.image.outcome }}
-          DOWNLOAD: ${{ steps.download.outcome }}
+      - name: Syntax and schema checks
         run: |
-          printf 'text=%s image=%s download=%s\n' "$TEXT" "$IMAGE" "$DOWNLOAD"
-          test "$TEXT" = success
-          test "$IMAGE" = success
-          test "$DOWNLOAD" = success
+          node --check assets/runtime/deck-runtime.js
+          node --check assets/runtime/deck-editor.js
+          node --check scripts/bundle-html.mjs
+          node --check tests/presenter.test.mjs
+          node --check tests/editor.test.mjs
+          python3 -m json.tool schemas/deck.schema.json >/dev/null
+          python3 -m json.tool examples/ai-ad-workflow/deck.json >/dev/null
+      - name: Core regression
+        run: npm run test:core
+      - name: Runtime regression
+        run: node --test --test-concurrency=1 tests/runtime.test.mjs
+      - name: Presenter regression
+        run: npm run test:presenter
+      - name: Editor regression
+        run: node --test --test-concurrency=1 tests/editor.test.mjs
+      - name: Visual QA regression
+        run: node --test --test-concurrency=1 tests/visual-qa.test.mjs
+      - name: Task contracts
+        run: npm run tasks:validate && npm run tasks:run
+      - name: Production example
+        run: npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
+      - name: Rendered task regression
+        run: npm run tasks:qa

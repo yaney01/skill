@@ -39,8 +39,10 @@ jobs:
         run: npm run test:core
       - name: Runtime regression
         run: node --test --test-concurrency=1 tests/runtime.test.mjs
-      - name: Presenter regression
-        run: npm run test:presenter
+      - name: Presenter overview and jump regression
+        run: node --test --test-concurrency=1 --test-name-pattern="Escape overview" tests/presenter.test.mjs
+      - name: Presenter popup and reconnect regression
+        run: node --test --test-concurrency=1 --test-name-pattern="P opens" tests/presenter.test.mjs
       - name: Editor regression
         run: node --test --test-concurrency=1 tests/editor.test.mjs
       - name: Visual QA regression

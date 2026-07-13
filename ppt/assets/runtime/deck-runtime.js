@@ -13,6 +13,7 @@
       this.presenterChannel = null;
       this.presenterManifest = null;
       this.overview = null;
+      this.presenterPreview = new URLSearchParams(location.search).has('htmlppt-presenter-preview');
 
       if (!this.stage || this.slides.length === 0) {
         console.warn('[HTML PPT] Missing .deck-stage or .slide elements.');
@@ -22,7 +23,7 @@
       this.bind();
       this.scaleStage();
       this.show(this.index, { updateHash: false });
-      this.initPresenterChannel();
+      if (!this.presenterPreview) this.initPresenterChannel();
     }
 
     readInitialIndex() {
@@ -37,7 +38,7 @@
         const next = this.readInitialIndex();
         if (next !== this.index) this.show(next, { updateHash: false });
       });
-      window.addEventListener('message', (event) => this.onPresenterMessage(event.data));
+      if (!this.presenterPreview) window.addEventListener('message', (event) => this.onPresenterMessage(event.data));
       document.addEventListener('keydown', (event) => this.onKeydown(event));
       document.addEventListener('wheel', (event) => this.onWheel(event), { passive: false });
       document.addEventListener('touchstart', (event) => this.onTouchStart(event), { passive: true });
@@ -65,14 +66,14 @@
       } else if (event.key === 'End') {
         event.preventDefault();
         this.show(this.slides.length - 1);
-      } else if (event.key.toLowerCase() === 'p') {
+      } else if (!this.presenterPreview && event.key.toLowerCase() === 'p') {
         event.preventDefault();
         this.openPresenter();
-      } else if (event.key.toLowerCase() === 'g') {
+      } else if (!this.presenterPreview && event.key.toLowerCase() === 'g') {
         event.preventDefault();
         const value = window.prompt(`Go to slide (1–${this.slides.length})`);
         if (value) this.show(Number(value) - 1);
-      } else if (event.key === 'Escape') {
+      } else if (!this.presenterPreview && event.key === 'Escape') {
         event.preventDefault();
         this.toggleOverview();
       }
@@ -123,7 +124,7 @@
       document.dispatchEvent(new CustomEvent('htmlppt:slidechange', {
         detail: { index: this.index, count: this.slides.length, slide: this.slides[this.index] }
       }));
-      this.broadcastPresenterState();
+      if (!this.presenterPreview) this.broadcastPresenterState();
 
       if (updateHash) history.replaceState(null, '', `#slide-${this.index + 1}`);
     }
@@ -247,7 +248,6 @@
 
   window.HtmlPptDeck = HtmlPptDeck;
   window.addEventListener('DOMContentLoaded', () => {
-    if (new URLSearchParams(location.search).has('htmlppt-presenter-preview')) return;
     window.htmlPptDeck = new HtmlPptDeck(document);
   }, { once: true });
 })();

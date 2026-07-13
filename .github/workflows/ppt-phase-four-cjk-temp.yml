@@ -1,0 +1,52 @@
+name: PPT phase four CJK verification
+
+on:
+  push:
+    branches:
+      - agent/ppt-phase-four-themes
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package.json
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Run complete regression suite
+        shell: bash
+        run: |
+          set +e
+          npm run ci > phase-four-cjk-output.txt 2>&1
+          code=$?
+          cat phase-four-cjk-output.txt
+          exit $code
+      - name: Validate all themes
+        run: npm run themes:validate
+      - name: Render all theme QA
+        run: npm run themes:qa
+      - name: Bundle and validate every theme
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa/themes/bundled
+          for theme in swiss-grid editorial-ink technical-field guizang-magazine guizang-swiss; do
+            node scripts/bundle-html.mjs assets/themes/$theme/preview.html qa/themes/bundled/$theme.html
+            node scripts/validate-deck.mjs qa/themes/bundled/$theme.html
+          done
+      - name: Upload diagnostic output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-phase-four-cjk-output
+          path: ppt/phase-four-cjk-output.txt
+          if-no-files-found: warn

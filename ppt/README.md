@@ -22,6 +22,7 @@ A cross-agent skill for creating editable, fixed-stage HTML presentations.
 - Static validation, rendered QA screenshots, and PDF export
 - Chinese and mixed CJK typography rules
 - Reusable layout and image-slot contracts
+- A tested 12-page Chinese regression deck under [`examples/ai-ad-workflow`](./examples/ai-ad-workflow/)
 
 ## Install for Codex
 
@@ -123,6 +124,26 @@ Then run:
 node scripts/qa-deck.mjs path/to/deck.html --screenshots path/to/qa
 node scripts/export-pdf.mjs path/to/deck.html output.pdf
 ```
+
+## Real-world regression example
+
+The example deck at [`examples/ai-ad-workflow`](./examples/ai-ad-workflow/) contains 12 Chinese slides and two local SVG assets. It covers cover, statement, section, data hero, comparison, image split, three-column, evidence grid, process, quote, timeline, and closing layouts.
+
+Run the dependency-free regression path:
+
+```bash
+npm run example:validate
+npm run example:bundle
+node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
+```
+
+Run rendered browser QA after installing Playwright:
+
+```bash
+npm run example:qa
+```
+
+The committed QA record confirms 12 rendered slides, zero overflow or out-of-bounds errors, zero broken images, zero console errors, working Arrow Right navigation, and working `E` edit-mode activation. Generated bundles and PNG screenshots are ignored and can be recreated locally.
 
 ## Editing controls in generated decks
 

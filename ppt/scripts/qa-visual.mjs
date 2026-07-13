@@ -240,7 +240,8 @@ for (const image of allImages) {
     }
   }
   const displayedLarge = image.displayWidth * image.displayHeight > 1920 * 1080 * 0.2;
-  if (displayedLarge && (image.naturalWidth < 800 || image.naturalHeight < 450)) {
+  const vectorSource = /(?:\.svg(?:[?#]|$)|^data:image\/svg\+xml)/i.test(image.src);
+  if (!vectorSource && displayedLarge && (image.naturalWidth < 800 || image.naturalHeight < 450)) {
     addFinding('P0', 'image.thumbnail-upscaled', image.slide, `Image ${image.id} is a small source rendered as a large visual.`, { natural: `${image.naturalWidth}×${image.naturalHeight}`, displayed: `${Math.round(image.displayWidth)}×${Math.round(image.displayHeight)}` });
   }
   const displayRatio = image.displayHeight ? image.displayWidth / image.displayHeight : 0;

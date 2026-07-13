@@ -1,27 +1,33 @@
 # Layout library and slot contracts
 
-Use layout names in `data-layout`. Layouts define communication structure, not a rigid visual skin.
+Use canonical layout names in `data-layout`. Layouts define communication structure, not a rigid visual skin.
 
-## Core layouts
+For themed projects, the selected layout must also exist in `theme/layout-manifest.json`. Read [`layout-registry.md`](layout-registry.md) for registration, validation, and extension rules.
 
-| ID | Name | Best use | Primary contract |
-|---|---|---|---|
-| L01 | `cover` | title and positioning | one dominant title, optional subtitle/meta, one visual thesis |
-| L02 | `section` | chapter transition | short title, index/label, generous negative space |
-| L03 | `statement` | key claim or shift | one sentence or number, minimal support |
-| L04 | `split` | explanation + image | 5/7 or 6/6 text/image split |
-| L05 | `image-focus` | product, evidence, photography | 16:9, 16:10, 4:3, or full-bleed image slot plus concise caption |
-| L06 | `three-up` | three ideas, features, examples | three equal or intentionally weighted columns |
-| L07 | `four-grid` | compact categories | 2×2 grid; each cell must have comparable information |
-| L08 | `metrics` | KPI summary | 1–4 metrics with explicit labels, units, and period |
-| L09 | `comparison` | before/after or option A/B | mirrored structure and shared comparison criteria |
-| L10 | `timeline` | chronological change | 3–7 milestones with consistent date hierarchy |
-| L11 | `process` | sequence or workflow | 3–6 steps, directional logic, clear start/end |
-| L12 | `chart` | quantitative evidence | one chart, conclusion headline, source and unit |
-| L13 | `quote` | testimony or principle | quote, attribution, optional portrait; no fake quotes |
-| L14 | `evidence-wall` | screenshots or artifacts | 2–6 images with captions and deliberate focus |
-| L15 | `roadmap` | phases and ownership | time axis or swimlanes, status and dependencies |
-| L16 | `closing` | synthesis or action | one takeaway, decision, or next step; contact only if useful |
+## Registered core layouts
+
+The three core themes currently guarantee 14 layouts:
+
+| ID | Best use | Primary contract |
+|---|---|---|
+| `cover` | title and positioning | one dominant title, optional subtitle/meta, one visual thesis |
+| `section` | chapter transition | short title, index/label, generous negative space |
+| `statement` | key claim or shift | one sentence or number, minimal support |
+| `split` | explanation + image | 5/7, 6/6, or 7/5 text/visual split |
+| `image-focus` | product, evidence, photography | dominant 21:9, 16:10, 16:9, 4:3, or 3:2 visual plus concise caption |
+| `three-up` | three ideas, features, examples | exactly three equal or intentionally weighted items |
+| `four-grid` | compact categories | 2×2 grid; each cell carries comparable information |
+| `metrics` | KPI summary | 1–4 metrics with labels, units, period, and context |
+| `comparison` | before/after or option A/B | mirrored structure and shared criteria |
+| `timeline` | chronological change | 3–7 milestones with consistent date hierarchy |
+| `process` | sequence or workflow | 3–6 steps, directional logic, clear start/end |
+| `chart` | quantitative evidence | one chart, conclusion headline, source, and unit |
+| `quote` | testimony or principle | sourced quote, attribution, optional portrait |
+| `closing` | synthesis or action | one takeaway, decision, or next step |
+
+The semantic library also recognizes `evidence-wall` and `roadmap`, but they are not yet guaranteed across all core themes. Register and implement them before using them in a themed production deck.
+
+`grid` is a legacy alias for `three-up`. Do not use it in new HTML or `deck.json` files.
 
 ## Image-slot ratios
 
@@ -55,19 +61,32 @@ These are warning thresholds, not goals:
 
 - cover: title + subtitle + up to two metadata lines
 - statement: one central claim and one supporting line
-- split: one headline, one short paragraph or 3–5 bullets, one image
+- split: one headline, one short paragraph or 3–5 bullets, one visual
+- image-focus: one dominant visual and one concise caption block
 - three-up: up to 45 CJK characters or ~70 Latin words per card including labels
 - four-grid: up to 30 CJK characters or ~45 Latin words per cell
 - metrics: one label, one value, one comparison/context line per metric
+- comparison: up to five shared criteria per side
+- timeline: 3–7 milestones
 - process: 3–6 steps; split longer processes
-- evidence wall: captions must remain legible and images must not become thumbnails without informational value
+- chart: one primary quantitative message; split secondary charts
+- quote: one sourced quotation and attribution
 
 ## Selection rules
 
 - Use `statement` or `section` to reset attention after dense slides.
 - Use `chart` only when the quantitative encoding improves understanding.
 - Use `comparison` only with explicit shared criteria.
-- Use `three-up`/`four-grid` when items are genuinely parallel.
-- Use `evidence-wall` for proof, not decoration.
+- Use `three-up` or `four-grid` only when items are genuinely parallel.
 - Use `image-focus` when the image itself is the evidence.
-- Avoid more than two consecutive slides with the same layout unless repetition is intentional, such as a case-study sequence.
+- Avoid more than two consecutive slides with the same layout unless repetition is intentional.
+- Do not select an unregistered layout and hope the Agent improvises a stable design.
+
+## Validation
+
+```bash
+node scripts/validate-layouts.mjs --strict
+node scripts/validate-manifest.mjs project/deck.json --html project/index.html --strict
+```
+
+The first command validates theme support and CSS implementation. The second validates each final slide against the copied project registry.

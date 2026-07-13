@@ -10,7 +10,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  task-diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run isolated task regression tests
+        run: npm run test:tasks
+
   test:
+    needs: task-diagnostics
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -37,8 +52,6 @@ jobs:
           python3 -m json.tool tests/tasks/cases.json >/dev/null
       - name: Validate task contracts
         run: npm run tasks:validate
-      - name: Run task regression unit tests
-        run: npm run test:tasks
       - name: Run existing core regression
         run: node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs
       - name: Run browser regression

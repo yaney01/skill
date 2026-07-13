@@ -19,8 +19,9 @@ A cross-agent skill for creating and converting editable, fixed-stage HTML prese
 - Maintain an auditable source-page-to-final-slide mapping
 - Fixed 1920×1080 slide canvas scaled to any screen
 - Keyboard, wheel, swipe, and hash navigation
-- Browser text editing and image replacement
-- Local autosave and edited-HTML download
+- Versioned constrained browser editing with undo/redo and scoped reset
+- Image replacement, fit, focus, and alt-text controls
+- Local autosave, edit-state JSON import/export, and edited-HTML download
 - Bundle runtime files and local media into one portable HTML file
 - Structural validation, source validation, rendered QA, semantic visual QA, contact sheets, and PDF export
 - Automated source, structure, bundling, runtime, editor, theme, CJK, manifest, and visual regression tests
@@ -346,10 +347,14 @@ Browser coverage includes:
 - one active slide
 - keyboard, hash, wheel, and touch navigation
 - mobile whole-stage scaling without reflow
-- edit-mode activation and exit
-- text autosave and reload restoration
+- edit-mode activation and presenter-preview isolation
+- version 2 local edit-state persistence and legacy migration
+- transaction-based undo/redo
+- selected-element and current-slide reset
 - image replacement with embedded Data URLs
-- edited self-contained HTML download
+- image fit, focal position, and alt-text persistence
+- sanitized edit-state JSON import/export
+- edited self-contained HTML download without transient editor UI
 - semantic visual QA and contact-sheet generation
 
 Run the complete regression pipeline:
@@ -360,17 +365,33 @@ npm run ci
 
 The `ci` command remains self-contained inside `ppt/`; permanent repository-level workflow configuration is not required.
 
-## Editing controls in generated decks
+## Playback, presenter, and editing controls
+
+Playback:
 
 - `←` / `→`, `PageUp` / `PageDown`, or `Space`: navigate
 - Mouse wheel or horizontal swipe: navigate
 - `Home` / `End`: first or last slide
+- `P`: open the presenter window
+- `Esc`: open or close slide overview when edit mode is inactive
+- `G`: jump to a numbered slide
+
+Constrained editing:
+
 - `E`: toggle edit mode
 - Click editable text: edit in place
-- Click an editable image: replace it locally
+- Click an editable image: select it; double-click or choose **Replace image** to replace it
+- Image properties: theme default / cover / contain, focal position, and alt text
+- `Ctrl/Cmd+Z`: undo
+- `Ctrl/Cmd+Shift+Z` or `Ctrl+Y`: redo
+- **Reset element**: restore the selected authored element
+- **Reset slide**: restore editable content on the current slide
+- **Export edits / Import edits**: transfer version 2 edit-state JSON for the same deck
 - `Ctrl/Cmd+S`: download the current edited HTML
-- `Esc`: exit text editing or edit mode
+- `Esc`: finish text editing or exit edit mode
+
+See [`references/editing-contract.md`](./references/editing-contract.md), [`schemas/edit-state.schema.json`](./schemas/edit-state.schema.json), and [`references/presenter-mode.md`](./references/presenter-mode.md).
 
 ## Design scope
 
-The editor is intentionally constrained. It supports content edits and image replacement while preserving the authored grid and hierarchy. Free-form dragging, resizing, layers, cloud sync, comments, permissions, and multiplayer editing are not included.
+The editor is intentionally constrained. It edits only existing `data-editable` elements while preserving the authored grid, hierarchy, source mapping, and registered layout. Free-form dragging, resizing, arbitrary coordinates, slide duplication/deletion/reordering, layers, unrestricted theme controls, cloud sync, comments, permissions, and multiplayer editing are not included.

@@ -103,8 +103,8 @@
         slide.setAttribute('aria-hidden', String(!current));
       });
 
-      document.documentElement.style.setProperty('--slide-index', String(this.index + 1));
-      document.documentElement.style.setProperty('--slide-count', String(this.slides.length));
+      document.documentElement.style.setProperty('--slide-index', `"${this.index + 1}"`);
+      document.documentElement.style.setProperty('--slide-count', `"${this.slides.length}"`);
       document.dispatchEvent(new CustomEvent('htmlppt:slidechange', {
         detail: { index: this.index, count: this.slides.length, slide: this.slides[this.index] }
       }));

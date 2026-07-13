@@ -5,7 +5,7 @@ description: Create, redesign, edit, validate, and export polished browser-edita
 
 # HTML PPT
 
-Create presentation-quality HTML decks that are editable in the browser and deliverable as a single HTML file. The runtime is dependency-free; optional validation, screenshots, and PDF export use Node.js and Playwright.
+Create presentation-quality HTML decks that are editable in the browser and deliverable as a single HTML file. Development projects keep runtime files separate for maintainability; the final bundling step embeds local runtime and media assets into one portable HTML document.
 
 ## Non-negotiable output contract
 
@@ -46,7 +46,7 @@ Choose one route:
 2. **Convert** — Rebuild an existing PPT/PDF/document as an HTML deck while preserving meaning and order.
 3. **Redesign** — Improve an existing HTML deck without losing content.
 4. **Edit** — Make targeted content, visual, image, or structural changes.
-5. **Validate/export** — Inspect, screenshot, or export an existing deck.
+5. **Validate/export** — Inspect, screenshot, bundle, or export an existing deck.
 
 For conversion or redesign, inspect the source before proposing a new structure. Preserve source facts and explicitly identify anything omitted or condensed.
 
@@ -100,17 +100,39 @@ Read:
 - [`references/design-system.md`](references/design-system.md)
 - [`references/cjk-typography.md`](references/cjk-typography.md) for Chinese or mixed CJK decks
 
-### 4. Generate the deck
+### 4. Initialize the development project
 
-Start from [`assets/templates/starter.html`](assets/templates/starter.html) or reproduce its architecture.
+For a new deck, use the project generator instead of manually copying or duplicating runtime code:
 
-The final deck must include the complete contents of:
+```bash
+node scripts/create-deck.mjs \
+  --name deck-name \
+  --title "Presentation title" \
+  --lang zh-CN \
+  --output /absolute/path/to/project
+```
 
-- [`assets/runtime/viewport-base.css`](assets/runtime/viewport-base.css)
-- [`assets/runtime/deck-runtime.js`](assets/runtime/deck-runtime.js)
-- [`assets/runtime/deck-editor.js`](assets/runtime/deck-editor.js)
+The generated project contains:
 
-Inline those assets into the final HTML. Do not leave runtime `<script src>` or stylesheet dependencies in the delivered file.
+```text
+project/
+├── index.html
+├── deck.json
+├── README.md
+├── images/
+└── runtime/
+    ├── viewport-base.css
+    ├── deck-runtime.js
+    └── deck-editor.js
+```
+
+Use `--force` only when intentionally replacing generated files inside an existing directory. It must not be used to delete unrelated content.
+
+For an existing deck, preserve its working project structure and stable IDs instead of regenerating it.
+
+### 5. Generate the deck
+
+Edit the generated `index.html`. The development file references the canonical runtime copies in `runtime/`; do not paste a second minified runtime into it.
 
 Required markup:
 
@@ -139,19 +161,22 @@ Image rules:
 - Use `object-fit` and `object-position`; never distort images.
 - Do not repeat the same non-logo image across multiple slides without a narrative reason.
 
-### 5. Validate visually and mechanically
+### 6. Validate visually and mechanically
 
-Run the dependency-free structural validator:
+Run the dependency-free structural validator against the development file:
 
 ```bash
-node scripts/validate-deck.mjs path/to/deck.html
+node scripts/validate-deck.mjs /absolute/path/to/project/index.html
 ```
+
+The validator resolves local runtime dependencies, so development HTML and bundled HTML follow the same structural contract.
 
 For browser QA and screenshots:
 
 ```bash
 npm install
-node scripts/qa-deck.mjs path/to/deck.html --screenshots path/to/qa
+npx playwright install chromium
+node scripts/qa-deck.mjs /absolute/path/to/project/index.html --screenshots /absolute/path/to/qa
 ```
 
 Inspect every screenshot. Fix the underlying layout rather than hiding warnings. At minimum verify:
@@ -166,21 +191,42 @@ Inspect every screenshot. Fix the underlying layout rather than hiding warnings.
 
 Read [`references/quality-checklist.md`](references/quality-checklist.md).
 
-### 6. Deliver
+### 7. Bundle the final single-file HTML
 
-Open the final HTML locally and report:
+After the development deck passes validation and visual QA, bundle it:
+
+```bash
+node scripts/bundle-html.mjs \
+  /absolute/path/to/project/index.html \
+  /absolute/path/to/dist/presentation.html
+```
+
+The bundler embeds local stylesheets, JavaScript, images, fonts, SVG, audio, video, icons, and CSS `url()` assets. It preserves and reports remote URLs rather than downloading them.
+
+Validate the bundled output again:
+
+```bash
+node scripts/validate-deck.mjs /absolute/path/to/dist/presentation.html
+```
+
+Do not deliver the development folder as the only artifact when the user requested a portable single HTML file.
+
+### 8. Deliver
+
+Open the bundled HTML locally and report:
 
 - file path
 - slide count
 - selected design direction
 - navigation: arrows, space, wheel, swipe
 - editing: press `E`, click text, click an editable image, `Ctrl/Cmd+S` to download
-- validation performed and any remaining caveats
+- validation and screenshot QA performed
+- any remote font or media references that still require a network connection
 
 Optional PDF export:
 
 ```bash
-node scripts/export-pdf.mjs path/to/deck.html [output.pdf]
+node scripts/export-pdf.mjs /absolute/path/to/dist/presentation.html [output.pdf]
 ```
 
 PDF is a static snapshot; browser editing and animation are not preserved.
@@ -195,6 +241,7 @@ When editing an existing deck:
 - Keep stable `data-slide-id` and `data-element-id` values unless an element is intentionally replaced.
 - After every structural change, rerun validation and inspect affected slides in the browser.
 - Never use `display: none` / `display: block` as the primary slide visibility mechanism; use `active` / `visible` with visibility, opacity, and pointer events.
+- Keep development runtime code in `runtime/` and use `bundle-html.mjs` for final inlining; do not maintain duplicate runtime implementations.
 
 ## Resource loading guide
 
@@ -209,5 +256,10 @@ Load only what the current task requires:
 | `references/layouts.md` | Layout selection and slot contracts |
 | `references/editing-contract.md` | Browser editing and stable element IDs |
 | `references/quality-checklist.md` | Final QA |
-| `assets/templates/starter.html` | Working starting point |
-| `scripts/*.mjs` | Validation, screenshots, PDF export |
+| `assets/templates/starter.html` | Development starter used by the generator |
+| `assets/runtime/*` | Canonical fixed-stage and editor runtime |
+| `scripts/create-deck.mjs` | Initialize a deck project |
+| `scripts/bundle-html.mjs` | Produce portable single-file HTML |
+| `scripts/validate-deck.mjs` | Structural validation for development or bundled HTML |
+| `scripts/qa-deck.mjs` | Rendered browser QA and screenshots |
+| `scripts/export-pdf.mjs` | Static PDF export |

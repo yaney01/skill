@@ -1,10 +1,12 @@
 {
   "name": "html-ppt-agent-skill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Optional validation, screenshot, and PDF tools for the HTML PPT agent skill.",
+  "description": "Project generation, validation, bundling, screenshot, and PDF tools for the HTML PPT agent skill.",
   "scripts": {
+    "create": "node scripts/create-deck.mjs",
+    "bundle": "node scripts/bundle-html.mjs",
     "validate": "node scripts/validate-deck.mjs",
     "qa": "node scripts/qa-deck.mjs",
     "pdf": "node scripts/export-pdf.mjs"

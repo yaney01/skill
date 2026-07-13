@@ -35,7 +35,19 @@ jobs:
           node --check tests/presenter.test.mjs
           python3 -m json.tool schemas/deck.schema.json >/dev/null
           python3 -m json.tool examples/ai-ad-workflow/deck.json >/dev/null
-      - name: Run complete regression
-        run: npm run ci
-      - name: Run rendered task regression
+      - name: Core regression
+        run: npm run test:core
+      - name: Runtime regression
+        run: node --test --test-concurrency=1 tests/runtime.test.mjs
+      - name: Presenter regression
+        run: npm run test:presenter
+      - name: Editor regression
+        run: node --test --test-concurrency=1 tests/editor.test.mjs
+      - name: Visual QA regression
+        run: node --test --test-concurrency=1 tests/visual-qa.test.mjs
+      - name: Task contracts
+        run: npm run tasks:validate && npm run tasks:run
+      - name: Production example
+        run: npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
+      - name: Rendered task regression
         run: npm run tasks:qa

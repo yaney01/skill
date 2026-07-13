@@ -14,6 +14,21 @@
     "themeName": { "type": ["string", "null"] },
     "themeTier": { "type": ["string", "null"] },
     "purpose": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["manifest", "originalFile", "type", "mode", "mapping"],
+      "properties": {
+        "manifest": { "type": "string", "minLength": 1 },
+        "originalFile": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["pptx", "docx", "pdf", "markdown"] },
+        "mode": { "enum": ["semantic", "preserve-layout"] },
+        "mapping": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceMapping" }
+        }
+      },
+      "additionalProperties": true
+    },
     "visualStrategy": {
       "type": "object",
       "required": ["mode", "targetCoverage", "targetEvidenceCoverage", "maxConsecutiveTextOnly"],
@@ -38,6 +53,33 @@
   },
   "additionalProperties": true,
   "$defs": {
+    "sourceMapping": {
+      "type": "object",
+      "required": ["sourceIds", "slideIds", "treatment", "reason"],
+      "properties": {
+        "sourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^page-[0-9]{3,}$" }
+        },
+        "slideIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "treatment": {
+          "enum": ["preserve", "split", "merge", "condense", "omit", "redraw-chart", "retain-pixel-faithful"]
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "treatment": { "const": "omit" } } },
+          "then": { "properties": { "slideIds": { "maxItems": 0 } } },
+          "else": { "properties": { "slideIds": { "minItems": 1 } } }
+        }
+      ],
+      "additionalProperties": true
+    },
     "slide": {
       "type": "object",
       "required": ["id", "purpose", "layout", "headline", "visual"],
@@ -47,6 +89,7 @@
         "layout": { "type": "string", "minLength": 1 },
         "headline": { "type": "string" },
         "notes": { "type": "string" },
+        "sourceIds": { "type": "array", "items": { "type": "string" } },
         "visual": { "$ref": "#/$defs/visual" }
       },
       "additionalProperties": true

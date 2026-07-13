@@ -1,0 +1,184 @@
+{
+  "$schema": "../../../schemas/task.schema.json",
+  "manifestVersion": 1,
+  "cases": [
+    {
+      "id": "topic-only-zh-speaker",
+      "title": "从人工出图到 AI 协同",
+      "language": "zh-CN",
+      "density": "speaker-led",
+      "theme": "swiss-grid",
+      "visualStrategy": {"mode":"generated-and-diagram","targetCoverage":1,"targetEvidenceCoverage":0.5,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"从人工出图到 AI 协同","body":"电商广告素材生产流程升级方案","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"statement","headline":"真正缺少的不是更快的工具，而是稳定、可复用、可检查的生产链路。","body":"从单点生成进入系统生产。","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"three-up","headline":"三个问题决定流程能否规模化","body":"重复生产、质量波动、反馈失真。","visual":{"type":"html-visualization","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"metrics","headline":"效率提升必须转化为可衡量结果","body":"42% / 3.2 倍 / 18 min 均为示例数据。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"process","headline":"五步建立 AI 协同生产链路","body":"需求结构化、内容规划、生成、质量检查、沉淀。","visual":{"type":"workflow-diagram","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"comparison","headline":"旧流程与新流程的差异不是模型，而是系统化程度","body":"个人经验转化为模板、规则和 QA。","visual":{"type":"comparison-diagram","required":true,"status":"ready","source":"html","role":"comparison"}},
+        {"layout":"timeline","headline":"六周试点计划","body":"建立基线、模板、小范围试用、复盘与扩展。","visual":{"type":"timeline","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"closing","headline":"先把一次成功，变成下一次可以复用的系统。","body":"NEXT STEP / 选择试点任务","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "expected":{"slideCount":8,"uniqueLayoutsMin":8,"requiredLayouts":["cover","metrics","process","comparison","timeline","closing"],"sourceCoverage":false,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "topic-only-en-reading",
+      "title": "Designing an AI Operating Model",
+      "language": "en",
+      "density": "reading-first",
+      "theme": "editorial-ink",
+      "visualStrategy": {"mode":"mixed","targetCoverage":1,"targetEvidenceCoverage":0.43,"maxConsecutiveTextOnly":2},
+      "slides": [
+        {"layout":"cover","headline":"Designing an AI Operating Model","body":"A reading-first strategy brief for product and design leaders.","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"statement","headline":"Tools create local speed. Operating models create repeatable outcomes.","body":"The unit of change is the workflow, not the prompt.","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"four-grid","headline":"Four capabilities must mature together","body":"Governance, production, measurement, and learning.","visual":{"type":"html-visualization","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"comparison","headline":"Ad hoc experimentation versus managed production","body":"Shared criteria make trade-offs visible.","visual":{"type":"comparison-diagram","required":true,"status":"ready","source":"html","role":"comparison"}},
+        {"layout":"chart","headline":"Adoption rises when quality controls become explicit","body":"Illustrative values for regression testing only.","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"quote","headline":"A reusable system is more valuable than a single impressive output.","body":"Operating principle","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"closing","headline":"Start with one workflow, one owner, and one measurable outcome.","body":"Decision requested","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "expected":{"slideCount":7,"uniqueLayoutsMin":7,"requiredLayouts":["cover","four-grid","comparison","chart","quote","closing"],"sourceCoverage":false,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "markdown-with-images",
+      "title": "Markdown 内容转演示稿",
+      "language": "zh-CN",
+      "density": "speaker-led",
+      "theme": "editorial-ink",
+      "source":{"fixture":"sample.md","mode":"semantic","strict":true},
+      "visualStrategy": {"mode":"supplied","targetCoverage":1,"targetEvidenceCoverage":0.6,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"Markdown 内容转演示稿","body":"保留章节、图片、表格与来源关系。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"image-focus","headline":"本地图片必须被复制并保持可追溯","body":"图片来自 source/images，而不是远程链接。","assetPath":"source/images/page-001-image-01.png","visual":{"type":"image","required":true,"status":"ready","source":"supplied","role":"evidence","slot":"16:9","path":"source/images/page-001-image-01.png","alt":"Markdown fixture image"}},
+        {"layout":"chart","headline":"Markdown 表格转为结构化数据","body":"指标与数值可以被重新可视化。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"statement","headline":"章节结构决定叙事拆分，而不是机械地一节一页。","body":"第二部分保留来源映射。","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"closing","headline":"内容、图片和来源合同必须一起交付。","body":"SOURCE → DECK → QA","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "sourceMapping":[
+        {"sourceIds":["page-001"],"slideIds":["slide-01","slide-02","slide-03"],"treatment":"split","reason":"第一部分拆分为封面、图片证据和表格证据。"},
+        {"sourceIds":["page-002"],"slideIds":["slide-04"],"treatment":"preserve","reason":"第二部分作为核心观点保留。"}
+      ],
+      "expected":{"slideCount":5,"uniqueLayoutsMin":5,"requiredLayouts":["image-focus","chart"],"sourceCoverage":true,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "pptx-semantic-redesign",
+      "title": "PPTX 语义重构",
+      "language": "zh-CN",
+      "density": "speaker-led",
+      "theme": "swiss-grid",
+      "source":{"fixture":"sample.pptx","mode":"semantic","strict":true},
+      "visualStrategy": {"mode":"mixed","targetCoverage":1,"targetEvidenceCoverage":0.6,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"PPTX 语义重构","body":"提取内容、图片、备注、表格与图表数据。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"image-focus","headline":"源图片按证据素材保留","body":"不通过生成模型重画关键内容。","assetPath":"source/images/page-001-image-01.png","visual":{"type":"image","required":true,"status":"ready","source":"supplied","role":"evidence","slot":"16:9","path":"source/images/page-001-image-01.png","alt":"PPTX extracted image"}},
+        {"layout":"chart","headline":"缓存图表数据可以重新编码","body":"源数据从 charts JSON 进入 HTML 图表。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"quote","headline":"Speaker Notes 进入结构化演讲信息，而不是丢失。","body":"原备注：这是演讲者备注。","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"closing","headline":"重构的是叙事与视觉，不是来源事实。","body":"可追溯、可验证、可编辑","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "sourceMapping":[{"sourceIds":["page-001"],"slideIds":["slide-01","slide-02","slide-03","slide-04"],"treatment":"split","reason":"单页源材料包含标题、图片、图表和备注，按语义拆分。"}],
+      "expected":{"slideCount":5,"uniqueLayoutsMin":5,"requiredLayouts":["image-focus","chart","quote"],"sourceCoverage":true,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "pptx-preserve-layout",
+      "title": "PPTX 版式保留迁移",
+      "language": "zh-CN",
+      "density": "reading-first",
+      "theme": "swiss-grid",
+      "source":{"fixture":"sample.pptx","mode":"preserve-layout","strict":true},
+      "visualStrategy": {"mode":"supplied","targetCoverage":1,"targetEvidenceCoverage":1,"maxConsecutiveTextOnly":0},
+      "slides": [
+        {"layout":"image-focus","headline":"源文件导入：保留文本、图片与备注","body":"一页源幻灯片严格对应一页最终幻灯片。","assetPath":"source/images/page-001-image-01.png","visual":{"type":"image","required":true,"status":"ready","source":"supplied","role":"evidence","slot":"16:9","path":"source/images/page-001-image-01.png","alt":"Preserved PPTX image"}}
+      ],
+      "sourceMapping":[{"sourceIds":["page-001"],"slideIds":["slide-01"],"treatment":"preserve","reason":"版式保留模式要求一对一迁移。"}],
+      "expected":{"slideCount":1,"uniqueLayoutsMin":1,"requiredLayouts":["image-focus"],"sourceCoverage":true,"preserveSourceOneToOne":true,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "docx-to-deck",
+      "title": "DOCX 章节转演示稿",
+      "language": "zh-CN",
+      "density": "reading-first",
+      "theme": "editorial-ink",
+      "source":{"fixture":"sample.docx","mode":"semantic","strict":true},
+      "visualStrategy": {"mode":"mixed","targetCoverage":1,"targetEvidenceCoverage":0.5,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"DOCX 章节转演示稿","body":"标题层级负责组织来源，不直接决定最终页数。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"image-focus","headline":"第一章：图片和正文共同决定页面结构","body":"嵌入图片被复制到 source/images。","assetPath":"source/images/page-001-image-01.png","visual":{"type":"image","required":true,"status":"ready","source":"supplied","role":"evidence","slot":"16:9","path":"source/images/page-001-image-01.png","alt":"DOCX extracted image"}},
+        {"layout":"four-grid","headline":"第一章：表格信息拆为可读要点","body":"项目、状态与结论保持来源对应。","visual":{"type":"html-visualization","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"statement","headline":"第二章：正文可以压缩，但不能静默改变含义。","body":"第二段正文。","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"closing","headline":"从文档层级进入演示叙事。","body":"保留来源，重新组织表达。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "sourceMapping":[
+        {"sourceIds":["page-001"],"slideIds":["slide-01","slide-02","slide-03"],"treatment":"split","reason":"第一章含标题、图片和表格，拆分为三页。"},
+        {"sourceIds":["page-002"],"slideIds":["slide-04"],"treatment":"preserve","reason":"第二章正文作为观点页保留。"}
+      ],
+      "expected":{"slideCount":5,"uniqueLayoutsMin":5,"requiredLayouts":["image-focus","four-grid"],"sourceCoverage":true,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "pdf-selectable-text",
+      "title": "PDF 可选择文字重构",
+      "language": "zh-CN",
+      "density": "reading-first",
+      "theme": "technical-field",
+      "source":{"fixture":"sample.pdf","mode":"semantic","strict":false,"expectedWarnings":["pdf.layout-flattened"]},
+      "visualStrategy": {"mode":"diagram-first","targetCoverage":1,"targetEvidenceCoverage":0.67,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"PDF 可选择文字重构","body":"压平格式必须保留人工复核警告。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"process","headline":"文字提取之后仍需检查阅读顺序","body":"提取、复核、映射、重建。","visual":{"type":"workflow-diagram","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"comparison","headline":"语义重构与视觉复刻是两种不同任务","body":"PDF 无法自动恢复原始可编辑结构。","visual":{"type":"comparison-diagram","required":true,"status":"ready","source":"html","role":"comparison"}}
+      ],
+      "sourceMapping":[{"sourceIds":["page-001"],"slideIds":["slide-01","slide-02","slide-03"],"treatment":"split","reason":"单页 PDF 分别说明来源、流程和转换边界。"}],
+      "expected":{"slideCount":3,"uniqueLayoutsMin":3,"requiredLayouts":["process","comparison"],"sourceCoverage":true,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "data-heavy-report",
+      "title": "AI 系统运行周报",
+      "language": "zh-CN",
+      "density": "reading-first",
+      "theme": "technical-field",
+      "visualStrategy": {"mode":"diagram-first","targetCoverage":1,"targetEvidenceCoverage":0.75,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"AI 系统运行周报","body":"模型、数据、成本与质量的统一观察。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"metrics","headline":"核心运行指标","body":"请求量、成功率、P95 延迟。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"chart","headline":"请求量增长没有牺牲稳定性","body":"示例数据用于回归测试。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"comparison","headline":"本周与上周的结构变化","body":"共享指标口径与单位。","visual":{"type":"comparison-diagram","required":true,"status":"ready","source":"html","role":"comparison"}},
+        {"layout":"process","headline":"故障定位链路","body":"检测、隔离、回滚、复盘。","visual":{"type":"workflow-diagram","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"four-grid","headline":"四类风险需要同步观察","body":"质量、成本、延迟和依赖。","visual":{"type":"html-visualization","required":true,"status":"ready","source":"html","role":"evidence"}},
+        {"layout":"timeline","headline":"下周变更窗口","body":"验证、灰度、扩容、复盘。","visual":{"type":"timeline","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"closing","headline":"稳定性来自可观察、可回滚、可复盘。","body":"NEXT RUN / 2026-W29","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "expected":{"slideCount":8,"uniqueLayoutsMin":8,"requiredLayouts":["metrics","chart","comparison","process","four-grid","timeline"],"sourceCoverage":false,"offline":true,"bundle":true,"contactSheet":true}
+    },
+    {
+      "id": "cjk-long-title",
+      "title": "在复杂业务约束下建立可复用、可验证、可持续迭代的中文人工智能内容生产系统",
+      "language": "zh-CN",
+      "density": "speaker-led",
+      "theme": "swiss-grid",
+      "visualStrategy": {"mode":"typography-led","targetCoverage":1,"targetEvidenceCoverage":0.4,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"在复杂业务约束下建立可复用、可验证、|可持续迭代的中文人工智能内容生产系统","body":"长标题必须按语义换行，不能通过压缩字号解决。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"statement","headline":"中文标题的字距、行高、换行和标点必须共同工作。","body":"避免孤字、行首标点和数字单位分离。","visual":{"type":"intentional-text","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"metrics","headline":"42%、3.2 倍、18 min 与 2026 年必须保持完整","body":"数字和单位不能被错误拆行。","visual":{"type":"data-chart","required":true,"status":"ready","source":"chart","role":"evidence"}},
+        {"layout":"process","headline":"先规划语义断点，再选择布局，再执行机械与视觉 QA","body":"不以缩小字体代替内容编辑。","visual":{"type":"workflow-diagram","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"closing","headline":"中文排版是生产合同，不是最后补丁。","body":"CJK / READY","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "expected":{"slideCount":5,"uniqueLayoutsMin":5,"requiredLayouts":["cover","metrics","process"],"sourceCoverage":false,"offline":true,"bundle":true,"contactSheet":true,"longTitleRequired":true}
+    },
+    {
+      "id": "no-network",
+      "title": "完全离线交付验证",
+      "language": "zh-CN",
+      "density": "speaker-led",
+      "theme": "editorial-ink",
+      "visualStrategy": {"mode":"mixed","targetCoverage":1,"targetEvidenceCoverage":0.5,"maxConsecutiveTextOnly":1},
+      "slides": [
+        {"layout":"cover","headline":"完全离线交付验证","body":"运行时、主题、图片和字体规则均来自本地文件。","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}},
+        {"layout":"four-grid","headline":"离线交付需要同时满足四个条件","body":"本地运行时、本地主题、本地素材、无远程请求。","visual":{"type":"html-visualization","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"process","headline":"开发版验证之后再执行单文件打包","body":"结构、渲染、视觉、打包、重新打开。","visual":{"type":"workflow-diagram","required":true,"status":"ready","source":"html","role":"explanation"}},
+        {"layout":"comparison","headline":"开发项目与最终单 HTML 承担不同职责","body":"一个用于生产，一个用于交付。","visual":{"type":"comparison-diagram","required":true,"status":"ready","source":"html","role":"comparison"}},
+        {"layout":"closing","headline":"断网后仍能翻页、编辑和重新打开。","body":"PORTABLE / VERIFIED","visual":{"type":"typographic","required":false,"status":"ready","source":"css","role":"typography"}}
+      ],
+      "expected":{"slideCount":5,"uniqueLayoutsMin":5,"requiredLayouts":["four-grid","process","comparison"],"sourceCoverage":false,"offline":true,"bundle":true,"contactSheet":true}
+    }
+  ]
+}

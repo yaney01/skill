@@ -32,7 +32,7 @@ jobs:
       - name: Long CJK title contract
         run: node scripts/run-task-regression.mjs --mode contract --case cjk-long-title --output /tmp/task-cjk
       - name: Negative task assertions
-        run: node --test tests/task-regression.test.mjs --test-name-pattern="rejects"
+        run: node --test --test-name-pattern="rejects" tests/task-regression.test.mjs
 
   test:
     needs: task-diagnostics

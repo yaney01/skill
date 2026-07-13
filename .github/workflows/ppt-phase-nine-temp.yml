@@ -1,9 +1,9 @@
 name: PPT phase nine presenter mode verification
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/ppt-phase-nine-final-verification
+      - agent/ppt-phase-nine-diagnostic-base-6
   workflow_dispatch:
 
 jobs:

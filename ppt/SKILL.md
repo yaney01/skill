@@ -411,6 +411,8 @@ When editing an existing deck:
 - rerun affected source, manifest, mechanical, and visual checks
 - never use `display: none` / `display: block` as the primary slide visibility mechanism
 - keep development runtime code in `runtime/` and use the bundler for final inlining
+- keep browser editing constrained to existing `data-editable` elements; do not add free dragging, arbitrary coordinates, or structural page editing
+- preserve stable `data-element-id` values so versioned edit-state JSON and local autosave remain compatible
 
 ## Resource loading guide
 
@@ -430,7 +432,9 @@ Load only what the task requires:
 | `references/design-system.md` | Tokens, grids, components, and motion |
 | `references/cjk-typography.md` | Chinese and mixed-language typography |
 | `references/layouts.md` | Layout selection and slot contracts |
-| `references/editing-contract.md` | Browser editing and stable element IDs |
+| `references/editing-contract.md` | Versioned constrained browser editing and stable element IDs |
+| `schemas/edit-state.schema.json` | Browser edit-state import/export contract |
+| `references/presenter-mode.md` | Presenter notes, popup, overview, and offline behavior |
 | `references/quality-checklist.md` | Mechanical final QA |
 | `assets/templates/starter.html` | Neutral development starter |
 | `assets/runtime/*` | Canonical fixed-stage and editor runtime |

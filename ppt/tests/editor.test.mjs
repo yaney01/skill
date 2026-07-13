@@ -12,7 +12,7 @@ async function openBundledPage(browser, bundled) {
   });
   const page = await context.newPage();
   await page.goto(fileUrl(bundled), { waitUntil: 'load' });
-  await page.waitForFunction(() => Boolean(window.htmlPptEditor));
+  await page.waitForFunction(() => Boolean(window.htmlPptEditor && window.htmlPptDeck));
   return { context, page };
 }
 
@@ -70,6 +70,14 @@ test('image replacement is saved as an embedded data URL', async () => {
     await page.keyboard.press('e');
     const image = page.locator('[data-editable="image"][data-element-id]').first();
     const elementId = await image.getAttribute('data-element-id');
+
+    await image.evaluate((element) => {
+      const slide = element.closest('.slide');
+      const slides = [...document.querySelectorAll('.slide')];
+      window.htmlPptDeck.show(slides.indexOf(slide));
+    });
+    await image.waitFor({ state: 'visible' });
+
     const chooserPromise = page.waitForEvent('filechooser');
     await image.click();
     const chooser = await chooserPromise;

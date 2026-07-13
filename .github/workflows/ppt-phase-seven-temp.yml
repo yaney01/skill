@@ -1,0 +1,50 @@
+name: PPT phase seven layout registry verification
+
+on:
+  push:
+    branches:
+      - agent/ppt-phase-seven-layout-registry
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package.json
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - run: npm install
+      - run: npx playwright install chromium
+      - name: Syntax and schema checks
+        run: |
+          node --check scripts/create-deck.mjs
+          node --check scripts/validate-layouts.mjs
+          node --check scripts/render-layout-catalog.mjs
+          node --check scripts/validate-manifest.mjs
+          node --check scripts/lib/layout-registry.mjs
+          node --check tests/layouts.test.mjs
+          python3 -m json.tool schemas/layout.schema.json >/dev/null
+          python3 -m json.tool schemas/deck.schema.json >/dev/null
+          python3 -m json.tool assets/themes/shared/layout-contracts.json >/dev/null
+      - name: Validate layout registries
+        run: npm run layouts:validate
+      - name: Run core regression
+        run: npm run test:core
+      - name: Run browser regression
+        run: npm run test:browser
+      - name: Render and QA core layout catalogs
+        run: npm run layouts:qa
+      - name: Run production example pipeline
+        run: npm run example:validate && npm run example:manifest && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html

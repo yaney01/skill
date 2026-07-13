@@ -16,7 +16,7 @@
       this.restore();
       this.bind();
     }
-    editableElements() { return Array.from(this.root.querySelectorAll('[data-editable]')); }
+    editableElements() { return Array.from(this.stage.querySelectorAll('[data-editable]')); }
     buildUi() {
       const ui = document.createElement('div');
       ui.className = 'editor-ui deck-ui';

@@ -1,0 +1,23 @@
+{
+  "slides": 12,
+  "structural_validation_development": "passed",
+  "bundle": {
+    "status": "passed",
+    "stylesheets_inlined": 1,
+    "scripts_inlined": 2,
+    "local_assets_inlined": 2
+  },
+  "structural_validation_bundled": "passed",
+  "rendered_qa": {
+    "viewport": "1920x1080",
+    "overflow_errors": 0,
+    "out_of_bounds_errors": 0,
+    "broken_images": 0,
+    "console_errors": 0
+  },
+  "interaction": {
+    "arrow_right_result": "slide-02",
+    "edit_mode_key": "E",
+    "edit_mode_activated": true
+  }
+}

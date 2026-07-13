@@ -111,7 +111,7 @@
       this.ready = this.loadManifest().then((manifest) => {
         this.manifest = manifest;
         this.byId = new Map((manifest?.slides || []).map((slide) => [slide.id, slide]));
-        this.presenter ? this.buildPresenter() : this.buildOverview();
+        if (this.presenter) this.buildPresenter();
         return this;
       });
     }
@@ -199,6 +199,7 @@
       this.presenter ? this.command(value - 1) : this.deck.show(value - 1);
     }
     buildOverview() {
+      if (this.overview) return;
       this.addStyles();
       const overlay = document.createElement('div');
       overlay.className = 'html-ppt-overview';
@@ -235,7 +236,7 @@
       this.selectOverview(this.deck.index);
     }
     toggleOverview(force) {
-      if (!this.overview) return;
+      if (!this.overview) this.buildOverview();
       const open = typeof force === 'boolean' ? force : !this.overview.classList.contains('open');
       this.overview.classList.toggle('open', open);
       if (open) {

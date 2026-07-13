@@ -1,9 +1,103 @@
 {
+  "$schema": "../../schemas/deck.schema.json",
+  "manifestVersion": 2,
   "id": "ai-ad-workflow-example",
   "title": "AI 广告生产的新工作流",
   "language": "zh-CN",
   "density": "speaker-led",
   "style": "swiss-technical",
-  "slides": 12,
-  "purpose": "real-world validation example"
+  "purpose": "real-world validation example",
+  "visualStrategy": {
+    "mode": "diagram-first",
+    "targetCoverage": 0.75,
+    "targetEvidenceCoverage": 0.4,
+    "maxConsecutiveTextOnly": 2,
+    "notes": "Use typography for rhetorical resets and diagrams or structured HTML visuals for systems, evidence, comparison, and timing."
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "purpose": "hook",
+      "layout": "cover",
+      "headline": "AI 广告生产的新工作流",
+      "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-02",
+      "purpose": "key-claim",
+      "layout": "statement",
+      "headline": "效率问题，不是生成得不够快，而是决策链仍然是手工的。",
+      "visual": { "type": "intentional-text", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-03",
+      "purpose": "section-reset",
+      "layout": "section",
+      "headline": "旧流程的瓶颈藏在交接处",
+      "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-04",
+      "purpose": "target",
+      "layout": "data-hero",
+      "headline": "压缩的不是设计时间，而是等待与返工",
+      "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-05",
+      "purpose": "compare",
+      "layout": "comparison",
+      "headline": "从串行交接，改成同一上下文中的并行协作",
+      "visual": { "type": "comparison-diagram", "required": true, "status": "ready", "source": "html", "role": "comparison", "slot": "16:9" }
+    },
+    {
+      "id": "slide-06",
+      "purpose": "explain",
+      "layout": "image-right",
+      "headline": "一条可观测的创意生产链",
+      "visual": { "type": "workflow-diagram", "required": true, "status": "ready", "source": "supplied", "role": "explanation", "slot": "16:9", "path": "images/workflow-map.svg", "alt": "AI 广告生产工作流示意图" }
+    },
+    {
+      "id": "slide-07",
+      "purpose": "explain",
+      "layout": "three-column",
+      "headline": "把一个万能 Agent 拆成三个清晰角色",
+      "visual": { "type": "html-visualization", "required": true, "status": "ready", "source": "html", "role": "explanation" }
+    },
+    {
+      "id": "slide-08",
+      "purpose": "evidence",
+      "layout": "evidence-grid",
+      "headline": "让质量要求变成可检查的证据",
+      "visual": { "type": "html-visualization", "required": true, "status": "ready", "source": "html", "role": "evidence" }
+    },
+    {
+      "id": "slide-09",
+      "purpose": "explain",
+      "layout": "process",
+      "headline": "把生成、验证和修正连成闭环",
+      "visual": { "type": "workflow-diagram", "required": true, "status": "ready", "source": "html", "role": "explanation" }
+    },
+    {
+      "id": "slide-10",
+      "purpose": "key-claim",
+      "layout": "quote",
+      "headline": "AI 不替代判断，而是让判断更早进入流程。",
+      "visual": { "type": "intentional-text", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-11",
+      "purpose": "plan",
+      "layout": "timeline",
+      "headline": "用四个阶段建立团队级工作流",
+      "visual": { "type": "timeline", "required": true, "status": "ready", "source": "html", "role": "explanation" }
+    },
+    {
+      "id": "slide-12",
+      "purpose": "close",
+      "layout": "closing",
+      "headline": "从一次成功，走向可复用的系统。",
+      "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    }
+  ]
 }

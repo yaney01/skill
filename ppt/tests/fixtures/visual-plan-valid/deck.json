@@ -1,0 +1,44 @@
+{
+  "manifestVersion": 2,
+  "id": "visual-plan-valid",
+  "title": "视觉计划固定回归样例",
+  "language": "zh-CN",
+  "density": "speaker-led",
+  "style": "fixture",
+  "visualStrategy": {
+    "mode": "diagram-first",
+    "targetCoverage": 1,
+    "targetEvidenceCoverage": 0.5,
+    "maxConsecutiveTextOnly": 1
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "purpose": "hook",
+      "layout": "cover",
+      "headline": "视觉计划先于页面生成",
+      "visual": { "type": "typographic", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-02",
+      "purpose": "explain",
+      "layout": "process",
+      "headline": "三步生产链",
+      "visual": { "type": "workflow-diagram", "required": true, "status": "ready", "source": "html", "role": "explanation", "slot": "16:9" }
+    },
+    {
+      "id": "slide-03",
+      "purpose": "reset",
+      "layout": "statement",
+      "headline": "没有视觉决策，就没有视觉叙事。",
+      "visual": { "type": "intentional-text", "required": false, "status": "ready", "source": "css", "role": "typography" }
+    },
+    {
+      "id": "slide-04",
+      "purpose": "compare",
+      "layout": "comparison",
+      "headline": "机械正确与视觉完整",
+      "visual": { "type": "comparison-diagram", "required": true, "status": "ready", "source": "html", "role": "comparison", "slot": "16:9" }
+    }
+  ]
+}

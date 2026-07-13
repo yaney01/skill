@@ -16,6 +16,7 @@ Create presentation-quality HTML decks that are editable in the browser and deli
 - Use a constrained design system. Do not build an unrestricted Canva-style free canvas.
 - Final delivery must work locally by opening the HTML file. External fonts may degrade gracefully; core navigation and editing must not depend on a network connection.
 - Preserve semantic HTML, keyboard navigation, touch navigation, and reduced-motion support.
+- A deck is not complete merely because structural and screenshot QA pass. It must also pass the visual production contract or clearly document unresolved visual findings.
 
 ## Runtime adaptation
 
@@ -25,7 +26,7 @@ Use the capabilities available in the current agent environment.
 
 - Prefer native image understanding, image generation/editing, browser, screenshot, and shell tools when available.
 - Generate visual style previews when the design direction is not already fixed.
-- Use browser screenshots for final visual verification, not DOM checks alone.
+- Use browser screenshots and a contact sheet for final visual verification, not DOM checks alone.
 
 ### Claude Code
 
@@ -36,7 +37,7 @@ Use the capabilities available in the current agent environment.
 ### Other coding agents
 
 - Require only filesystem access for deck generation.
-- Treat image generation and browser automation as optional enhancements.
+- Treat image generation and browser automation as optional enhancements, but preserve the manifest and visual-planning contract.
 
 ## Determine the task mode
 
@@ -46,7 +47,7 @@ Choose one route:
 2. **Convert** — Rebuild an existing PPT/PDF/document as an HTML deck while preserving meaning and order.
 3. **Redesign** — Improve an existing HTML deck without losing content.
 4. **Edit** — Make targeted content, visual, image, or structural changes.
-5. **Validate/export** — Inspect, screenshot, bundle, or export an existing deck.
+5. **Validate/export** — Inspect, screenshot, visually review, bundle, or export an existing deck.
 
 For conversion or redesign, inspect the source before proposing a new structure. Preserve source facts and explicitly identify anything omitted or condensed.
 
@@ -68,23 +69,62 @@ Resolve:
 
 If the user gives enough information, start without asking.
 
-Read [`references/workflow.md`](references/workflow.md) for planning, content architecture, and mode-specific rules.
+Read [`references/workflow.md`](references/workflow.md).
 
-### 2. Build the narrative before styling
+### 2. Inspect source assets before locking the outline
 
-Create a slide map with one job per slide. Use a clear arc:
+When images, screenshots, diagrams, charts, or an existing deck are supplied:
+
+- inspect every usable asset
+- identify what it proves or explains
+- note dimensions, ratios, legibility, and fidelity constraints
+- reject unusable assets with a reason
+- let the selected assets influence the narrative map
+
+Do not finish all slide content first and then add visuals as decoration.
+
+### 3. Build the narrative and visual plan
+
+Create one job per slide using a clear arc:
 
 - hook
 - context
-- core argument or evidence
+- thesis
+- evidence
 - shift / decision
-- takeaway / action
+- action
+- close
 
-Select layouts by communication purpose, not visual novelty. Read [`references/layouts.md`](references/layouts.md).
+Before authoring the full HTML, update `deck.json` as the production manifest. It must include:
 
-For data-heavy work, verify calculations and labels before visualizing. Do not fabricate sources, metrics, logos, quotes, or citations.
+- `manifestVersion: 2`
+- density and theme
+- `visualStrategy`
+- a `slides` array
+- one explicit visual decision for every slide
 
-### 3. Choose a design direction
+Typical speaker-led defaults:
+
+```json
+{
+  "visualStrategy": {
+    "mode": "mixed",
+    "targetCoverage": 0.5,
+    "targetEvidenceCoverage": 0.3,
+    "maxConsecutiveTextOnly": 2
+  }
+}
+```
+
+Visual types are not limited to generated images. Choose among supplied images, generated illustrations, screenshots, charts, workflow diagrams, system diagrams, comparisons, timelines, HTML/CSS visualizations, typographic visuals, and intentional text-only pages.
+
+Read:
+
+- [`schemas/deck.schema.json`](schemas/deck.schema.json)
+- [`references/visual-planning.md`](references/visual-planning.md)
+- [`references/layouts.md`](references/layouts.md)
+
+### 4. Choose a design direction
 
 When the user has not fixed a style, create three genuine title-slide previews using real deck content:
 
@@ -100,19 +140,20 @@ Read:
 - [`references/design-system.md`](references/design-system.md)
 - [`references/cjk-typography.md`](references/cjk-typography.md) for Chinese or mixed CJK decks
 
-### 4. Initialize the development project
+### 5. Initialize the development project
 
-For a new deck, use the project generator instead of manually copying or duplicating runtime code:
+For a new deck, use the generator:
 
 ```bash
 node scripts/create-deck.mjs \
   --name deck-name \
   --title "Presentation title" \
   --lang zh-CN \
+  --theme swiss-grid \
   --output /absolute/path/to/project
 ```
 
-The generated project contains:
+The generated project contains a versioned visual production manifest:
 
 ```text
 project/
@@ -120,108 +161,162 @@ project/
 ├── deck.json
 ├── README.md
 ├── images/
-└── runtime/
-    ├── viewport-base.css
-    ├── deck-runtime.js
-    └── deck-editor.js
+├── runtime/
+└── theme/        # when a theme is selected
 ```
 
-Use `--force` only when intentionally replacing generated files inside an existing directory. It must not be used to delete unrelated content.
+The generated `deck.json` is a starting manifest inferred from the template. Replace the preview content and correct every slide purpose, headline, layout, visual type, source, role, ratio, status, and path before full production.
 
-For an existing deck, preserve its working project structure and stable IDs instead of regenerating it.
+For an existing deck, preserve its working structure and stable IDs; upgrade its legacy integer slide count to the manifest array.
 
-### 5. Generate the deck
+### 6. Produce and frame visual assets
 
-Edit the generated `index.html`. The development file references the canonical runtime copies in `runtime/`; do not paste a second minified runtime into it.
+- Use supplied assets before generating replacements.
+- Match the final slot ratio before generating or framing an image.
+- Preserve screenshot text, brands, numbers, and UI details when fidelity is required.
+- Use HTML/SVG for diagrams and exact labels when precision matters.
+- Generated images are embedded assets, not pre-rendered slides.
+- Generated images must not contain titles, captions, logos, page numbers, slide chrome, or fake UI text.
+- Use `object-fit` and intentional `object-position`; never distort images.
+- Do not repeat the same non-logo image without `data-reuse="allowed"` and a narrative reason.
+- Add meaningful alt text.
 
-Required markup:
+Read:
+
+- [`references/image-prompts.md`](references/image-prompts.md)
+- [`references/screenshot-framing.md`](references/screenshot-framing.md)
+
+### 7. Generate the deck
+
+Edit `index.html`. Development HTML references canonical runtime copies in `runtime/`; do not paste a second minified runtime into it.
+
+Required structure:
 
 ```html
 <div class="deck-viewport">
   <main class="deck-stage" id="deckStage" data-deck-id="meaningful-id">
-    <section class="slide active visible" data-slide-id="slide-01" data-layout="cover">
+    <section
+      class="slide active visible"
+      data-slide-id="slide-01"
+      data-layout="cover"
+    >
       ...
     </section>
   </main>
 </div>
 ```
 
+Visual semantics:
+
+```html
+<section
+  class="slide"
+  data-slide-id="slide-07"
+  data-layout="process"
+  data-visual-required="true"
+>
+  <div
+    data-visual-type="workflow-diagram"
+    data-visual-role="explanation"
+  >...</div>
+</section>
+```
+
 Editing hooks:
 
-- Add `data-editable="text"` and a stable `data-element-id` to editable text.
-- Add `data-editable="image"`, `data-element-id`, and `data-image-slot` to replaceable images.
-- Keep decorative elements uneditable unless there is a clear user benefit.
-- Read [`references/editing-contract.md`](references/editing-contract.md).
+- `data-editable="text"` and stable `data-element-id` for editable text
+- `data-editable="image"`, stable `data-element-id`, and `data-image-slot` for replaceable images
+- `data-focus` for intentional image focal positions
+- `data-allow-overlap` only for deliberate text-over-image compositions
+- `data-reuse="allowed"` for legitimate repeated logos or persistent brand marks
 
-Image rules:
+Read [`references/editing-contract.md`](references/editing-contract.md).
 
-- Use supplied assets before generating replacements.
-- Preserve screenshot text, brands, numbers, and interface details when fidelity is required.
-- Match the slot ratio before placing or generating an image.
-- Use `object-fit` and `object-position`; never distort images.
-- Do not repeat the same non-logo image across multiple slides without a narrative reason.
+### 8. Validate structure and manifest
 
-### 6. Validate visually and mechanically
-
-Run the dependency-free structural validator against the development file:
+Run dependency-free checks first:
 
 ```bash
 node scripts/validate-deck.mjs /absolute/path/to/project/index.html
+node scripts/validate-manifest.mjs \
+  /absolute/path/to/project/deck.json \
+  --html /absolute/path/to/project/index.html \
+  --strict
 ```
 
-The validator resolves local runtime dependencies, so development HTML and bundled HTML follow the same structural contract.
+Do not mark a required visual `ready` before the asset or DOM visual exists.
 
-For browser QA and screenshots:
+### 9. Run mechanical and semantic visual QA
+
+Install Playwright once:
 
 ```bash
 npm install
 npx playwright install chromium
-node scripts/qa-deck.mjs /absolute/path/to/project/index.html --screenshots /absolute/path/to/qa
 ```
 
-Inspect every screenshot. Fix the underlying layout rather than hiding warnings. At minimum verify:
+Mechanical QA:
 
-- stage remains 16:9
-- no clipping or unintended overlap
-- text is readable at presentation distance
-- Chinese line breaks and punctuation are deliberate
-- images load, crop correctly, and retain required details
-- the deck has visual rhythm rather than repeating one layout
-- editing mode does not alter playback layout
+```bash
+node scripts/qa-deck.mjs \
+  /absolute/path/to/project/index.html \
+  --screenshots /absolute/path/to/project/qa/screenshots
+```
 
-Read [`references/quality-checklist.md`](references/quality-checklist.md).
+Semantic visual QA:
 
-### 7. Bundle the final single-file HTML
+```bash
+node scripts/qa-visual.mjs \
+  /absolute/path/to/project/index.html \
+  --manifest /absolute/path/to/project/deck.json \
+  --json /absolute/path/to/project/qa/visual-report.json
+```
 
-After the development deck passes validation and visual QA, bundle it:
+Whole-deck contact sheet:
+
+```bash
+node scripts/build-contact-sheet.mjs \
+  /absolute/path/to/project/index.html \
+  /absolute/path/to/project/qa/contact-sheet.png
+```
+
+`qa-deck.mjs` checks rendering integrity. `qa-visual.mjs` checks declared visual requirements, evidence coverage, consecutive text-only slides, repeated layouts, repeated images, alt text, source resolution, slot ratios, crop focus, and text/visual overlap. P0 blocks delivery; P1 requires review; P2 is an improvement suggestion.
+
+Inspect every screenshot and the contact sheet. Fix the underlying design rather than hiding findings.
+
+Read:
+
+- [`references/quality-checklist.md`](references/quality-checklist.md)
+- [`references/visual-quality-checklist.md`](references/visual-quality-checklist.md)
+
+### 10. Bundle and revalidate
+
+After the development deck passes both QA layers:
 
 ```bash
 node scripts/bundle-html.mjs \
   /absolute/path/to/project/index.html \
   /absolute/path/to/dist/presentation.html
+node scripts/validate-deck.mjs /absolute/path/to/dist/presentation.html
 ```
 
 The bundler embeds local stylesheets, JavaScript, images, fonts, SVG, audio, video, icons, and CSS `url()` assets. It preserves and reports remote URLs rather than downloading them.
 
-Validate the bundled output again:
+### 11. Deliver
 
-```bash
-node scripts/validate-deck.mjs /absolute/path/to/dist/presentation.html
-```
+Report:
 
-Do not deliver the development folder as the only artifact when the user requested a portable single HTML file.
-
-### 8. Deliver
-
-Open the bundled HTML locally and report:
-
-- file path
+- final file path
 - slide count
 - selected design direction
-- navigation: arrows, space, wheel, swipe
-- editing: press `E`, click text, click an editable image, `Ctrl/Cmd+S` to download
-- validation and screenshot QA performed
-- any remote font or media references that still require a network connection
+- visual coverage and evidence visual coverage
+- navigation and editing controls
+- structural, mechanical, manifest, and visual QA results separately
+- contact sheet path
+- unresolved P1/P2 findings
+- remote references that still require a network connection
+
+Do not summarize design quality only as “0 errors, 0 warnings” from mechanical QA.
 
 Optional PDF export:
 
@@ -229,37 +324,36 @@ Optional PDF export:
 node scripts/export-pdf.mjs /absolute/path/to/dist/presentation.html [output.pdf]
 ```
 
-PDF is a static snapshot; browser editing and animation are not preserved.
-
 ## Modification rules
 
 When editing an existing deck:
 
-- Preserve working runtime and editor behavior.
-- Count content before adding more. Split slides rather than shrinking text into unreadability.
-- Reuse the established tokens, grid, typography, and component grammar.
-- Keep stable `data-slide-id` and `data-element-id` values unless an element is intentionally replaced.
-- After every structural change, rerun validation and inspect affected slides in the browser.
-- Never use `display: none` / `display: block` as the primary slide visibility mechanism; use `active` / `visible` with visibility, opacity, and pointer events.
-- Keep development runtime code in `runtime/` and use `bundle-html.mjs` for final inlining; do not maintain duplicate runtime implementations.
+- preserve working runtime and editor behavior
+- keep stable `data-slide-id` and `data-element-id` values
+- update `deck.json` whenever a slide purpose, layout, or visual decision changes
+- split crowded slides instead of shrinking content
+- reuse established tokens and layout grammar
+- rerun affected manifest, mechanical, and visual checks after structural changes
+- never use `display: none` / `display: block` as the primary slide visibility mechanism
+- keep development runtime code in `runtime/` and use the bundler for final inlining
 
 ## Resource loading guide
 
-Load only what the current task requires:
+Load only what the task requires:
 
 | Resource | Use |
 |---|---|
-| `references/workflow.md` | Planning, source handling, narrative architecture |
+| `references/workflow.md` | Source handling, narrative and visual production sequence |
+| `references/visual-planning.md` | Per-slide visual decisions and coverage targets |
+| `references/image-prompts.md` | Generated image contracts and exclusions |
+| `references/screenshot-framing.md` | Pixel-faithful screenshot treatment |
+| `references/visual-quality-checklist.md` | P0/P1/P2 semantic visual review |
 | `references/styles.md` | Style discovery and visual territories |
 | `references/design-system.md` | Tokens, grids, components, motion |
 | `references/cjk-typography.md` | Chinese and mixed-language typography |
 | `references/layouts.md` | Layout selection and slot contracts |
 | `references/editing-contract.md` | Browser editing and stable element IDs |
-| `references/quality-checklist.md` | Final QA |
-| `assets/templates/starter.html` | Development starter used by the generator |
+| `references/quality-checklist.md` | Mechanical final QA |
+| `schemas/deck.schema.json` | Production manifest schema |
+| `assets/templates/starter.html` | Neutral development starter |
 | `assets/runtime/*` | Canonical fixed-stage and editor runtime |
-| `scripts/create-deck.mjs` | Initialize a deck project |
-| `scripts/bundle-html.mjs` | Produce portable single-file HTML |
-| `scripts/validate-deck.mjs` | Structural validation for development or bundled HTML |
-| `scripts/qa-deck.mjs` | Rendered browser QA and screenshots |
-| `scripts/export-pdf.mjs` | Static PDF export |

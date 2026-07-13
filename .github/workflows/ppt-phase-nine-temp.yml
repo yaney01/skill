@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  presenter-overview:
+  presenter-popup:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Run focused overview regression
+      - name: Run focused popup and reconnect regression
         shell: bash
         env:
           CI: "1"
@@ -25,4 +25,4 @@ jobs:
           cd ppt
           npm install --silent >/dev/null 2>&1
           npx playwright install chromium >/dev/null 2>&1
-          node --test --test-concurrency=1 --test-name-pattern="Escape overview" tests/presenter.test.mjs
+          node --test --test-concurrency=1 --test-name-pattern="P opens" tests/presenter.test.mjs

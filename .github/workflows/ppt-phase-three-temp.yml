@@ -25,4 +25,18 @@ jobs:
           cache-dependency-path: ppt/package.json
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - run: npm run ci
+      - name: Run complete regression
+        shell: bash
+        run: |
+          set +e
+          npm run ci > ci-output.txt 2>&1
+          code=$?
+          cat ci-output.txt
+          exit $code
+      - name: Upload diagnostic output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-ci-output
+          path: ppt/ci-output.txt
+          if-no-files-found: error

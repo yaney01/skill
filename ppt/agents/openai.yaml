@@ -1,0 +1,6 @@
+interface:
+  display_name: "HTML PPT"
+  short_description: "Create editable single-file HTML presentations"
+  default_prompt: "Create or improve a polished, browser-editable 16:9 HTML presentation and validate it visually."
+policy:
+  allow_implicit_invocation: true

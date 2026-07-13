@@ -1,4 +1,0 @@
-interface:
-  display_name: "扩图"
-  short_description: "使用 GPT Image 将图片自然扩展到指定宽高比"
-  default_prompt: "Use $image-expansion to expand this image to 16:9 while preserving the original subject and pixels."

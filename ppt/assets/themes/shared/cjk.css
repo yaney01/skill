@@ -1,0 +1,91 @@
+:root {
+  --font-cjk-serif: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "Songti SC", "STSong", serif;
+  --font-cjk-sans: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-cjk-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+html:lang(zh-CN) .theme-canvas,
+html:lang(zh-Hans) .theme-canvas,
+html:lang(zh) .theme-canvas {
+  font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  font-kerning: normal;
+  font-synthesis: none;
+  font-variant-east-asian: proportional-width;
+  line-break: strict;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-autospace: normal;
+  text-spacing-trim: trim-start;
+  hanging-punctuation: none;
+}
+
+html:lang(zh-CN) :is(.theme-display, .theme-title, .theme-statement__claim, .theme-card h3),
+html:lang(zh-Hans) :is(.theme-display, .theme-title, .theme-statement__claim, .theme-card h3),
+html:lang(zh) :is(.theme-display, .theme-title, .theme-statement__claim, .theme-card h3) {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  letter-spacing: -0.005em !important;
+  text-wrap: balance;
+}
+
+html:lang(zh-CN) .theme-display,
+html:lang(zh-Hans) .theme-display,
+html:lang(zh) .theme-display {
+  line-height: 1.04 !important;
+}
+
+html:lang(zh-CN) :is(.theme-title, .theme-statement__claim),
+html:lang(zh-Hans) :is(.theme-title, .theme-statement__claim),
+html:lang(zh) :is(.theme-title, .theme-statement__claim) {
+  line-height: 1.12 !important;
+}
+
+html:lang(zh-CN) :is(.theme-lead, .theme-card p, figcaption, [data-cjk="body"]),
+html:lang(zh-Hans) :is(.theme-lead, .theme-card p, figcaption, [data-cjk="body"]),
+html:lang(zh) :is(.theme-lead, .theme-card p, figcaption, [data-cjk="body"]) {
+  font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  letter-spacing: 0.01em !important;
+  line-height: 1.65 !important;
+  text-wrap: pretty;
+}
+
+html:lang(zh-CN) :is(.theme-kicker, .theme-folio, .theme-masthead, .theme-status, .theme-node, .theme-statement__bar),
+html:lang(zh-Hans) :is(.theme-kicker, .theme-folio, .theme-masthead, .theme-status, .theme-node, .theme-statement__bar),
+html:lang(zh) :is(.theme-kicker, .theme-folio, .theme-masthead, .theme-status, .theme-node, .theme-statement__bar) {
+  font-family: var(--theme-cjk-meta, var(--font-cjk-mono));
+  letter-spacing: 0.08em !important;
+  line-height: 1.35 !important;
+}
+
+.cjk-text {
+  line-break: strict;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-autospace: normal;
+  text-spacing-trim: trim-start;
+  hanging-punctuation: none;
+}
+
+.cjk-display {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  letter-spacing: -0.005em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.cjk-body {
+  font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  letter-spacing: 0.01em;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.nowrap,
+.cjk-nowrap,
+[data-nowrap] {
+  white-space: nowrap;
+}
+
+.keep-unit {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

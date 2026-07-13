@@ -87,8 +87,10 @@ try {
   for (let index = 0; index < slideCount; index += 1) {
     await page.evaluate((current) => {
       document.querySelectorAll('.slide').forEach((slide, slideIndex) => {
-        slide.classList.toggle('active', slideIndex === current);
-        slide.classList.toggle('visible', slideIndex === current);
+        const active = slideIndex === current;
+        slide.classList.toggle('active', active);
+        slide.classList.toggle('visible', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
       });
     }, index);
     await page.waitForTimeout(60);

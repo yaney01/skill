@@ -2,38 +2,89 @@
 
 Each theme is a production template, not a color preset. Every theme contains:
 
-- `theme.json` — machine-readable identity, tier, intended use, and provenance
+- `theme.json` — machine-readable identity, tier, intended use, and registered layout IDs
+- `layout-manifest.json` — executable layout support, selectors, aliases, and contract reference
 - `tokens.css` — palette, typography, spacing, and surface tokens
-- `layouts.css` — six implemented layout families
-- `preview.html` — a six-slide editable deck using real theme markup
+- `layouts.css` — actual CSS implementation for every registered selector
+- `preview.html` — a six-slide editable design preview
 
-All themes also load `shared/cjk.css`, which implements the common Chinese typography layer:
+All themes also load:
 
-- Noto / Source Han serif and sans font stacks with local fallbacks
-- separate Chinese display, body, and metadata roles
-- restrained Chinese title tracking instead of Latin-style aggressive negative tracking
-- strict CJK line breaking and normal word breaking
-- Chinese body line-height and spacing defaults
-- punctuation containment, mixed-language spacing support, no-wrap phrases, and number-unit binding
+- `shared/cjk.css` — common Chinese typography rules
+- `shared/layout-contracts.json` — canonical layout purposes, variants, slots, capacities, and visual policies
+
+The preview is not the complete layout library. Use the layout manifest or generated layout catalog to inspect production coverage.
 
 ## Core themes
 
-| ID | Direction | Best for |
-|---|---|---|
-| `swiss-grid` | precise, objective, asymmetric | product, data, design, technology |
-| `editorial-ink` | warm, narrative, premium | research, culture, industry analysis |
-| `technical-field` | dark, engineered, diagram-led | AI systems, architecture, engineering |
+| ID | Direction | Best for | Registered layouts |
+|---|---|---|---:|
+| `swiss-grid` | precise, objective, asymmetric | product, data, design, technology | 14 |
+| `editorial-ink` | warm, narrative, premium | research, culture, industry analysis | 14 |
+| `technical-field` | dark, engineered, diagram-led | AI systems, architecture, engineering | 14 |
+
+Core themes implement:
+
+```text
+cover
+section
+statement
+split
+image-focus
+three-up
+four-grid
+metrics
+comparison
+timeline
+process
+chart
+quote
+closing
+```
 
 ## Backup themes
 
-| ID | Direction | Best for |
-|---|---|---|
-| `guizang-magazine` | electronic magazine × electronic ink | Chinese talks, industry observation, commercial storytelling |
-| `guizang-swiss` | Swiss internationalism with functional color | Chinese product, data, design, and engineering sharing |
+| ID | Direction | Best for | Registered layouts |
+|---|---|---|---:|
+| `guizang-magazine` | electronic magazine × electronic ink | Chinese talks, industry observation, commercial storytelling | 6 |
+| `guizang-swiss` | Swiss internationalism with functional color | Chinese product, data, design, and engineering sharing | 6 |
 
 The backup themes are clean-room implementations inspired by the public design principles of `guizang-ppt-skill`. No AGPL source template, script, or asset is copied. They remain optional and are not selected automatically over the core themes.
 
-Create a themed project:
+## Validate registries
+
+```bash
+node scripts/validate-layouts.mjs --strict
+node scripts/validate-layouts.mjs --theme swiss-grid --strict
+```
+
+The validator checks:
+
+- theme and manifest identity
+- tier-specific minimum layout count
+- canonical contract existence
+- duplicate IDs and invalid aliases
+- exact agreement with `theme.json`
+- CSS implementation of every selector
+- preview use of registered layouts or declared aliases
+
+## Render a complete layout catalog
+
+```bash
+node scripts/render-layout-catalog.mjs \
+  --theme swiss-grid \
+  --output ./qa/layout-catalogs/swiss-grid
+```
+
+The output is an independent 14-slide HTML project with its own runtime, theme files, `deck.json`, layout manifest, and canonical contracts. Run normal structural, manifest, and browser QA against it.
+
+```bash
+npm run layouts:validate
+npm run layouts:catalogs
+npm run layouts:qa
+```
+
+## Create a themed project
 
 ```bash
 node scripts/create-deck.mjs \
@@ -43,20 +94,16 @@ node scripts/create-deck.mjs \
   --output ./projects/launch-review
 ```
 
-Create a backup-theme project explicitly:
+Generated themed projects copy:
 
-```bash
-node scripts/create-deck.mjs \
-  --name industry-notes \
-  --title "行业观察" \
-  --theme guizang-magazine \
-  --output ./projects/industry-notes
+```text
+theme/
+├── theme.json
+├── layout-manifest.json
+├── layout-contracts.json
+├── tokens.css
+├── layouts.css
+└── cjk.css
 ```
 
-List installed themes and their tier:
-
-```bash
-node scripts/create-deck.mjs --list-themes
-```
-
-Generated projects copy `theme.json`, `tokens.css`, `layouts.css`, and `cjk.css` into `theme/`, so they remain editable and independent of the Skill installation. Final delivery still uses `bundle-html.mjs` to inline all local CSS and runtime files.
+`deck.json.layoutRegistry` points to `theme/layout-manifest.json`. The manifest validator rejects unregistered layout IDs. The legacy `grid` name remains accepted as an alias for `three-up`, but new work should use the canonical ID.

@@ -1,9 +1,9 @@
 name: PPT phase eight focused topic regression
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/ppt-phase-eight-finalize
+      - agent/ppt-phase-eight-diagnostic-base
   workflow_dispatch:
 
 jobs:

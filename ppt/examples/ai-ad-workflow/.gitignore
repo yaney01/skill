@@ -1,2 +1,4 @@
 dist/
 qa/screenshots/
+qa/visual-report.json
+qa/contact-sheet.png

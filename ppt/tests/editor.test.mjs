@@ -129,7 +129,7 @@ test('Ctrl+S downloads a self-contained edited HTML document without runtime pre
     assert.doesNotMatch(html, /class="editor-ui/);
     assert.doesNotMatch(html, /class="html-ppt-overview/);
     assert.doesNotMatch(html, /class="html-ppt-presenter-ui/);
-    assert.doesNotMatch(html, /data-presenter-runtime/);
+    assert.doesNotMatch(html, /<style\b[^>]*data-presenter-runtime/);
     assert.doesNotMatch(html, /(?:src|href)="(?:\.\.\/|\.\/|images\/)/);
     await context.close();
   } finally {

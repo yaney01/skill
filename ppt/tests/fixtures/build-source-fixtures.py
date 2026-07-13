@@ -10,7 +10,7 @@ ROOT = Path(sys.argv[1]).resolve()
 ROOT.mkdir(parents=True, exist_ok=True)
 
 
-def png(width=16, height=9, rgb=(36, 85, 255)):
+def png(width=1600, height=900, rgb=(36, 85, 255)):
     raw = b''.join(b'\x00' + bytes(rgb) * width for _ in range(height))
     def chunk(kind, data):
         return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
@@ -18,7 +18,21 @@ def png(width=16, height=9, rgb=(36, 85, 255)):
 
 IMAGE = png()
 (ROOT / 'sample.png').write_bytes(IMAGE)
-(ROOT / 'sample.md').write_text('''---\ntitle: Fixture\n---\n# 第一部分\n正文一。\n\n![示例图](sample.png)\n\n| 指标 | 数值 |\n|---|---|\n| 速度 | 42% |\n\n## 第二部分\n正文二。\n''', encoding='utf-8')
+(ROOT / 'sample.md').write_text('''---
+title: Fixture
+---
+# 第一部分
+正文一。
+
+![示例图](sample.png)
+
+| 指标 | 数值 |
+|---|---|
+| 速度 | 42% |
+
+## 第二部分
+正文二。
+''', encoding='utf-8')
 
 pptx_files = {
 '[Content_Types].xml': '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slides/slide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/><Override PartName="/ppt/notesSlides/notesSlide1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml"/><Override PartName="/ppt/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>''',

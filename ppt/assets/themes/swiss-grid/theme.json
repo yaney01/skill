@@ -2,18 +2,25 @@
   "id": "swiss-grid",
   "name": "Swiss Grid",
   "summary": "Precise, objective layouts for product, data, design, and technology presentations.",
+  "tier": "core",
+  "layoutManifest": "layout-manifest.json",
   "layouts": [
     "cover",
     "section",
     "statement",
     "split",
-    "grid",
+    "image-focus",
+    "three-up",
+    "four-grid",
+    "metrics",
+    "comparison",
+    "timeline",
+    "process",
+    "chart",
+    "quote",
     "closing"
   ],
   "stage": "1920x1080",
-  "languageSupport": [
-    "zh-CN",
-    "en"
-  ],
-  "version": 1
+  "languageSupport": ["zh-CN", "en"],
+  "version": 2
 }

@@ -13,6 +13,7 @@
     "style": { "type": "string" },
     "themeName": { "type": ["string", "null"] },
     "themeTier": { "type": ["string", "null"] },
+    "layoutRegistry": { "type": "string", "minLength": 1 },
     "purpose": { "type": "string" },
     "source": {
       "type": "object",

@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../schemas/layout.schema.json",
+  "manifestVersion": 1,
+  "theme": "technical-field",
+  "tier": "core",
+  "stage": "1920x1080",
+  "contracts": "../shared/layout-contracts.json",
+  "legacyAliases": {"grid": "three-up"},
+  "layouts": [
+    {"id": "cover", "selector": ".theme-cover"},
+    {"id": "section", "selector": ".theme-section"},
+    {"id": "statement", "selector": ".theme-statement"},
+    {"id": "split", "selector": ".theme-split"},
+    {"id": "image-focus", "selector": ".theme-image-focus"},
+    {"id": "three-up", "selector": ".theme-grid"},
+    {"id": "four-grid", "selector": ".theme-four-grid"},
+    {"id": "metrics", "selector": ".theme-metrics"},
+    {"id": "comparison", "selector": ".theme-comparison"},
+    {"id": "timeline", "selector": ".theme-timeline"},
+    {"id": "process", "selector": ".theme-process"},
+    {"id": "chart", "selector": ".theme-chart"},
+    {"id": "quote", "selector": ".theme-quote"},
+    {"id": "closing", "selector": ".theme-closing__layout"}
+  ]
+}

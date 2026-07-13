@@ -1,16 +1,27 @@
 # Workflow and content architecture
 
-## 1. Source intake
+## 1. Source intake and standardization
 
-Prefer authoritative source material supplied by the user. For each source, extract:
+Prefer authoritative source material supplied by the user. When the source is PPTX, PDF, DOCX, or Markdown, normalize it before designing the narrative:
+
+```bash
+python3 scripts/ingest-source.py input.pptx --output project/source
+node scripts/validate-source.mjs project/source/manifest.json --source input.pptx --strict
+```
+
+Read [`source-ingestion.md`](source-ingestion.md) for the complete contract.
+
+The standardized source must record:
 
 - claims and supporting evidence
 - dates, names, numbers, units, and definitions
-- required quotations or screenshots
-- content that may be condensed versus content that must remain verbatim
-- uncertainty, conflicts, or missing context
+- original page or section order
+- required quotations and screenshots
+- extracted images, dimensions, notes, tables, and chart data
+- content that may be merged, condensed, omitted, or must remain verbatim
+- provenance, uncertainty, conflicts, parser warnings, and missing context
 
-Do not treat a visual reference as factual evidence. Do not invent citations to make a slide look complete.
+Do not treat a visual reference as factual evidence. Do not invent citations to make a slide look complete. Do not delete or overwrite the original source.
 
 When images or screenshots are supplied, inspect them before finalizing the outline. Images and content jointly determine the slide structure; do not finish the complete narrative and then add visuals as decoration.
 
@@ -31,7 +42,29 @@ A complete brief contains:
 
 Ask only for missing dimensions that materially change the deck.
 
-## 3. Narrative map
+## 3. Source-to-slide mapping
+
+Before writing detailed HTML, create an auditable mapping from standardized source records to final slides.
+
+| Source | Final slide | Treatment | Reason |
+|---|---|---|---|
+| page-001 | slide-01 | preserve | required title |
+| page-002–003 | slide-02 | merge | repeated context |
+| page-004 | slide-04 | redraw chart | structured data available |
+
+Allowed treatments:
+
+- preserve
+- split
+- merge
+- condense
+- omit with an explicit reason and permission
+- redraw from extracted table/chart data
+- retain screenshot pixel-faithfully
+
+Never silently omit a source page or change a protected number, quotation, product UI, legal statement, or cited claim.
+
+## 4. Narrative map
 
 Use a slide map before writing detailed HTML. Every slide must have one primary job.
 
@@ -47,7 +80,7 @@ Recommended arc:
 
 A report may repeat evidence sections; a tutorial may replace thesis/evidence with progressive steps.
 
-## 4. Density modes
+## 5. Density modes
 
 ### Speaker-led
 
@@ -65,7 +98,7 @@ A report may repeat evidence sections; a tutorial may replace thesis/evidence wi
 - use annotations, labels, sources, and explicit conclusions
 - maintain strong hierarchy; do not paste a document onto the canvas
 
-## 5. Slide map and visual plan
+## 6. Slide map and visual plan
 
 The slide map is stored in `deck.json`, not only in temporary prose. Use `schemas/deck.schema.json` as the production contract.
 
@@ -76,6 +109,7 @@ Each slide record must include:
 - `headline`
 - `layout`
 - one explicit `visual` decision
+- source provenance or source-to-slide mapping when source material exists
 
 Visual decisions include:
 
@@ -107,7 +141,7 @@ For speaker-led work, start with:
 
 Read [`visual-planning.md`](visual-planning.md) before authoring the full HTML.
 
-## 6. Style discovery
+## 7. Style discovery
 
 If direction is open, generate three title-slide previews using real title/subtitle/company/date content:
 
@@ -117,47 +151,51 @@ If direction is open, generate three title-slide previews using real title/subti
 
 The previews must be viable systems, not decorative one-offs. Each must imply how content, data, section, quote, and closing slides will work.
 
-## 7. Asset production
+## 8. Asset production
 
 After the visual plan is approved or internally resolved:
 
-1. inventory supplied assets
+1. inventory supplied and extracted assets
 2. assign slot ratios
 3. frame screenshots without redrawing critical UI
 4. generate only the images that carry a clear narrative role
 5. build diagrams, charts, and exact labels in HTML/SVG when precision matters
 6. record paths, alt text, focus, source, and status in `deck.json`
 7. mark required assets `ready` only when the actual file or DOM visual exists
+8. retain a provenance link back to the standardized source asset
 
 Read:
 
 - [`image-prompts.md`](image-prompts.md)
 - [`screenshot-framing.md`](screenshot-framing.md)
 
-## 8. Generation sequence
+## 9. Generation sequence
 
 Generate in this order:
 
-1. production manifest and visual plan
-2. theme tokens
-3. global grid and safe areas
-4. cover and section layouts
-5. representative content and visual layouts
-6. remaining slides and assets
-7. navigation and editor
-8. structural and manifest validation
-9. rendered mechanical QA
-10. semantic visual QA and contact sheet
-11. targeted fixes
-12. final bundling and export
+1. standardized source import and validation when applicable
+2. source-to-slide mapping
+3. production manifest and visual plan
+4. theme tokens
+5. global grid and safe areas
+6. cover and section layouts
+7. representative content and visual layouts
+8. remaining slides and assets
+9. navigation and editor
+10. structural and manifest validation
+11. rendered mechanical QA
+12. semantic visual QA and contact sheet
+13. targeted fixes
+14. final bundling and export
 
 Do not spend time polishing every detail before one complete representative pass exists.
 
-## 9. QA sequence
+## 10. QA sequence
 
-Run separate mechanical and visual checks:
+Run separate source, mechanical, and visual checks:
 
 ```bash
+node scripts/validate-source.mjs project/source/manifest.json --source original.pptx --strict
 node scripts/validate-deck.mjs project/index.html
 node scripts/validate-manifest.mjs project/deck.json --html project/index.html
 node scripts/qa-deck.mjs project/index.html --screenshots project/qa/screenshots
@@ -165,22 +203,24 @@ node scripts/qa-visual.mjs project/index.html --manifest project/deck.json --jso
 node scripts/build-contact-sheet.mjs project/index.html project/qa/contact-sheet.png
 ```
 
-Mechanical QA confirms that the page is not broken. Visual QA checks coverage, evidence, sequence, repeated layouts, image-slot ratios, repeated imagery, alt text, crop focus, and declared visual requirements. The contact sheet is the final whole-deck rhythm review.
+Source validation confirms that the original material was extracted and indexed consistently. Mechanical QA confirms that the page is not broken. Visual QA checks coverage, evidence, sequence, repeated layouts, image-slot ratios, repeated imagery, alt text, crop focus, and declared visual requirements. The contact sheet is the final whole-deck rhythm review.
 
 Read [`visual-quality-checklist.md`](visual-quality-checklist.md).
 
-## 10. Conversion rules
+## 11. Conversion rules
 
 When converting an existing deck or document:
 
-- preserve meaning, slide order, and required assets unless the user approves restructuring
-- record omissions and consolidations
-- retain speaker notes as structured data when they are available
-- avoid tracing low-quality screenshots when the underlying text/data can be rebuilt semantically
+- preserve meaning, source order, and required assets unless the user approves restructuring
+- standardize source content before redesigning the visual system
+- record omissions, consolidations, splits, and chart redraws
+- retain speaker notes as structured data when available
+- avoid tracing low-quality screenshots when the underlying text or data can be rebuilt semantically
 - preserve screenshots pixel-faithfully when they are evidence or product UI
-- standardize source text and extracted media before redesigning the visual system
+- distinguish source extraction limitations from final design decisions
+- keep `source/manifest.json` and `deck.json` as separate contracts
 
-## 11. Redesign rules
+## 12. Redesign rules
 
 When redesigning an existing HTML deck:
 

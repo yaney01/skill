@@ -1,0 +1,21 @@
+{
+  "id": "guizang-swiss",
+  "name": "Guizang Swiss Backup",
+  "summary": "Backup Swiss-international theme with extreme type contrast, functional color, and strict Chinese information hierarchy.",
+  "tier": "backup",
+  "provenance": "Clean-room implementation inspired by the public design principles of guizang-ppt-skill; no source template, script, or asset copied.",
+  "layouts": [
+    "cover",
+    "section",
+    "statement",
+    "split",
+    "grid",
+    "closing"
+  ],
+  "stage": "1920x1080",
+  "languageSupport": [
+    "zh-CN",
+    "en"
+  ],
+  "version": 1
+}

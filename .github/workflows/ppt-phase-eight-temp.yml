@@ -12,7 +12,7 @@ on:
 jobs:
   task-diagnostics:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: ppt
@@ -21,8 +21,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Run isolated task regression tests
-        run: npm run test:tasks
+      - name: Validate task registry
+        run: npm run tasks:validate
+      - name: Topic-only Chinese contract
+        run: node scripts/run-task-regression.mjs --mode contract --case topic-only-zh-speaker --output /tmp/task-topic
+      - name: Markdown source contract
+        run: node scripts/run-task-regression.mjs --mode contract --case markdown-with-images --output /tmp/task-markdown
+      - name: PPTX preserve-layout contract
+        run: node scripts/run-task-regression.mjs --mode contract --case pptx-preserve-layout --output /tmp/task-pptx
+      - name: Long CJK title contract
+        run: node scripts/run-task-regression.mjs --mode contract --case cjk-long-title --output /tmp/task-cjk
+      - name: Negative task assertions
+        run: node --test tests/task-regression.test.mjs --test-name-pattern="rejects"
 
   test:
     needs: task-diagnostics

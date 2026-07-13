@@ -33,7 +33,20 @@ jobs:
           node --check scripts/build-contact-sheet.mjs
           node --check scripts/create-deck.mjs
       - name: Run complete regression suite
-        run: npm run ci
+        shell: bash
+        run: |
+          set +e
+          npm run ci > phase-five-output.txt 2>&1
+          code=$?
+          cat phase-five-output.txt
+          exit $code
+      - name: Upload diagnostic output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-phase-five-output
+          path: ppt/phase-five-output.txt
+          if-no-files-found: error
       - name: Build real example contact sheet
         run: npm run example:contact-sheet
       - name: Verify contact sheet

@@ -12,7 +12,8 @@ async function openBundledPage(browser, bundled) {
   });
   const page = await context.newPage();
   await page.goto(fileUrl(bundled), { waitUntil: 'load' });
-  await page.waitForFunction(() => Boolean(window.htmlPptEditor && window.htmlPptDeck));
+  await page.waitForFunction(() => Boolean(window.htmlPptEditor && window.htmlPptDeck && window.htmlPptPresenter?.ready));
+  await page.evaluate(() => window.htmlPptPresenter.ready);
   return { context, page };
 }
 
@@ -39,7 +40,7 @@ test('text edits persist through localStorage and reload', async () => {
   try {
     const { context, page } = await openBundledPage(browser, bundled);
     await page.keyboard.press('e');
-    const editable = page.locator('[data-editable="text"][data-element-id]').first();
+    const editable = page.locator('#deckStage [data-editable="text"][data-element-id]').first();
     const elementId = await editable.getAttribute('data-element-id');
     await editable.evaluate((element) => {
       element.innerHTML = '自动测试已保存';
@@ -55,7 +56,7 @@ test('text edits persist through localStorage and reload', async () => {
 
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => Boolean(window.htmlPptEditor));
-    assert.equal(await page.locator(`[data-element-id="${elementId}"]`).innerText(), '自动测试已保存');
+    assert.equal(await page.locator(`#deckStage [data-element-id="${elementId}"]`).innerText(), '自动测试已保存');
     await context.close();
   } finally {
     await browser.close();
@@ -68,12 +69,12 @@ test('image replacement is saved as an embedded data URL', async () => {
   try {
     const { context, page } = await openBundledPage(browser, bundled);
     await page.keyboard.press('e');
-    const image = page.locator('[data-editable="image"][data-element-id]').first();
+    const image = page.locator('#deckStage [data-editable="image"][data-element-id]').first();
     const elementId = await image.getAttribute('data-element-id');
 
     await image.evaluate((element) => {
       const slide = element.closest('.slide');
-      const slides = [...document.querySelectorAll('.slide')];
+      const slides = [...document.querySelectorAll('#deckStage .slide')];
       window.htmlPptDeck.show(slides.indexOf(slide));
     });
     await image.waitFor({ state: 'visible' });
@@ -86,7 +87,7 @@ test('image replacement is saved as an embedded data URL', async () => {
       mimeType: 'image/svg+xml',
       buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="red"/></svg>'),
     });
-    await page.waitForFunction((id) => document.querySelector(`[data-element-id="${id}"]`)?.getAttribute('src')?.startsWith('data:image/svg+xml;base64,'), elementId);
+    await page.waitForFunction((id) => document.querySelector(`#deckStage [data-element-id="${id}"]`)?.getAttribute('src')?.startsWith('data:image/svg+xml;base64,'), elementId);
 
     const saved = await page.evaluate((id) => {
       const key = window.htmlPptEditor.storageKey;
@@ -99,14 +100,14 @@ test('image replacement is saved as an embedded data URL', async () => {
   }
 });
 
-test('Ctrl+S downloads a self-contained edited HTML document', async () => {
+test('Ctrl+S downloads a self-contained edited HTML document without runtime presenter UI clones', async () => {
   const directory = temporaryDirectory('html-ppt-download-');
   const bundled = bundleExample(directory);
   const browser = await chromium.launch({ headless: true });
   try {
     const { context, page } = await openBundledPage(browser, bundled);
     await page.keyboard.press('e');
-    const editable = page.locator('[data-editable="text"][data-element-id]').first();
+    const editable = page.locator('#deckStage [data-editable="text"][data-element-id]').first();
     await editable.evaluate((element) => {
       element.innerHTML = '下载内容已更新';
       element.dispatchEvent(new Event('input', { bubbles: true }));
@@ -123,8 +124,12 @@ test('Ctrl+S downloads a self-contained edited HTML document', async () => {
 
     assert.match(download.suggestedFilename(), /\.html$/);
     assert.match(html, /下载内容已更新/);
+    assert.match(html, /id="htmlPptManifest"/);
     assert.doesNotMatch(html, /contenteditable=/);
     assert.doesNotMatch(html, /class="editor-ui/);
+    assert.doesNotMatch(html, /class="html-ppt-overview/);
+    assert.doesNotMatch(html, /class="html-ppt-presenter-ui/);
+    assert.doesNotMatch(html, /data-presenter-runtime/);
     assert.doesNotMatch(html, /(?:src|href)="(?:\.\.\/|\.\/|images\/)/);
     await context.close();
   } finally {

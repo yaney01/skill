@@ -1,4 +1,4 @@
-name: Apply phase eleven manifest stage patch
+name: Apply phase eleven production patches
 
 on:
   push:
@@ -20,7 +20,9 @@ jobs:
         with:
           node-version: 20
       - name: Apply exact replacements
-        run: node ppt/scripts/patch-phase-eleven-manifest-stage.mjs
+        run: |
+          node ppt/scripts/patch-phase-eleven-manifest-stage.mjs
+          node ppt/scripts/patch-phase-eleven-create-deck.mjs
       - name: Commit patch when needed
         run: |
           if git diff --quiet; then
@@ -29,6 +31,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ppt/scripts/lib/visual-contract.mjs ppt/scripts/validate-manifest.mjs
-          git commit -m "Add planning and delivery manifest stages"
+          git add ppt/scripts/create-deck.mjs ppt/scripts/lib/visual-contract.mjs ppt/scripts/validate-manifest.mjs
+          git commit -m "Integrate visual work orders into project creation"
           git push origin HEAD:agent/ppt-phase-eleven-visual-production

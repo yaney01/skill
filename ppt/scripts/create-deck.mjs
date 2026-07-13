@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(scriptDir, '..');
 const themesRoot = path.join(skillRoot, 'assets', 'themes');
 const sharedCjkPath = path.join(themesRoot, 'shared', 'cjk.css');
+const sourceImporterPath = path.join(scriptDir, 'ingest-source.py');
+const sourceValidatorPath = path.join(scriptDir, 'validate-source.mjs');
 
 function loadThemes() {
   if (!fs.existsSync(themesRoot)) return new Map();
@@ -36,6 +40,10 @@ Options:
   --title <title>       Presentation title. Defaults to the name.
   --lang <language>     HTML language tag. Defaults to zh-CN.
   --theme <theme-id>    Use an installed production theme.
+  --source <file>       Normalize PPTX, DOCX, PDF, or Markdown into project/source.
+  --preserve-layout     Preserve source geometry and forbid merge/condense/omit.
+  --allow-omit          Permit justified source omissions during semantic redesign.
+  --strict-source       Treat source-import warnings as validation failures.
   --output <directory>  Output directory. Defaults to ./<deck-name>.
   --force               Overwrite generated files in an existing directory.
   --list-themes         List installed production themes.
@@ -45,15 +53,25 @@ Options:
 }
 
 function parseArgs(argv) {
-  const options = { lang: 'zh-CN', force: false, listThemes: false };
+  const options = {
+    lang: 'zh-CN',
+    force: false,
+    listThemes: false,
+    preserveLayout: false,
+    allowOmit: false,
+    strictSource: false,
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === '--help' || arg === '-h') usage(0);
     if (arg === '--force') { options.force = true; continue; }
     if (arg === '--list-themes') { options.listThemes = true; continue; }
+    if (arg === '--preserve-layout') { options.preserveLayout = true; continue; }
+    if (arg === '--allow-omit') { options.allowOmit = true; continue; }
+    if (arg === '--strict-source') { options.strictSource = true; continue; }
     if (!arg.startsWith('--')) throw new Error(`Unexpected argument: ${arg}`);
     const key = arg.slice(2);
-    if (!['name', 'title', 'lang', 'theme', 'output'].includes(key)) throw new Error(`Unknown option: ${arg}`);
+    if (!['name', 'title', 'lang', 'theme', 'source', 'output'].includes(key)) throw new Error(`Unknown option: ${arg}`);
     const value = argv[index + 1];
     if (!value || value.startsWith('--')) throw new Error(`${arg} requires a value.`);
     options[key] = value;
@@ -99,6 +117,62 @@ function copyTheme(theme, outputDirectory) {
   fs.copyFileSync(theme.layoutPath, path.join(targetDirectory, 'layouts.css'));
   fs.copyFileSync(theme.cjkPath, path.join(targetDirectory, 'cjk.css'));
   fs.copyFileSync(theme.metadataPath, path.join(targetDirectory, 'theme.json'));
+}
+
+function runChecked(command, args, label) {
+  const result = spawnSync(command, args, { encoding: 'utf8' });
+  if (result.error) throw new Error(`${label} could not start: ${result.error.message}`);
+  if (result.status !== 0) {
+    const details = [result.stdout, result.stderr].filter(Boolean).join('\n').trim();
+    throw new Error(`${label} failed${details ? `:\n${details}` : '.'}`);
+  }
+  return result;
+}
+
+function prepareSource(options) {
+  if (!options.source) return null;
+  const sourcePath = path.resolve(options.source);
+  if (!fs.existsSync(sourcePath) || !fs.statSync(sourcePath).isFile()) throw new Error(`Source file not found: ${sourcePath}`);
+  if (!fs.existsSync(sourceImporterPath)) throw new Error(`Source importer not found: ${sourceImporterPath}`);
+  if (!fs.existsSync(sourceValidatorPath)) throw new Error(`Source validator not found: ${sourceValidatorPath}`);
+
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'html-ppt-source-'));
+  const sourceDirectory = path.join(tempRoot, 'source');
+  try {
+    const importArgs = [sourceImporterPath, sourcePath, '--output', sourceDirectory];
+    if (options.preserveLayout) importArgs.push('--preserve-layout');
+    if (options.allowOmit) importArgs.push('--allow-omit');
+    runChecked(process.env.PYTHON || 'python3', importArgs, 'Source ingestion');
+
+    const manifestPath = path.join(sourceDirectory, 'manifest.json');
+    const validateArgs = [sourceValidatorPath, manifestPath, '--source', sourcePath];
+    if (options.strictSource) validateArgs.push('--strict');
+    runChecked(process.execPath, validateArgs, 'Source validation');
+
+    return {
+      tempRoot,
+      directory: sourceDirectory,
+      manifest: JSON.parse(fs.readFileSync(manifestPath, 'utf8')),
+      originalPath: sourcePath,
+      mode: options.preserveLayout ? 'preserve-layout' : 'semantic',
+      strict: options.strictSource,
+    };
+  } catch (error) {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+function installPreparedSource(sourceInfo, outputDirectory) {
+  if (!sourceInfo) return;
+  const target = path.join(outputDirectory, 'source');
+  fs.rmSync(target, { recursive: true, force: true });
+  fs.cpSync(sourceInfo.directory, target, { recursive: true });
+  const readmePath = path.join(target, 'README.md');
+  if (fs.existsSync(readmePath)) {
+    const content = fs.readFileSync(readmePath, 'utf8').replaceAll(sourceInfo.directory, target);
+    fs.writeFileSync(readmePath, content, 'utf8');
+  }
 }
 
 function inferPurpose(layout) {
@@ -164,8 +238,11 @@ function extractSlideManifest(html) {
   });
 }
 
-function buildProjectReadme({ title, deckId, theme }) {
+function buildProjectReadme({ title, deckId, theme, sourceInfo }) {
   const themeLine = theme ? `- \`theme/\` — copied ${theme.metadata.name} theme, including shared CJK typography rules` : '- theme — not assigned; start from the neutral starter';
+  const sourceLine = sourceInfo ? `- \`source/\` — standardized ${sourceInfo.manifest.source.type.toUpperCase()} source, assets, provenance, and preservation rules` : '- source — not assigned; this project was initialized without an imported source file';
+  const sourceStep = sourceInfo ? `1. Review \`source/manifest.json\` and all importer warnings before changing the narrative.\n2. Complete \`deck.json.source.mapping\`; every source page or section must be preserved, split, merged, condensed, redrawn, or explicitly omitted with a reason.\n3.` : '1.';
+  const nextNumber = sourceInfo ? 4 : 2;
   return `# ${title}
 
 HTML PPT project generated by the \`ppt\` Agent Skill.
@@ -175,15 +252,16 @@ HTML PPT project generated by the \`ppt\` Agent Skill.
 - \`index.html\` — editable development deck
 - \`runtime/\` — fixed-stage player and browser editor
 - \`images/\` — local presentation assets
-- \`deck.json\` — production manifest, slide map, and visual plan
+- \`deck.json\` — production manifest, source mapping, slide map, and visual plan
+${sourceLine}
 ${themeLine}
 
 ## Production order
 
-1. Edit \`deck.json\` before building the full deck. Assign every slide a purpose, layout, and visual decision.
-2. Create or frame the required assets in \`images/\`.
-3. Build the HTML and mark required visuals ready only when they exist.
-4. Run structural, rendered, and visual QA.
+${sourceStep} Edit \`deck.json\` before building the full deck. Assign every slide a purpose, layout, visual decision, and source provenance where applicable.
+${nextNumber}. Create or frame the required assets in \`images/\`.
+${nextNumber + 1}. Build the HTML and mark required visuals ready only when they exist.
+${nextNumber + 2}. Run source, structural, rendered, and visual QA.
 
 ## Open
 
@@ -194,7 +272,7 @@ Open \`index.html\` directly in a browser. Press \`E\` to edit text or replace m
 From the installed \`ppt\` Skill directory:
 
 \`\`\`bash
-node scripts/validate-deck.mjs /absolute/path/to/${deckId}/index.html
+${sourceInfo ? `node scripts/validate-source.mjs /absolute/path/to/${deckId}/source/manifest.json --source ${JSON.stringify(sourceInfo.originalPath)}\n` : ''}node scripts/validate-deck.mjs /absolute/path/to/${deckId}/index.html
 node scripts/validate-manifest.mjs /absolute/path/to/${deckId}/deck.json --html /absolute/path/to/${deckId}/index.html
 node scripts/qa-deck.mjs /absolute/path/to/${deckId}/index.html --screenshots /absolute/path/to/${deckId}/qa/screenshots
 node scripts/qa-visual.mjs /absolute/path/to/${deckId}/index.html --manifest /absolute/path/to/${deckId}/deck.json --json /absolute/path/to/${deckId}/qa/visual-report.json
@@ -202,7 +280,7 @@ node scripts/build-contact-sheet.mjs /absolute/path/to/${deckId}/index.html /abs
 node scripts/bundle-html.mjs /absolute/path/to/${deckId}/index.html /absolute/path/to/${deckId}.html
 \`\`\`
 
-The bundled file contains local runtime files, theme CSS, CJK typography rules, and local images as one portable HTML document.
+The bundled file contains local runtime files, theme CSS, CJK typography rules, and local images as one portable HTML document. The original source and standardized \`source/\` directory remain project inputs and are not embedded unless explicitly referenced by the deck.
 `;
 }
 
@@ -243,6 +321,14 @@ if (options.listThemes) {
 }
 
 if (!options.name) { console.error('--name is required.'); usage(2); }
+if (!options.source && (options.preserveLayout || options.allowOmit || options.strictSource)) {
+  console.error('--preserve-layout, --allow-omit, and --strict-source require --source.');
+  usage(2);
+}
+if (options.preserveLayout && options.allowOmit) {
+  console.error('--preserve-layout and --allow-omit express conflicting source policies.');
+  usage(2);
+}
 
 const theme = options.theme ? themes.get(options.theme) : null;
 if (options.theme && !theme) {
@@ -264,40 +350,68 @@ if (!directoryIsEmpty(outputDirectory) && !options.force) {
 const templatePath = theme ? theme.previewPath : path.join(skillRoot, 'assets', 'templates', 'starter.html');
 if (!fs.existsSync(templatePath)) { console.error(`Template not found: ${templatePath}`); process.exit(1); }
 
-fs.mkdirSync(outputDirectory, { recursive: true });
-fs.mkdirSync(path.join(outputDirectory, 'images'), { recursive: true });
-copyRuntime(outputDirectory);
-copyTheme(theme, outputDirectory);
+let sourceInfo = null;
+try {
+  sourceInfo = prepareSource(options);
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
 
-const html = prepareHtml(templatePath, { lang: options.lang, title, deckId, themed: Boolean(theme) });
-const metadata = {
-  $schema: 'https://github.com/yaney01/skill/blob/main/ppt/schemas/deck.schema.json',
-  manifestVersion: 2,
-  id: deckId,
-  title,
-  language: options.lang,
-  density: 'speaker-led',
-  style: theme?.metadata.id || 'unassigned',
-  themeName: theme?.metadata.name || null,
-  themeTier: theme?.metadata.tier || null,
-  visualStrategy: {
-    mode: 'mixed',
-    targetCoverage: 0.5,
-    targetEvidenceCoverage: 0.3,
-    maxConsecutiveTextOnly: 2,
-  },
-  slides: extractSlideManifest(html),
-  createdAt: new Date().toISOString(),
-  generator: 'html-ppt-agent-skill',
-};
+try {
+  fs.mkdirSync(outputDirectory, { recursive: true });
+  fs.mkdirSync(path.join(outputDirectory, 'images'), { recursive: true });
+  copyRuntime(outputDirectory);
+  copyTheme(theme, outputDirectory);
+  installPreparedSource(sourceInfo, outputDirectory);
 
-fs.writeFileSync(path.join(outputDirectory, 'index.html'), html, 'utf8');
-fs.writeFileSync(path.join(outputDirectory, 'deck.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
-fs.writeFileSync(path.join(outputDirectory, 'README.md'), buildProjectReadme({ title, deckId, theme }), 'utf8');
-fs.writeFileSync(path.join(outputDirectory, 'images', '.gitkeep'), '', 'utf8');
+  const html = prepareHtml(templatePath, { lang: options.lang, title, deckId, themed: Boolean(theme) });
+  const metadata = {
+    $schema: 'https://github.com/yaney01/skill/blob/main/ppt/schemas/deck.schema.json',
+    manifestVersion: 2,
+    id: deckId,
+    title,
+    language: options.lang,
+    density: 'speaker-led',
+    style: theme?.metadata.id || 'unassigned',
+    themeName: theme?.metadata.name || null,
+    themeTier: theme?.metadata.tier || null,
+    ...(sourceInfo ? {
+      source: {
+        manifest: 'source/manifest.json',
+        originalFile: sourceInfo.manifest.source.fileName,
+        type: sourceInfo.manifest.source.type,
+        mode: sourceInfo.mode,
+        mapping: [],
+      },
+    } : {}),
+    visualStrategy: {
+      mode: 'mixed',
+      targetCoverage: 0.5,
+      targetEvidenceCoverage: 0.3,
+      maxConsecutiveTextOnly: 2,
+    },
+    slides: extractSlideManifest(html),
+    createdAt: new Date().toISOString(),
+    generator: 'html-ppt-agent-skill',
+  };
 
-console.log(`Created HTML PPT project: ${outputDirectory}`);
-console.log(`Deck ID: ${deckId}`);
-console.log(`Theme: ${theme?.metadata.id || 'unassigned'}`);
-console.log(`Manifest slides: ${metadata.slides.length}`);
-console.log('Next: complete the visual plan in deck.json before authoring the full deck.');
+  fs.writeFileSync(path.join(outputDirectory, 'index.html'), html, 'utf8');
+  fs.writeFileSync(path.join(outputDirectory, 'deck.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
+  fs.writeFileSync(path.join(outputDirectory, 'README.md'), buildProjectReadme({ title, deckId, theme, sourceInfo }), 'utf8');
+  fs.writeFileSync(path.join(outputDirectory, 'images', '.gitkeep'), '', 'utf8');
+
+  console.log(`Created HTML PPT project: ${outputDirectory}`);
+  console.log(`Deck ID: ${deckId}`);
+  console.log(`Theme: ${theme?.metadata.id || 'unassigned'}`);
+  if (sourceInfo) {
+    console.log(`Source: ${sourceInfo.manifest.source.type} — ${sourceInfo.manifest.pageCount} pages/sections`);
+    console.log(`Source mode: ${sourceInfo.mode}`);
+  }
+  console.log(`Manifest slides: ${metadata.slides.length}`);
+  console.log(sourceInfo
+    ? 'Next: review source/manifest.json and complete deck.json.source.mapping before authoring the full deck.'
+    : 'Next: complete the visual plan in deck.json before authoring the full deck.');
+} finally {
+  if (sourceInfo?.tempRoot) fs.rmSync(sourceInfo.tempRoot, { recursive: true, force: true });
+}

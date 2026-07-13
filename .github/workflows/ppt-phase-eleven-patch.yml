@@ -1,0 +1,34 @@
+name: Apply phase eleven manifest stage patch
+
+on:
+  push:
+    branches:
+      - agent/ppt-phase-eleven-visual-production
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ppt-phase-eleven-visual-production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply exact replacements
+        run: node ppt/scripts/patch-phase-eleven-manifest-stage.mjs
+      - name: Commit patch when needed
+        run: |
+          if git diff --quiet; then
+            echo "No patch changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ppt/scripts/lib/visual-contract.mjs ppt/scripts/validate-manifest.mjs
+          git commit -m "Add planning and delivery manifest stages"
+          git push origin HEAD:agent/ppt-phase-eleven-visual-production

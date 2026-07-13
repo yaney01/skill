@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yaney01.github.io/skill/ppt/schemas/source.schema.json",
+  "title": "HTML PPT standardized source manifest",
+  "type": "object",
+  "required": ["manifestVersion", "source", "pageCount", "pages", "assets", "warnings"],
+  "properties": {
+    "manifestVersion": { "const": 1 },
+    "source": {
+      "type": "object",
+      "required": ["fileName", "type", "sha256", "sizeBytes", "importedAt", "importer", "preserveLayout"],
+      "properties": {
+        "fileName": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["pptx", "docx", "pdf", "markdown"] },
+        "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "importedAt": { "type": "string" },
+        "importer": { "type": "string", "minLength": 1 },
+        "preserveLayout": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "pageCount": { "type": "integer", "minimum": 1 },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "sourceIndex", "title", "textPath", "notesPath", "images", "tables", "charts", "elements", "preservation", "provenance"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^page-[0-9]{3,}$" },
+          "sourceIndex": { "type": "integer", "minimum": 1 },
+          "title": { "type": "string" },
+          "textPath": { "type": "string", "minLength": 1 },
+          "notesPath": { "type": ["string", "null"] },
+          "images": { "type": "array", "items": { "$ref": "#/$defs/image" } },
+          "tables": { "type": "array", "items": { "$ref": "#/$defs/dataAsset" } },
+          "charts": { "type": "array", "items": { "$ref": "#/$defs/dataAsset" } },
+          "elements": { "type": "array" },
+          "preservation": { "$ref": "#/$defs/preservation" },
+          "provenance": { "type": "array", "minItems": 1, "items": { "type": "object" } }
+        },
+        "additionalProperties": true
+      }
+    },
+    "assets": {
+      "type": "object",
+      "required": ["images", "tables", "charts"],
+      "properties": {
+        "images": { "type": "array" },
+        "tables": { "type": "array" },
+        "charts": { "type": "array" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 },
+          "page": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "preservation": {
+      "type": "object",
+      "required": ["verbatim", "layout", "allowMerge", "allowCondense", "allowOmit"],
+      "properties": {
+        "verbatim": { "type": "boolean" },
+        "layout": { "type": "boolean" },
+        "allowMerge": { "type": "boolean" },
+        "allowCondense": { "type": "boolean" },
+        "allowOmit": { "type": "boolean" }
+      }
+    },
+    "image": {
+      "type": "object",
+      "required": ["id", "path", "role", "preservePixelFaithful", "allowCrop"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "originalPart": { "type": "string" },
+        "mediaType": { "type": ["string", "null"] },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 },
+        "role": { "type": "string" },
+        "external": { "type": "boolean" },
+        "preservePixelFaithful": { "type": "boolean" },
+        "allowCrop": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "dataAsset": {
+      "type": "object",
+      "required": ["id", "path"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
+  }
+}

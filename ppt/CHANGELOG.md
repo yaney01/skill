@@ -10,6 +10,7 @@ All notable changes to the HTML PPT Agent Skill are recorded here. Versions foll
 - Correct Coral's 90-day/12-week mismatch and align Ribbon's visible three-card module page with the registered `three-up` layout.
 - Replace static interaction claims with visual-cue language unless the preview actually implements the described behavior.
 - Add content-integrity regression for misleading placeholders, unlabeled demo metrics, timeline mismatches, and preview layout/content drift.
+- Render all installed theme previews in CI and retain their screenshots under the rendered QA artifact for direct visual review.
 
 ## 0.15.2 — Guizang hierarchy alignment
 

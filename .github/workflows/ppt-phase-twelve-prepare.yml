@@ -26,7 +26,7 @@ jobs:
           npm install --package-lock-only --ignore-scripts
       - name: Commit lockfile when changed
         run: |
-          if git diff --quiet -- ppt/package-lock.json; then
+          if [ -z "$(git status --porcelain -- ppt/package-lock.json)" ]; then
             echo "Lockfile already current"
           else
             git config user.name "github-actions[bot]"
@@ -50,13 +50,28 @@ jobs:
           node --check tests/browser-smoke.test.mjs
           node --check tests/accessibility.test.mjs
           npm run test:core
-      - name: Chromium release smoke
+      - name: Chromium browser smoke
         working-directory: ppt
         env:
           HTML_PPT_BROWSER: chromium
-        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility
-      - name: WebKit release smoke
+        run: npm run test:browser-smoke
+      - name: Chromium accessibility regression
+        working-directory: ppt
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:accessibility && npm run example:accessibility
+      - name: WebKit browser smoke
         working-directory: ppt
         env:
           HTML_PPT_BROWSER: webkit
-        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility
+        run: npm run test:browser-smoke
+      - name: WebKit accessibility regression
+        working-directory: ppt
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:accessibility
+      - name: WebKit production accessibility
+        working-directory: ppt
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run example:accessibility

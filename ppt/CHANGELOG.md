@@ -2,6 +2,13 @@
 
 All notable changes to the HTML PPT Agent Skill are recorded here. Versions follow semantic versioning for the `ppt/` package and its production contracts.
 
+## 0.15.1 — Four-theme Chinese typography correction
+
+- Map the Cobalt, Coral, Ribbon, and Blue Growth class namespaces into the shared Chinese typography layer.
+- Correct Chinese cover display sizes, title weights, tracking, and line-height so multi-line headings retain visible separation.
+- Apply the shared Chinese body and metadata roles to custom theme paragraphs, labels, tabs, chips, folios, and navigation chrome.
+- Add Chromium and WebKit computed-style regression for display, title, body, metadata, strict line breaking, and generated font stacks.
+
 ## 0.15.0 — Composition-faithful theme expansion
 
 - Add `cobalt-executive-deck`, `coral-startup-deck`, `ribbon-tab-brochure`, and `blue-growth-deck` as explicit-selection backup themes.

@@ -89,7 +89,7 @@ test('all installed themes expose metadata, CSS, registered layouts, shared cont
     if (compositionPrefix) {
       assert.equal(registry.layouts.length, 14, `${themeId} must implement the full 14-layout production contract`);
       assert.ok(registry.layouts.every((layout) => layout.selector.startsWith(compositionPrefix)), `${themeId} reuses a foreign composition selector`);
-      assert.match(html, new RegExp(escapeRegExp(compositionPrefix)));
+      assert.ok(html.includes(`class="${compositionPrefix.slice(1)}`), `${themeId} preview does not use its composition prefix`);
       assert.doesNotMatch(html, /class="[^"]*\btheme-(?:cover|section|statement|split|grid|closing)\b/);
     }
   }

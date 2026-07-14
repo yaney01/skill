@@ -1,9 +1,10 @@
 {
   "name": "html-ppt-agent-skill",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "type": "module",
-  "description": "Visual production work orders, versioned constrained browser editing, presenter mode, task-level regression, registered layouts, integrated source ingestion, project generation, themes, CJK typography, semantic visual QA, bundling, browser QA, PDF export, examples, and automated tests for the HTML PPT agent skill.",
+  "packageManager": "npm@10.8.2",
+  "description": "Deterministic CI, cross-browser smoke coverage, accessibility QA, visual production work orders, constrained browser editing, presenter mode, task regression, registered layouts, source ingestion, bundling, and automated delivery checks for the HTML PPT agent skill.",
   "scripts": {
     "create": "node scripts/create-deck.mjs",
     "ingest": "python3 scripts/ingest-source.py",
@@ -23,6 +24,7 @@
     "manifest": "node scripts/validate-manifest.mjs",
     "qa": "node scripts/qa-deck.mjs",
     "qa:visual": "node scripts/qa-visual.mjs",
+    "qa:accessibility": "node scripts/qa-accessibility.mjs",
     "contact-sheet": "node scripts/build-contact-sheet.mjs",
     "pdf": "node scripts/export-pdf.mjs",
     "test:source": "node --test tests/source-ingestion.test.mjs tests/source-integration.test.mjs",
@@ -31,24 +33,30 @@
     "test:tasks": "node --test tests/task-regression.test.mjs",
     "test:editor": "node --test --test-concurrency=1 tests/editor.test.mjs",
     "test:presenter": "node --test --test-concurrency=1 tests/presenter.test.mjs",
-    "test:core": "node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/visual-work-orders.test.mjs tests/create-deck-visual-work-orders.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs tests/task-regression.test.mjs",
-    "test:browser": "node --test --test-concurrency=1 tests/runtime.test.mjs tests/editor.test.mjs tests/presenter.test.mjs tests/visual-qa.test.mjs",
+    "test:browser-smoke": "node --test --test-concurrency=1 tests/browser-smoke.test.mjs",
+    "test:accessibility": "node --test --test-concurrency=1 tests/accessibility.test.mjs",
+    "test:core": "node --test tests/structure.test.mjs tests/bundle.test.mjs tests/themes.test.mjs tests/layouts.test.mjs tests/visual-manifest.test.mjs tests/visual-work-orders.test.mjs tests/create-deck-visual-work-orders.test.mjs tests/source-ingestion.test.mjs tests/source-integration.test.mjs tests/task-regression.test.mjs tests/accessibility.test.mjs",
+    "test:browser": "node --test --test-concurrency=1 tests/runtime.test.mjs tests/editor.test.mjs tests/presenter.test.mjs tests/visual-qa.test.mjs tests/browser-smoke.test.mjs",
     "test": "npm run test:core && npm run test:browser",
-    "ci": "npm run layouts:validate && npm run tasks:validate && npm run test && npm run tasks:run && npm run example:validate && npm run example:manifest && npm run example:visual-plan && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html",
+    "ci:contracts": "npm run layouts:validate && npm run tasks:validate && npm run test:core && npm run tasks:run && npm run example:validate && npm run example:manifest && npm run example:visual-plan && npm run example:visual && npm run example:bundle && node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html",
+    "ci:browser": "npm run test:browser && npm run example:accessibility",
+    "ci": "npm run ci:contracts && npm run ci:browser",
     "themes:validate": "node scripts/validate-deck.mjs assets/themes/swiss-grid/preview.html && node scripts/validate-deck.mjs assets/themes/editorial-ink/preview.html && node scripts/validate-deck.mjs assets/themes/technical-field/preview.html && node scripts/validate-deck.mjs assets/themes/guizang-magazine/preview.html && node scripts/validate-deck.mjs assets/themes/guizang-swiss/preview.html",
     "themes:qa": "node scripts/qa-deck.mjs assets/themes/swiss-grid/preview.html --screenshots qa/themes/swiss-grid && node scripts/qa-deck.mjs assets/themes/editorial-ink/preview.html --screenshots qa/themes/editorial-ink && node scripts/qa-deck.mjs assets/themes/technical-field/preview.html --screenshots qa/themes/technical-field && node scripts/qa-deck.mjs assets/themes/guizang-magazine/preview.html --screenshots qa/themes/guizang-magazine && node scripts/qa-deck.mjs assets/themes/guizang-swiss/preview.html --screenshots qa/themes/guizang-swiss",
     "example:validate": "node scripts/validate-deck.mjs examples/ai-ad-workflow/index.html",
     "example:manifest": "node scripts/validate-manifest.mjs examples/ai-ad-workflow/deck.json --html examples/ai-ad-workflow/index.html --stage delivery --strict",
     "example:visual-plan": "node scripts/build-visual-work-orders.mjs examples/ai-ad-workflow/deck.json --output examples/ai-ad-workflow/qa/visual-work-orders.json --markdown examples/ai-ad-workflow/qa/visual-work-orders.md --stage delivery --force && node scripts/validate-visual-work-orders.mjs examples/ai-ad-workflow/qa/visual-work-orders.json --deck examples/ai-ad-workflow/deck.json --stage delivery --strict",
     "example:visual": "node scripts/qa-visual.mjs examples/ai-ad-workflow/index.html --manifest examples/ai-ad-workflow/deck.json --json examples/ai-ad-workflow/qa/visual-report.json",
+    "example:accessibility": "node scripts/qa-accessibility.mjs examples/ai-ad-workflow/index.html --json examples/ai-ad-workflow/qa/accessibility-report.json",
     "example:contact-sheet": "node scripts/build-contact-sheet.mjs examples/ai-ad-workflow/index.html examples/ai-ad-workflow/qa/contact-sheet.png",
     "example:bundle": "node scripts/bundle-html.mjs examples/ai-ad-workflow/index.html examples/ai-ad-workflow/dist/ai-ad-workflow.html",
     "example:qa": "node scripts/qa-deck.mjs examples/ai-ad-workflow/index.html --screenshots examples/ai-ad-workflow/qa/screenshots"
   },
   "devDependencies": {
-    "playwright": "^1.55.0"
+    "playwright": "1.55.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "npm": ">=10 <11"
   }
 }

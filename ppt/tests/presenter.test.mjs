@@ -41,6 +41,10 @@ test('bundled presenter mode loads notes and synchronizes both directions', asyn
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const page = await context.newPage();
+    const deckJsonRequests = [];
+    page.on('request', (request) => {
+      if (/\/deck\.json(?:[?#]|$)/.test(request.url())) deckJsonRequests.push(request.url());
+    });
     await page.goto(fileUrl(bundled), { waitUntil: 'load' });
     await page.waitForFunction(() => Boolean(window.htmlPptDeck));
 
@@ -50,6 +54,7 @@ test('bundled presenter mode loads notes and synchronizes both directions', asyn
     await presenter.waitForSelector('#position');
     await presenter.waitForFunction(() => document.querySelector('#position')?.textContent === '1 / 3');
     assert.equal(await presenter.locator('#notes').textContent(), 'Introduce the decision.');
+    assert.deepEqual(deckJsonRequests, [], 'Bundled decks must use the embedded manifest without requesting deck.json.');
 
     await presenter.locator('[data-c="next"]').click();
     await page.waitForFunction(() => window.htmlPptDeck.index === 1);

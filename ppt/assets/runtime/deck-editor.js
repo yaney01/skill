@@ -200,9 +200,9 @@
           return;
         }
         this.select(editable);
+        event.stopPropagation();
         if (editable.dataset.editable === 'image') {
           event.preventDefault();
-          event.stopPropagation();
         }
       });
       this.stage.addEventListener('dblclick', (event) => {

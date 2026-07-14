@@ -1,0 +1,211 @@
+name: HTML PPT CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ppt/**'
+      - '.github/workflows/ppt-ci.yml'
+      - '.github/workflows/ppt-phase-twelve-prepare.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ppt/**'
+      - '.github/workflows/ppt-ci.yml'
+      - '.github/workflows/ppt-phase-twelve-prepare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: html-ppt-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: PPT contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+        working-directory: .
+      - name: Deterministic install
+        run: npm ci
+      - name: Validate registered layouts
+        run: npm run layouts:validate
+      - name: Validate task registry
+        run: npm run tasks:validate
+      - name: Core regression
+        run: npm run test:core
+      - name: Task contract regression
+        run: npm run tasks:run
+      - name: Production example structure
+        run: npm run example:validate
+      - name: Production example manifest
+        run: npm run example:manifest
+      - name: Production example visual work orders
+        run: npm run example:visual-plan
+      - name: Production example bundle
+        run: npm run example:bundle
+      - name: Validate bundled production example
+        run: node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
+      - name: Upload contract reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-contract-reports
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ppt/examples/ai-ad-workflow/qa/*.json
+            ppt/examples/ai-ad-workflow/qa/*.md
+            ppt/examples/ai-ad-workflow/dist/*.html
+            ppt/qa/task-regression/**/*.json
+
+  browser:
+    name: PPT browser (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Deterministic install
+        run: npm ci
+      - name: Install ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Chromium runtime regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: node --test --test-concurrency=1 tests/runtime.test.mjs
+      - name: Chromium presenter regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:presenter
+      - name: Chromium editor regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: |
+          mkdir -p qa/ci
+          set -o pipefail
+          node --test --test-concurrency=1 tests/editor.test.mjs 2>&1 | tee qa/ci/editor.tap
+      - name: Chromium semantic visual QA regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: node --test --test-concurrency=1 tests/visual-qa.test.mjs
+      - name: Chromium production semantic visual QA
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run example:visual
+      - name: Chromium browser smoke
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:browser-smoke
+      - name: Chromium accessibility regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:accessibility
+      - name: Chromium production accessibility
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run example:accessibility
+      - name: WebKit browser smoke
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:browser-smoke
+      - name: WebKit accessibility regression
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:accessibility
+      - name: WebKit production accessibility
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run example:accessibility
+      - name: Upload browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-browser-${{ matrix.browser }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ppt/qa/ci/**
+            ppt/examples/ai-ad-workflow/qa/accessibility-report.json
+            ppt/examples/ai-ad-workflow/qa/visual-report.json
+
+  rendered:
+    name: PPT rendered regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+        working-directory: .
+      - name: Deterministic install
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Render task cases
+        run: npm run tasks:qa
+      - name: Render registered layout catalogs
+        run: npm run layouts:qa
+      - name: Render production example
+        run: npm run example:qa && npm run example:contact-sheet
+      - name: Upload rendered QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-rendered-qa
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ppt/qa/task-regression/**
+            ppt/qa/layout-catalogs/**
+            ppt/examples/ai-ad-workflow/qa/**

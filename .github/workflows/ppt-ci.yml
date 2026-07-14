@@ -1,0 +1,142 @@
+name: HTML PPT CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ppt/**'
+      - '.github/workflows/ppt-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ppt/**'
+      - '.github/workflows/ppt-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: html-ppt-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: PPT contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+        working-directory: .
+      - name: Deterministic install
+        run: npm ci
+      - name: Contract and production-chain regression
+        run: npm run ci:contracts
+      - name: Upload contract reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-contract-reports
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ppt/examples/ai-ad-workflow/qa/*.json
+            ppt/examples/ai-ad-workflow/qa/*.md
+            ppt/examples/ai-ad-workflow/dist/*.html
+            ppt/qa/task-regression/**/*.json
+
+  browser:
+    name: PPT browser (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Deterministic install
+        run: npm ci
+      - name: Install ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Chromium complete browser regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:browser && npm run example:accessibility
+      - name: WebKit release regression
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-accessibility-${{ matrix.browser }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: ppt/examples/ai-ad-workflow/qa/accessibility-report.json
+
+  rendered:
+    name: PPT rendered regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    defaults:
+      run:
+        working-directory: ppt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ppt/package-lock.json
+      - name: Pin npm
+        run: npm install --global npm@10.8.2
+      - name: Install PDF extraction tools
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+        working-directory: .
+      - name: Deterministic install
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Render task cases
+        run: npm run tasks:qa
+      - name: Render registered layout catalogs
+        run: npm run layouts:qa
+      - name: Render production example
+        run: npm run example:qa && npm run example:contact-sheet
+      - name: Upload rendered QA artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppt-rendered-qa
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            ppt/qa/task-regression/**
+            ppt/qa/layout-catalogs/**
+            ppt/examples/ai-ad-workflow/qa/**

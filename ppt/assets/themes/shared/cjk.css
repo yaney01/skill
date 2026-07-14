@@ -2,6 +2,12 @@
   --font-cjk-serif: "Noto Serif SC", "Source Han Serif SC", "Source Han Serif CN", "Songti SC", "STSong", serif;
   --font-cjk-sans: "Noto Sans SC", "Source Han Sans SC", "Source Han Sans CN", "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-cjk-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --guizang-cjk-display-size: 116px;
+  --guizang-cjk-title-size: 76px;
+  --guizang-cjk-statement-size: 84px;
+  --guizang-cjk-lead-size: 30px;
+  --guizang-cjk-card-body-size: 24px;
+  --guizang-cjk-meta-size: 20px;
 }
 
 html:lang(zh-CN) .theme-canvas,
@@ -90,8 +96,8 @@ html:lang(zh) :is(.theme-kicker, .theme-folio, .theme-masthead, .theme-status, .
   font-variant-numeric: tabular-nums;
 }
 
-/* Composition themes use independent class namespaces. Map those namespaces
-   back into the shared Chinese display/title/body/meta contract. */
+/* Composition themes keep their own layouts and components, but their primary
+   Chinese hierarchy follows the Guizang Swiss visual type scale. */
 html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) {
   font-family: var(--theme-cjk-body, var(--font-cjk-sans));
   font-kerning: normal;
@@ -107,53 +113,78 @@ html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) {
 
 html:lang(zh) :is(.cobalt-display, .coral-display, .ribbon-display, .growth-display) {
   font-family: var(--theme-cjk-display, var(--font-cjk-sans));
-  font-weight: 800 !important;
+  font-size: var(--guizang-cjk-display-size) !important;
+  font-weight: 900 !important;
   letter-spacing: -0.005em !important;
   line-height: 1.04 !important;
   text-wrap: balance;
 }
 
-html:lang(zh) .cobalt-display { font-size: 90px !important; }
-html:lang(zh) .coral-display { font-size: 90px !important; }
-html:lang(zh) .ribbon-display { font-size: 86px !important; }
-html:lang(zh) .growth-display { font-size: 96px !important; }
-
 html:lang(zh) :is(
   .cobalt-title,
   .coral-title,
   .ribbon-title,
-  .growth-title,
+  .growth-title
+) {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  font-size: var(--guizang-cjk-title-size) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.12 !important;
+  text-wrap: balance;
+}
+
+html:lang(zh) :is(
   .cobalt-statement__claim h2,
   .coral-statement__card h2,
   .ribbon-statement__card h2,
   .growth-statement__card h2
 ) {
   font-family: var(--theme-cjk-display, var(--font-cjk-sans));
-  font-weight: 800 !important;
-  letter-spacing: 0px !important;
+  font-size: var(--guizang-cjk-statement-size) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.005em !important;
   line-height: 1.12 !important;
   text-wrap: balance;
 }
 
-html:lang(zh) .cobalt-title { font-size: 58px !important; }
-html:lang(zh) .coral-title { font-size: 58px !important; }
-html:lang(zh) .ribbon-title { font-size: 56px !important; }
-html:lang(zh) .growth-title { font-size: 60px !important; }
+html:lang(zh) :is(
+  .cobalt-cover__headline,
+  .coral-cover__headline,
+  .ribbon-cover__headline,
+  .growth-cover__copy,
+  .cobalt-closing__copy,
+  .coral-closing__copy,
+  .ribbon-closing__copy,
+  .growth-closing__copy
+) :is(.cobalt-display, .coral-display, .ribbon-display, .growth-display) {
+  margin: 30px 0 34px !important;
+}
 
 html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) h3 {
   font-family: var(--theme-cjk-display, var(--font-cjk-sans));
-  font-weight: 800 !important;
-  letter-spacing: 0px !important;
-  line-height: 1.16 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.08 !important;
   text-wrap: balance;
 }
 
-html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) :is(p, li, figcaption, [data-cjk="body"]),
-html:lang(zh) :is(.cobalt-copy, .coral-copy, .ribbon-copy, .growth-copy) {
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) :is(p, li, figcaption, [data-cjk="body"]) {
   font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  font-weight: 500 !important;
   letter-spacing: 0.01em !important;
   line-height: 1.65 !important;
   text-wrap: pretty;
+}
+
+html:lang(zh) :is(.cobalt-copy, .coral-copy, .ribbon-copy, .growth-copy) {
+  font-size: var(--guizang-cjk-lead-size) !important;
+}
+
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) :is(article, aside) p,
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) :is(li, figcaption),
+html:lang(zh) :is(.cobalt-split__stats, .growth-chart__copy) :is(.cobalt-copy, .growth-copy) {
+  font-size: var(--guizang-cjk-card-body-size) !important;
 }
 
 html:lang(zh) :is(
@@ -179,7 +210,8 @@ html:lang(zh) :is(
   .growth-float-card small
 ) {
   font-family: var(--theme-cjk-meta, var(--font-cjk-mono));
-  font-weight: 600 !important;
+  font-size: var(--guizang-cjk-meta-size) !important;
+  font-weight: 700 !important;
   letter-spacing: 0.08em !important;
   line-height: 1.35 !important;
 }

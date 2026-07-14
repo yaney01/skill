@@ -1,0 +1,62 @@
+name: PPT phase twelve preparation
+
+on:
+  pull_request:
+    branches:
+      - agent/ppt-phase-twelve-diagnostic-base
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ppt-phase-twelve-release-hardening
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Pin npm and generate lockfile
+        working-directory: ppt
+        run: |
+          npm install --global npm@10.8.2
+          npm install --package-lock-only --ignore-scripts
+      - name: Commit lockfile when changed
+        run: |
+          if git diff --quiet -- ppt/package-lock.json; then
+            echo "Lockfile already current"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add ppt/package-lock.json
+            git commit -m "Add deterministic PPT package lock"
+            git push origin HEAD:agent/ppt-phase-twelve-release-hardening
+          fi
+      - name: Deterministic install
+        working-directory: ppt
+        run: npm ci
+      - name: Install browsers
+        working-directory: ppt
+        run: npx playwright install --with-deps chromium webkit
+      - name: Syntax and core regression
+        working-directory: ppt
+        run: |
+          node --check scripts/lib/browser-launcher.mjs
+          node --check scripts/lib/accessibility-audit.mjs
+          node --check scripts/qa-accessibility.mjs
+          node --check tests/browser-smoke.test.mjs
+          node --check tests/accessibility.test.mjs
+          npm run test:core
+      - name: Chromium release smoke
+        working-directory: ppt
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility
+      - name: WebKit release smoke
+        working-directory: ppt
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility

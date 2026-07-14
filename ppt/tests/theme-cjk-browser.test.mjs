@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { selectedBrowserName, selectedBrowserType } from '../scripts/lib/browser-launcher.mjs';
@@ -22,6 +23,8 @@ function closeTo(actual, expected, tolerance, message) {
 
 test(`${browserName} applies Chinese display, title, body, and metadata rules to the four composition themes`, async () => {
   const browser = await selectedBrowserType(browserName).launch({ headless: true });
+  const reports = [];
+  const reportPath = path.join(pptRoot, 'qa', 'ci', `theme-cjk-${browserName}.json`);
   try {
     const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
     for (const theme of cases) {
@@ -52,6 +55,10 @@ test(`${browserName} applies Chinese display, title, body, and metadata rules to
           meta: inspect(`.${prefix}-kicker`),
         };
       }, { prefix: theme.prefix });
+
+      reports.push({ theme: theme.id, expected: theme, styles });
+      fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+      fs.writeFileSync(reportPath, `${JSON.stringify(reports, null, 2)}\n`, 'utf8');
 
       assert.equal(Number.parseFloat(styles.display.fontSize), theme.displaySize, `${theme.id} display size`);
       assert.equal(Number.parseFloat(styles.title.fontSize), theme.titleSize, `${theme.id} title size`);

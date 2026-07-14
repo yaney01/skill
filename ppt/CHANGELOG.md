@@ -2,6 +2,14 @@
 
 All notable changes to the HTML PPT Agent Skill are recorded here. Versions follow semantic versioning for the `ppt/` package and its production contracts.
 
+## 0.15.2 — Guizang hierarchy alignment
+
+- Align the Cobalt, Coral, Ribbon, and Blue Growth Chinese display hierarchy to the Guizang Swiss production scale.
+- Standardize primary display text at 116 px / 900, slide titles at 76 px / 900, lead copy at 30 px / 500, and metadata at 20 px / 700.
+- Preserve the four themes' independent compositions while applying Guizang tracking, line-height, and cover-title spacing.
+- Keep compact card copy at the Guizang 24 px reading size instead of forcing lead-copy dimensions into dense modules.
+- Extend Chromium and WebKit regression to verify the Guizang type scale, vertical title spacing, and 1920×1080 text containment.
+
 ## 0.15.1 — Four-theme Chinese typography correction
 
 - Map the Cobalt, Coral, Ribbon, and Blue Growth class namespaces into the shared Chinese typography layer.

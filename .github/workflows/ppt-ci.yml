@@ -6,13 +6,11 @@ on:
     paths:
       - 'ppt/**'
       - '.github/workflows/ppt-ci.yml'
-      - '.github/workflows/ppt-phase-twelve-prepare.yml'
   push:
     branches: [main]
     paths:
       - 'ppt/**'
       - '.github/workflows/ppt-ci.yml'
-      - '.github/workflows/ppt-phase-twelve-prepare.yml'
   workflow_dispatch:
 
 permissions:

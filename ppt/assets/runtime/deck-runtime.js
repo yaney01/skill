@@ -139,12 +139,14 @@
     async loadPresenterManifest() {
       if (this.presenterManifest) return this.presenterManifest;
       const inline = document.getElementById('deckManifest');
-      try {
-        const response = await fetch('deck.json', { cache: 'no-store' });
-        if (response.ok) this.presenterManifest = await response.json();
-      } catch {}
-      if (!this.presenterManifest && inline) {
+      if (inline) {
         try { this.presenterManifest = JSON.parse(inline.textContent || '{}'); } catch {}
+      }
+      if (!this.presenterManifest) {
+        try {
+          const response = await fetch('deck.json', { cache: 'no-store' });
+          if (response.ok) this.presenterManifest = await response.json();
+        } catch {}
       }
       this.presenterManifest ||= { slides: [] };
       return this.presenterManifest;

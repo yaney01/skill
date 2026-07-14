@@ -58,8 +58,6 @@ jobs:
         run: npm run example:manifest
       - name: Production example visual work orders
         run: npm run example:visual-plan
-      - name: Production example semantic visual QA
-        run: npm run example:visual
       - name: Production example bundle
         run: npm run example:bundle
       - name: Validate bundled production example
@@ -115,12 +113,20 @@ jobs:
         if: matrix.browser == 'chromium'
         env:
           HTML_PPT_BROWSER: chromium
-        run: npm run test:editor
+        run: |
+          mkdir -p qa/ci
+          set -o pipefail
+          node --test --test-concurrency=1 tests/editor.test.mjs 2>&1 | tee qa/ci/editor.tap
       - name: Chromium semantic visual QA regression
         if: matrix.browser == 'chromium'
         env:
           HTML_PPT_BROWSER: chromium
         run: node --test --test-concurrency=1 tests/visual-qa.test.mjs
+      - name: Chromium production semantic visual QA
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run example:visual
       - name: Chromium browser smoke
         if: matrix.browser == 'chromium'
         env:
@@ -151,14 +157,17 @@ jobs:
         env:
           HTML_PPT_BROWSER: webkit
         run: npm run example:accessibility
-      - name: Upload accessibility report
+      - name: Upload browser diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ppt-accessibility-${{ matrix.browser }}
+          name: ppt-browser-${{ matrix.browser }}
           if-no-files-found: warn
           retention-days: 14
-          path: ppt/examples/ai-ad-workflow/qa/accessibility-report.json
+          path: |
+            ppt/qa/ci/**
+            ppt/examples/ai-ad-workflow/qa/accessibility-report.json
+            ppt/examples/ai-ad-workflow/qa/visual-report.json
 
   rendered:
     name: PPT rendered regression

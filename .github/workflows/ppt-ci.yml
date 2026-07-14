@@ -6,11 +6,13 @@ on:
     paths:
       - 'ppt/**'
       - '.github/workflows/ppt-ci.yml'
+      - '.github/workflows/ppt-phase-twelve-prepare.yml'
   push:
     branches: [main]
     paths:
       - 'ppt/**'
       - '.github/workflows/ppt-ci.yml'
+      - '.github/workflows/ppt-phase-twelve-prepare.yml'
   workflow_dispatch:
 
 permissions:
@@ -42,8 +44,22 @@ jobs:
         working-directory: .
       - name: Deterministic install
         run: npm ci
-      - name: Contract and production-chain regression
-        run: npm run ci:contracts
+      - name: Validate registered layouts
+        run: npm run layouts:validate
+      - name: Validate task registry
+        run: npm run tasks:validate
+      - name: Core regression
+        run: npm run test:core
+      - name: Task contract regression
+        run: npm run tasks:run
+      - name: Production example contract
+        run: |
+          npm run example:validate
+          npm run example:manifest
+          npm run example:visual-plan
+          npm run example:visual
+          npm run example:bundle
+          node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
       - name: Upload contract reports
         if: always()
         uses: actions/upload-artifact@v4

@@ -2,6 +2,15 @@
 
 All notable changes to the HTML PPT Agent Skill are recorded here. Versions follow semantic versioning for the `ppt/` package and its production contracts.
 
+## 0.15.3 — Composition preview detail polish
+
+- Remove the unsupported `73% visual clarity` claim and other misleading cover placeholders from Blue Growth.
+- Label all illustrative percentage and ratio charts as sample data so preview values cannot be mistaken for sourced business results.
+- Replace source-specific Cobalt branding with theme-neutral identifiers and use factual layout/page counts in the structural stats example.
+- Correct Coral's 90-day/12-week mismatch and align Ribbon's visible three-card module page with the registered `three-up` layout.
+- Replace static interaction claims with visual-cue language unless the preview actually implements the described behavior.
+- Add content-integrity regression for misleading placeholders, unlabeled demo metrics, timeline mismatches, and preview layout/content drift.
+
 ## 0.15.2 — Guizang hierarchy alignment
 
 - Align the Cobalt, Coral, Ribbon, and Blue Growth Chinese display hierarchy to the Guizang Swiss production scale.

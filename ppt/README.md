@@ -6,7 +6,7 @@ A cross-agent skill for creating and converting editable, fixed-stage HTML prese
 - **Compatible environment:** Claude Code
 - **Output:** browser-editable HTML, not native PowerPoint
 - **Runtime:** zero dependencies
-- **Tooling:** Node.js 20+ and Python 3; Playwright is required for rendered QA, PDF export, and browser interaction tests
+- **Tooling:** Node.js 20+, npm 10.8.2, Python 3, and the committed `package-lock.json`; Playwright is required for rendered QA, PDF export, accessibility, and browser interaction tests
 - **Optional PDF tooling:** Poppler (`pdftotext`, `pdfinfo`, `pdfimages`)
 - **Collaboration:** intentionally out of scope; there is no account system, backend, database, or real-time multi-user editing
 
@@ -25,8 +25,9 @@ A cross-agent skill for creating and converting editable, fixed-stage HTML prese
 - Image replacement, fit, focus, and alt-text controls
 - Local autosave, edit-state JSON import/export, and edited-HTML download
 - Bundle runtime files and local media into one portable HTML file
-- Structural validation, source validation, rendered QA, semantic visual QA, contact sheets, and PDF export
-- Automated source, structure, bundling, runtime, editor, theme, CJK, manifest, and visual regression tests
+- Structural validation, source validation, rendered QA, semantic visual QA, accessibility QA, contact sheets, and PDF export
+- Deterministic permanent CI with Chromium and WebKit release gates
+- Automated source, structure, bundling, runtime, editor, presenter, accessibility, theme, CJK, manifest, and visual regression tests
 - Three core themes plus two optional guizang-inspired clean-room backup themes
 - Implemented Chinese and mixed CJK typography rules
 - Reusable layout and image-slot contracts
@@ -294,8 +295,8 @@ node scripts/validate-manifest.mjs \
 Rendered QA:
 
 ```bash
-npm install
-npx playwright install chromium
+npm ci
+npx playwright install chromium webkit
 
 node scripts/qa-deck.mjs \
   /absolute/path/to/project/index.html \
@@ -305,6 +306,13 @@ node scripts/qa-visual.mjs \
   /absolute/path/to/project/index.html \
   --manifest /absolute/path/to/project/deck.json \
   --json /absolute/path/to/project/qa/visual-report.json
+
+node scripts/qa-accessibility.mjs \
+  /absolute/path/to/project/index.html \
+  --browser chromium \
+  --json /absolute/path/to/project/qa/accessibility-report.json
+
+HTML_PPT_BROWSER=webkit npm run test:browser-smoke
 
 node scripts/build-contact-sheet.mjs \
   /absolute/path/to/project/index.html \
@@ -322,6 +330,24 @@ node scripts/validate-deck.mjs /absolute/path/to/dist/presentation.html
 ```
 
 `bundle-html.mjs` embeds local stylesheets, JavaScript, images, SVG, fonts, audio, video, icons, and CSS `url()` assets. The original source and unused standardized assets are not embedded automatically.
+
+## Release hardening and permanent CI
+
+<!-- phase-twelve-readme -->
+The repository commits `package-lock.json` and uses `npm ci` for deterministic verification. The permanent workflow is `.github/workflows/ppt-ci.yml`.
+
+Stable release checks:
+
+- `PPT contracts`
+- `PPT browser (chromium)`
+- `PPT browser (webkit)`
+- `PPT rendered regression`
+
+Chromium runs the complete runtime, presenter, editor, visual, accessibility, task, and production-example chain. WebKit is a required Safari-compatible gate for bundled playback, navigation, constrained editing, reduced motion, offline manifest loading, and accessibility.
+
+Failed jobs retain JSON reports, screenshots, contact sheets, and rendered task artifacts for diagnosis.
+
+See [`references/release-ci.md`](./references/release-ci.md), [`references/accessibility-qa.md`](./references/accessibility-qa.md), [`CHANGELOG.md`](./CHANGELOG.md), and [`MIGRATIONS.md`](./MIGRATIONS.md).
 
 ## PDF behavior
 
@@ -373,9 +399,11 @@ Core coverage includes:
 Browser tests:
 
 ```bash
-npm install
-npx playwright install chromium
+npm ci
+npx playwright install chromium webkit
 npm run test:browser
+HTML_PPT_BROWSER=webkit npm run test:browser-smoke
+HTML_PPT_BROWSER=webkit npm run test:accessibility
 ```
 
 Browser coverage includes:

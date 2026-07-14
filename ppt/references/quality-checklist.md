@@ -10,10 +10,15 @@ Resolve all P0 issues before delivery. P1 issues should be resolved unless the u
 - [ ] No slide scrolls internally.
 - [ ] No required text is clipped or outside the slide.
 - [ ] No unintended panel, text, or image overlap appears in screenshots.
-- [ ] All required images load.
+- [ ] All required images load and every image has an appropriate `alt` attribute.
+- [ ] The document declares language and title metadata.
+- [ ] Visible controls have accessible names and valid ARIA references.
+- [ ] Exactly one active slide is exposed to assistive technology; inactive slides are `aria-hidden`.
 - [ ] Navigation works with keyboard and touch/mouse input.
 - [ ] Edit mode works and does not reflow the layout.
 - [ ] Downloaded edited HTML reopens with the edits preserved.
+- [ ] The final bundled HTML passes the Chromium and WebKit release smoke tests.
+- [ ] Accessibility QA reports no blocking errors.
 - [ ] Facts, numbers, dates, units, names, and citations match the source.
 - [ ] There are no workflow labels, template names, placeholders, or internal notes visible in the deck.
 
@@ -58,6 +63,20 @@ node scripts/qa-deck.mjs deck.html --screenshots qa
 ```
 
 Review the generated screenshots at full size. Browser geometry checks cannot determine whether hierarchy, cropping, or composition is aesthetically correct.
+
+## Accessibility and browser validation
+
+<!-- phase-twelve-quality -->
+Run:
+
+```bash
+node scripts/qa-accessibility.mjs deck.html --browser chromium --json qa/accessibility-report.json
+HTML_PPT_BROWSER=webkit npm run test:browser-smoke
+HTML_PPT_BROWSER=webkit npm run test:accessibility
+```
+
+Review contrast warnings manually. Gradients, images, transparency, projection conditions, and screen-reader usefulness cannot be certified by geometry alone.
+
 
 ## Final smoke test
 

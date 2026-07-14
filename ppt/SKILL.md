@@ -365,8 +365,8 @@ Skip `validate-source.mjs` only when the project has no standardized source. Do 
 Install Playwright once:
 
 ```bash
-npm install
-npx playwright install chromium
+npm ci
+npx playwright install chromium webkit
 ```
 
 Mechanical QA:
@@ -386,6 +386,18 @@ node scripts/qa-visual.mjs \
   --json /absolute/path/to/project/qa/visual-report.json
 ```
 
+Accessibility QA:
+
+```bash
+node scripts/qa-accessibility.mjs \
+  /absolute/path/to/project/index.html \
+  --browser chromium \
+  --json /absolute/path/to/project/qa/accessibility-report.json
+
+HTML_PPT_BROWSER=webkit npm run test:browser-smoke
+HTML_PPT_BROWSER=webkit npm run test:accessibility
+```
+
 Whole-deck contact sheet:
 
 ```bash
@@ -394,7 +406,7 @@ node scripts/build-contact-sheet.mjs \
   /absolute/path/to/project/qa/contact-sheet.png
 ```
 
-`qa-deck.mjs` checks rendering integrity. `qa-visual.mjs` checks declared visual requirements, evidence coverage, consecutive text-only slides, repeated layouts/images, alt text, source resolution, slot ratios, crop focus, and text/visual overlap. P0 blocks delivery; P1 requires review; P2 is an improvement suggestion.
+`qa-deck.mjs` checks rendering integrity. `qa-visual.mjs` checks declared visual requirements, evidence coverage, consecutive text-only slides, repeated layouts/images, alt text, source resolution, slot ratios, crop focus, and text/visual overlap. `qa-accessibility.mjs` checks document language, titles, stable IDs, slide exposure state, image alt attributes, control names, ARIA references, approximate contrast, and runtime errors. Chromium and WebKit release gates must pass. P0 blocks delivery; P1 requires review; P2 is an improvement suggestion.
 
 Read:
 
@@ -420,8 +432,8 @@ Report:
 - source import and mapping status when applicable
 - visual and evidence coverage
 - navigation and editing controls
-- structural, source, mechanical, manifest, and visual QA separately
-- contact sheet path
+- structural, source, mechanical, manifest, visual, accessibility, and cross-browser QA separately
+- accessibility report and contact sheet paths
 - unresolved P1/P2 findings
 - remaining remote references
 
@@ -471,6 +483,10 @@ Load only what the task requires:
 | `references/editing-contract.md` | Versioned constrained browser editing and stable element IDs |
 | `schemas/edit-state.schema.json` | Browser edit-state import/export contract |
 | `references/presenter-mode.md` | Presenter notes, popup, overview, and offline behavior |
+| `references/accessibility-qa.md` | Automated and manual accessibility release checks |
+| `references/release-ci.md` | Permanent CI, deterministic installation, browser gates, and artifacts |
+| `CHANGELOG.md` | Versioned capability and compatibility history |
+| `MIGRATIONS.md` | Project, manifest, edit-state, and release upgrade procedures |
 | `references/quality-checklist.md` | Mechanical final QA |
 | `assets/templates/starter.html` | Neutral development starter |
 | `assets/runtime/*` | Canonical fixed-stage and editor runtime |

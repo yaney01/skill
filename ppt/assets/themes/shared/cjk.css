@@ -89,3 +89,97 @@ html:lang(zh) :is(.theme-kicker, .theme-folio, .theme-masthead, .theme-status, .
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
+
+/* Composition themes use independent class namespaces. Map those namespaces
+   back into the shared Chinese display/title/body/meta contract. */
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) {
+  font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  font-kerning: normal;
+  font-synthesis: none;
+  font-variant-east-asian: proportional-width;
+  line-break: strict;
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-autospace: normal;
+  text-spacing-trim: trim-start;
+  hanging-punctuation: none;
+}
+
+html:lang(zh) :is(.cobalt-display, .coral-display, .ribbon-display, .growth-display) {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  font-weight: 800 !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.04 !important;
+  text-wrap: balance;
+}
+
+html:lang(zh) .cobalt-display { font-size: 90px !important; }
+html:lang(zh) .coral-display { font-size: 90px !important; }
+html:lang(zh) .ribbon-display { font-size: 86px !important; }
+html:lang(zh) .growth-display { font-size: 96px !important; }
+
+html:lang(zh) :is(
+  .cobalt-title,
+  .coral-title,
+  .ribbon-title,
+  .growth-title,
+  .cobalt-statement__claim h2,
+  .coral-statement__card h2,
+  .ribbon-statement__card h2,
+  .growth-statement__card h2
+) {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  font-weight: 800 !important;
+  letter-spacing: 0px !important;
+  line-height: 1.12 !important;
+  text-wrap: balance;
+}
+
+html:lang(zh) .cobalt-title { font-size: 58px !important; }
+html:lang(zh) .coral-title { font-size: 58px !important; }
+html:lang(zh) .ribbon-title { font-size: 56px !important; }
+html:lang(zh) .growth-title { font-size: 60px !important; }
+
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) h3 {
+  font-family: var(--theme-cjk-display, var(--font-cjk-sans));
+  font-weight: 800 !important;
+  letter-spacing: 0px !important;
+  line-height: 1.16 !important;
+  text-wrap: balance;
+}
+
+html:lang(zh) :is(.cobalt-shell, .coral-shell, .ribbon-shell, .growth-shell) :is(p, li, figcaption, [data-cjk="body"]),
+html:lang(zh) :is(.cobalt-copy, .coral-copy, .ribbon-copy, .growth-copy) {
+  font-family: var(--theme-cjk-body, var(--font-cjk-sans));
+  letter-spacing: 0.01em !important;
+  line-height: 1.65 !important;
+  text-wrap: pretty;
+}
+
+html:lang(zh) :is(
+  .cobalt-kicker,
+  .cobalt-folio,
+  .cobalt-cover__meta div,
+  .coral-kicker,
+  .coral-folio,
+  .coral-cover__meta span,
+  .coral-section__tag span,
+  .ribbon-kicker,
+  .ribbon-folio,
+  .ribbon-tab,
+  .ribbon-tabs__note,
+  .ribbon-tabs__brand small,
+  .ribbon-cover__chips span,
+  .growth-kicker,
+  .growth-folio,
+  .growth-topbar,
+  .growth-bottombar,
+  .growth-pill,
+  .growth-section__chips span,
+  .growth-float-card small
+) {
+  font-family: var(--theme-cjk-meta, var(--font-cjk-mono));
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  line-height: 1.35 !important;
+}

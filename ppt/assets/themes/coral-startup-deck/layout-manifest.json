@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/layout.schema.json",
+  "manifestVersion": 1,
+  "theme": "coral-startup-deck",
+  "tier": "backup",
+  "stage": "1920x1080",
+  "contracts": "../shared/layout-contracts.json",
+  "legacyAliases": {},
+  "layouts": [
+    {"id":"cover","selector":".coral-cover"},{"id":"section","selector":".coral-section"},{"id":"statement","selector":".coral-statement"},{"id":"split","selector":".coral-split"},{"id":"image-focus","selector":".coral-image-focus"},{"id":"three-up","selector":".coral-three-up"},{"id":"four-grid","selector":".coral-four-grid"},{"id":"metrics","selector":".coral-metrics"},{"id":"comparison","selector":".coral-comparison"},{"id":"timeline","selector":".coral-timeline"},{"id":"process","selector":".coral-process"},{"id":"chart","selector":".coral-chart"},{"id":"quote","selector":".coral-quote"},{"id":"closing","selector":".coral-closing"}
+  ]
+}

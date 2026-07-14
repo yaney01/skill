@@ -5,12 +5,16 @@ import test from 'node:test';
 import { combinedOutput, pptRoot, runNode, temporaryDirectory } from './helpers.mjs';
 
 const coreThemes = ['swiss-grid', 'editorial-ink', 'technical-field'];
-const allThemes = [...coreThemes, 'guizang-magazine', 'guizang-swiss'];
+const themesRoot = path.join(pptRoot, 'assets', 'themes');
+const allThemes = fs.readdirSync(themesRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && entry.name !== 'shared' && fs.existsSync(path.join(themesRoot, entry.name, 'layout-manifest.json')))
+  .map((entry) => entry.name)
+  .sort();
 
 test('all installed layout registries pass strict validation', () => {
   const result = runNode(['scripts/validate-layouts.mjs', '--strict']);
   assert.equal(result.status, 0, combinedOutput(result));
-  assert.match(result.stdout, /Themes: 5/);
+  assert.match(result.stdout, new RegExp(`Themes: ${allThemes.length}`));
   for (const theme of coreThemes) assert.match(result.stdout, new RegExp(`OK \\[${theme}\\] 14 layouts`));
 });
 
@@ -65,7 +69,7 @@ test('legacy grid is accepted only through the registered alias and reported', (
 
 test('every registered selector is present in its theme CSS', () => {
   for (const theme of allThemes) {
-    const root = path.join(pptRoot, 'assets', 'themes', theme);
+    const root = path.join(themesRoot, theme);
     const registry = JSON.parse(fs.readFileSync(path.join(root, 'layout-manifest.json'), 'utf8'));
     const css = fs.readFileSync(path.join(root, 'layouts.css'), 'utf8');
     for (const layout of registry.layouts) assert.ok(css.includes(layout.selector), `${theme} is missing ${layout.selector}`);

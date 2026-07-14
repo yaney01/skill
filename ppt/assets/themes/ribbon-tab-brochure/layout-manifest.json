@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/layout.schema.json",
+  "manifestVersion": 1,
+  "theme": "ribbon-tab-brochure",
+  "tier": "backup",
+  "stage": "1920x1080",
+  "contracts": "../shared/layout-contracts.json",
+  "legacyAliases": {},
+  "layouts": [{"id":"cover","selector":".ribbon-cover"},{"id":"section","selector":".ribbon-section"},{"id":"statement","selector":".ribbon-statement"},{"id":"split","selector":".ribbon-split"},{"id":"image-focus","selector":".ribbon-image-focus"},{"id":"three-up","selector":".ribbon-three-up"},{"id":"four-grid","selector":".ribbon-four-grid"},{"id":"metrics","selector":".ribbon-metrics"},{"id":"comparison","selector":".ribbon-comparison"},{"id":"timeline","selector":".ribbon-timeline"},{"id":"process","selector":".ribbon-process"},{"id":"chart","selector":".ribbon-chart"},{"id":"quote","selector":".ribbon-quote"},{"id":"closing","selector":".ribbon-closing"}]
+}

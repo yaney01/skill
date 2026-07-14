@@ -1,0 +1,12 @@
+{
+  "id": "coral-startup-deck",
+  "name": "Coral Startup Deck",
+  "summary": "Warm coral startup layouts with abstract shapes, oversized chapter numbers, ivory cards, funnels, and implementation plans.",
+  "tier": "backup",
+  "provenance": "Clean-room adaptation of the named public visual direction; composition, CSS, runtime integration, and assets were reimplemented for this Skill without copying source scripts or media.",
+  "layoutManifest": "layout-manifest.json",
+  "layouts": ["cover","section","statement","split","image-focus","three-up","four-grid","metrics","comparison","timeline","process","chart","quote","closing"],
+  "stage": "1920x1080",
+  "languageSupport": ["zh-CN","en"],
+  "version": 2
+}

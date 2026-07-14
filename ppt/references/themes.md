@@ -5,7 +5,7 @@ The themes under `assets/themes/` are executable starting systems. They contain 
 ## Theme tiers
 
 - **Core** — normal production choices. Prefer these when they fit the audience and content.
-- **Backup** — optional clean-room references retained for users who explicitly want the visual language associated with `guizang-ppt-skill`. Do not select them automatically over a suitable core theme.
+- **Backup** — optional clean-room visual directions that require explicit selection. They preserve a named composition language without copying source templates, scripts, or media. Do not select them automatically over a suitable core theme.
 
 List installed themes and their tier:
 
@@ -67,6 +67,46 @@ Use only when the user explicitly asks for guizang's Swiss-international directi
 - dot grid, hard modules, indices, and diagram blocks
 - best for Chinese product, data, design, and engineering sharing
 - clean-room implementation; no AGPL template, script, or asset is copied
+
+### `cobalt-executive-deck`
+
+Use when the user explicitly wants the Cobalt Executive Deck / 钴蓝商策 composition.
+
+- split executive cover with a product-device object and vertical brand block
+- cool grey and white business canvases with controlled cobalt-blue emphasis
+- dedicated contents rail, product modules, KPI boards, comparison panels, and roadmap grids
+- best for business reports, company profiles, product portfolios, and partnership proposals
+- visual reference inspected at `XshuiAi/Pretty-HTML-PPT`; clean-room implementation with no source script, media, or template copied
+
+### `coral-startup-deck`
+
+Use when the user explicitly wants the Coral Startup Deck / 珊瑚企简 composition.
+
+- coral-to-orange identity fields, pale peach paper, and soft abstract shapes
+- oversized translucent chapter numbers and tilted ivory information cards
+- stepped funnel, startup metrics, warm comparison cards, and implementation timelines
+- best for startup introductions, team roadshows, project reports, and launch plans
+- visual reference inspected at `XshuiAi/Pretty-HTML-PPT`; clean-room implementation with no source script, media, or template copied
+
+### `ribbon-tab-brochure`
+
+Use when the user explicitly wants the Ribbon Tab Brochure / 彩签页报 composition.
+
+- persistent colored ribbon tabs and strong black brochure frames
+- pastel section pages, index rails, map-like diagrams, plan cards, and comparison sheets
+- information behaves like a project brochure rather than a generic card deck
+- best for service packages, project brochures, operations reviews, and external proposals
+- visual reference inspected at `XshuiAi/Pretty-HTML-PPT`; clean-room implementation with no source script, media, or template copied
+
+### `blue-growth-deck`
+
+Use when the user explicitly wants the Blue Growth Deck / 蓝色增长稿 composition.
+
+- full-width sky-blue top and bottom bars with deep-navy type
+- lime and blush accent fields, floating bubbles, phone-like UI objects, and rounded growth cards
+- dedicated product, interaction, metric, and growth-chart compositions
+- best for AI products, growth reviews, GEO recaps, and friendly business presentations
+- visual reference inspected at `XshuiAi/Pretty-HTML-PPT`; clean-room implementation with no source script, media, or template copied
 
 ## Shared Chinese typography
 
@@ -134,10 +174,10 @@ Every theme implements these six baseline layouts:
 | `section` | reset attention and introduce a chapter |
 | `statement` | isolate one key claim |
 | `split` | pair explanation with a visual or diagram |
-| `grid` | compare parallel ideas, evidence, or metrics |
+| `three-up` | compare three parallel ideas, evidence items, or metrics |
 | `closing` | synthesize the decision or next action |
 
-Additional layouts may reuse the theme's tokens and visual grammar. Do not force every content type into the six preview structures.
+Production themes may implement the complete 14-layout registry. A canonical layout ID defines the content contract, not a shared DOM composition: each theme must express the layout through its own selectors, grid, components, and visual grammar.
 
 ## Preview and QA
 

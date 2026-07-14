@@ -2,76 +2,132 @@
 
 Phase twelve turns the HTML PPT Skill from a feature-complete project into a continuously verifiable release surface.
 
+## Authoritative verification
+
+Permanent GitHub Actions completed successfully on 2026-07-14.
+
+- Workflow: `HTML PPT CI`
+- Run: `29297011656`
+- Result: passed
+- `PPT contracts`: job `86972656960`
+- `PPT browser (chromium)`: job `86972656996`
+- `PPT browser (webkit)`: job `86972656991`
+- `PPT rendered regression`: job `86972656964`
+
+The workflow uses stable job names suitable for branch protection.
+
 ## Scope
 
-- deterministic npm dependency installation through `package-lock.json` and `npm ci`
-- permanent GitHub Actions for contracts, browser behavior, and rendered QA
-- Chromium complete browser regression
-- WebKit playback, presenter, editor-download, and accessibility smoke regression
-- automated accessibility checks and JSON reports
-- retained Actions artifacts for contracts, accessibility, screenshots, contact sheets, and rendered-task reports
-- release changelog and migration guidance
-- stable CI job names suitable for branch protection
+- deterministic npm dependency installation through `package-lock.json` and `npm ci`;
+- permanent GitHub Actions for contracts, browser behavior, accessibility, and rendered QA;
+- Chromium complete browser regression;
+- WebKit bundled playback, navigation, edit-mode, reduced-motion, and accessibility smoke regression;
+- automated accessibility findings and JSON reports;
+- retained Actions artifacts for contracts, browser diagnostics, accessibility, screenshots, contact sheets, and rendered-task reports;
+- release changelog and migration guidance;
+- offline bundled-manifest loading before any sibling `deck.json` fetch;
+- deterministic editor reset regression timing.
 
-No presentation feature, theme, free-form editing capability, external image provider, or native PPTX output is added.
+No presentation feature, theme, free-form editing capability, external image provider, collaboration feature, or native PPTX output is added.
 
 ## Permanent checks
 
-The permanent `.github/workflows/ppt-ci.yml` runs on pull requests and pushes to `main` when `ppt/` or the workflow changes.
+The permanent `.github/workflows/ppt-ci.yml` runs on pull requests and pushes to `main` when `ppt/` or the workflow changes. It is read-only and never pushes commits.
 
 ### PPT contracts
 
-- deterministic `npm ci`
-- layout registry validation
-- task registry validation
-- core Node regression
-- all task contracts
-- 12-page production example structure, manifest, visual work orders, semantic visual QA, bundling, and bundled validation
-- contract reports uploaded as artifacts
+Passed:
+
+- exact npm and Playwright dependency installation through `npm ci`;
+- layout registry validation;
+- task registry validation;
+- complete core Node regression;
+- all 10 task contracts;
+- 12-page production example structure;
+- strict production manifest validation;
+- delivery-stage visual work-order validation;
+- single-file bundling and bundled structural validation;
+- contract reports uploaded as artifacts.
 
 ### PPT browser (chromium)
 
-- complete runtime regression
-- presenter regression
-- constrained editor regression
-- semantic visual QA regression
-- browser smoke regression
-- accessibility regression
-- production-example accessibility report
+Passed:
+
+- fixed-stage runtime regression;
+- presenter mode and speaker-note regression;
+- constrained editor regression;
+- semantic visual-QA regression;
+- production-example semantic visual QA;
+- bundled delivery smoke;
+- accessibility fixture regression;
+- production-example accessibility report;
+- browser diagnostics uploaded as artifacts.
 
 ### PPT browser (webkit)
 
-- fixed-stage playback smoke
-- presenter popup and synchronization smoke
-- constrained edited-HTML download smoke
-- accessibility regression
-- production-example accessibility report
+Passed:
+
+- bundled fixed-stage playback;
+- keyboard navigation and hash updates;
+- constrained edit-mode entry and exit;
+- reduced-motion media behavior;
+- zero page-level runtime errors;
+- accessibility fixture regression;
+- production-example accessibility report;
+- browser diagnostics uploaded as artifacts.
+
+WebKit is the automated Safari-compatible release gate. It is not a claim that every Safari version or platform-specific browser API has been exhaustively tested.
 
 ### PPT rendered regression
 
-- all 10 rendered task cases and 52 slides
-- all three registered layout catalogs
-- 12-page production example screenshots
-- production-example contact sheet
-- screenshots and JSON reports uploaded as artifacts
+Passed:
+
+- all 10 rendered task cases and 52 task slides;
+- all three core-theme layout catalogs, 42 registered-layout pages total;
+- 12-page production example screenshots;
+- production-example contact sheet;
+- mechanical browser QA;
+- rendered screenshots and reports uploaded as artifacts.
 
 ## Accessibility contract
 
-The automated accessibility audit checks blocking failures for:
+The automated accessibility audit reports blocking errors for:
 
-- valid document language
-- one visible current slide
-- accessible slide structure
-- meaningful image alt text
-- interactive element names
-- form labels
-- keyboard focus visibility
-- hidden-slide accessibility state
-- duplicate IDs
-- presenter and editor control semantics
-- reduced-motion behavior
+- missing document language;
+- missing document title;
+- missing deck stage;
+- duplicate DOM IDs;
+- missing or duplicate slide IDs;
+- invalid active-slide and `aria-hidden` state;
+- images without an `alt` attribute;
+- visible interactive controls without an accessible name;
+- `aria-controls` references to missing elements;
+- browser runtime errors during the audit.
 
-It reports findings as structured JSON. The audit supplements rather than replaces human review of reading order, language quality, projected contrast, cognitive load, or visual composition.
+It reports warnings for:
+
+- slides without semantic headings;
+- approximate text contrast below the applicable threshold.
+
+The browser smoke tests separately verify keyboard playback, edit-mode entry and exit, and reduced-motion media behavior.
+
+Manual review remains required for:
+
+- visible focus treatment and focus order;
+- screen-reader pronunciation and reading order;
+- the usefulness and factual accuracy of alternative text;
+- gradients, images, transparency, and projected-display contrast;
+- cognitive accessibility and information density;
+- language quality in mixed-language decks;
+- complete WCAG conformance.
+
+The automated audit does not claim accessibility certification.
+
+## Offline manifest correction
+
+The bundled HTML already contains `#deckManifest`. The runtime now parses that embedded manifest before attempting to fetch a sibling `deck.json`.
+
+This prevents local-file access-control errors in WebKit while preserving development-project fallback behavior. Presenter regression asserts that bundled decks do not request `deck.json`.
 
 ## Dependency reproducibility
 
@@ -79,32 +135,22 @@ It reports findings as structured JSON. The audit supplements rather than replac
 - npm: `>=10 <11`
 - package manager metadata: `npm@10.8.2`
 - Playwright: exact `1.55.0`
-- lockfile committed
-- CI uses `npm ci`
+- lockfile version: 3
+- `package-lock.json` committed
+- permanent CI uses `npm ci`
 
-## Verification before final PR
-
-The isolated preparation workflow confirmed:
-
-- lockfile generation and deterministic install
-- syntax and core regression
-- Chromium browser smoke
-- Chromium accessibility regression
-- WebKit browser smoke
-- WebKit accessibility regression
-- WebKit production-example accessibility
-
-The old diagnostic summary step incorrectly interpreted a successful `continue-on-error` step and was not carried into permanent CI. Permanent jobs use direct command exit status.
+Changing dependency versions requires updating and reviewing `package.json`, `package-lock.json`, `CHANGELOG.md`, and compatibility notes together.
 
 ## Repository cleanup
 
 The final phase removes:
 
-- temporary lockfile-generation workflow
-- diagnostic preparation workflow accidentally merged into `main`
-- all `.phase-twelve-*` trigger files
+- the temporary lockfile-generation workflow;
+- the diagnostic preparation workflow accidentally merged into `main`;
+- all `.phase-twelve-*` trigger files;
+- one-time editor-test patch scripts and write-enabled workflows.
 
-The permanent workflow is read-only and does not push commits.
+Only `.github/workflows/ppt-ci.yml` remains as the permanent HTML PPT workflow.
 
 ## Branch protection
 

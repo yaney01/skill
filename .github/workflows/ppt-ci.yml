@@ -47,7 +47,10 @@ jobs:
       - name: Validate task registry
         run: npm run tasks:validate
       - name: Core regression
-        run: npm run test:core
+        run: |
+          mkdir -p qa/ci
+          set -o pipefail
+          npm run test:core 2>&1 | tee qa/ci/core.tap
       - name: Task contract regression
         run: npm run tasks:run
       - name: Production example structure
@@ -68,6 +71,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
           path: |
+            ppt/qa/ci/core.tap
             ppt/examples/ai-ad-workflow/qa/*.json
             ppt/examples/ai-ad-workflow/qa/*.md
             ppt/examples/ai-ad-workflow/dist/*.html

@@ -52,14 +52,18 @@ jobs:
         run: npm run test:core
       - name: Task contract regression
         run: npm run tasks:run
-      - name: Production example contract
-        run: |
-          npm run example:validate
-          npm run example:manifest
-          npm run example:visual-plan
-          npm run example:visual
-          npm run example:bundle
-          node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
+      - name: Production example structure
+        run: npm run example:validate
+      - name: Production example manifest
+        run: npm run example:manifest
+      - name: Production example visual work orders
+        run: npm run example:visual-plan
+      - name: Production example semantic visual QA
+        run: npm run example:visual
+      - name: Production example bundle
+        run: npm run example:bundle
+      - name: Validate bundled production example
+        run: node scripts/validate-deck.mjs examples/ai-ad-workflow/dist/ai-ad-workflow.html
       - name: Upload contract reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,7 +80,7 @@ jobs:
   browser:
     name: PPT browser (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     strategy:
       fail-fast: false
       matrix:
@@ -97,16 +101,56 @@ jobs:
         run: npm ci
       - name: Install ${{ matrix.browser }}
         run: npx playwright install --with-deps ${{ matrix.browser }}
-      - name: Chromium complete browser regression
+      - name: Chromium runtime regression
         if: matrix.browser == 'chromium'
         env:
           HTML_PPT_BROWSER: chromium
-        run: npm run test:browser && npm run example:accessibility
-      - name: WebKit release regression
+        run: node --test --test-concurrency=1 tests/runtime.test.mjs
+      - name: Chromium presenter regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:presenter
+      - name: Chromium editor regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:editor
+      - name: Chromium semantic visual QA regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: node --test --test-concurrency=1 tests/visual-qa.test.mjs
+      - name: Chromium browser smoke
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:browser-smoke
+      - name: Chromium accessibility regression
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run test:accessibility
+      - name: Chromium production accessibility
+        if: matrix.browser == 'chromium'
+        env:
+          HTML_PPT_BROWSER: chromium
+        run: npm run example:accessibility
+      - name: WebKit browser smoke
         if: matrix.browser == 'webkit'
         env:
           HTML_PPT_BROWSER: webkit
-        run: npm run test:browser-smoke && npm run test:accessibility && npm run example:accessibility
+        run: npm run test:browser-smoke
+      - name: WebKit accessibility regression
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run test:accessibility
+      - name: WebKit production accessibility
+        if: matrix.browser == 'webkit'
+        env:
+          HTML_PPT_BROWSER: webkit
+        run: npm run example:accessibility
       - name: Upload accessibility report
         if: always()
         uses: actions/upload-artifact@v4

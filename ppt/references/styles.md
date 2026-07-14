@@ -2,7 +2,7 @@
 
 Use these as starting territories, not immutable themes. Every deck should adapt typography, palette, imagery, and graphic devices to its subject.
 
-Three core territories and two backup guizang directions now have executable themes. Read [`themes.md`](themes.md) and initialize the selected theme with `create-deck.mjs --theme <id>`.
+Three core territories and six backup production themes now have executable implementations. Read [`themes.md`](themes.md) and initialize the selected theme with `create-deck.mjs --theme <id>`.
 
 ## 1. Swiss Grid
 
@@ -28,13 +28,13 @@ Three core territories and two backup guizang directions now have executable the
 
 ## 3. Bold Signal
 
+- **Backup themes:** `coral-startup-deck` for warm startup storytelling; `blue-growth-deck` for friendly AI and growth presentations
 - **Tone:** assertive, launch-oriented, energetic
 - **Typography:** compressed or geometric display with clear body face
-- **Palette:** dominant dark or bright field with a high-contrast accent
-- **Devices:** oversized numbers, diagonal divisions, strong blocks, fast reveal
-- **Best for:** launches, pitches, campaign ideas, high-stakes recommendations
+- **Palette:** dominant bright field with high-contrast functional accents
+- **Devices:** oversized numbers, abstract shapes, bubbles, phone-like UI, strong blocks, and fast visual rhythm
+- **Best for:** launches, pitches, campaign ideas, product demos, and growth reviews
 - **Avoid:** using maximum emphasis on every slide
-- **Status:** territory only; no production theme yet
 
 ## 4. Technical Field
 
@@ -66,6 +66,12 @@ Three core territories and two backup guizang directions now have executable the
 - **Avoid:** weak stock imagery, text over busy focal areas, repeated hero-image treatment
 - **Status:** territory only; no production theme yet
 
+## 7. Executive and Brochure Compositions
+
+- **Backup theme:** `cobalt-executive-deck` for business reports, company profiles, product portfolios, KPI summaries, and delivery roadmaps
+- **Backup theme:** `ribbon-tab-brochure` for project brochures, service packages, operations reports, map-like explanations, and external proposals
+- **Rule:** preserve their composition grammar, not only their palettes. Cobalt requires its split executive cover, vertical brand object, KPI board, and roadmap. Ribbon requires persistent colored tabs, black frames, brochure pages, and map diagrams.
+
 ## Chinese typography requirement
 
 Every executable theme must load `assets/themes/shared/cjk.css`. Chinese titles must not inherit aggressive Latin negative tracking. Chinese body text must retain readable line-height, strict line breaking, punctuation containment, and stable Chinese/Latin spacing. See [`cjk-typography.md`](cjk-typography.md).
@@ -80,6 +86,8 @@ Previews must differ in more than color. Vary:
 - background/surface model
 - motion thesis
 - degree of formality
+
+Canonical layout IDs are semantic contracts. Do not implement a new theme by recoloring another theme's DOM composition. Each production theme needs its own selector family, layout geometry, component system, and six-slide preview.
 
 Use real title-slide content. Never place internal labels such as “safe option,” “wildcard,” “backup,” or style names on the slide.
 

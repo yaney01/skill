@@ -4,15 +4,39 @@ import path from 'node:path';
 import test from 'node:test';
 import { combinedOutput, pptRoot, runNode, temporaryDirectory } from './helpers.mjs';
 
-const coreThemeIds = ['swiss-grid', 'editorial-ink', 'technical-field'];
-const backupThemeIds = ['guizang-magazine', 'guizang-swiss'];
-const themeIds = [...coreThemeIds, ...backupThemeIds];
 const themesRoot = path.join(pptRoot, 'assets', 'themes');
 const sharedCjk = path.join(themesRoot, 'shared', 'cjk.css');
 const sharedContracts = path.join(themesRoot, 'shared', 'layout-contracts.json');
+const requiredCompositionThemes = [
+  'cobalt-executive-deck',
+  'coral-startup-deck',
+  'ribbon-tab-brochure',
+  'blue-growth-deck',
+];
+const compositionPrefixes = new Map([
+  ['cobalt-executive-deck', '.cobalt-'],
+  ['coral-startup-deck', '.coral-'],
+  ['ribbon-tab-brochure', '.ribbon-'],
+  ['blue-growth-deck', '.growth-'],
+]);
 
 function read(file) { return fs.readFileSync(file, 'utf8'); }
+function readJson(file) { return JSON.parse(read(file)); }
 function previewLayouts(html) { return [...html.matchAll(/data-layout="([^"]+)"/g)].map((match) => match[1]); }
+function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function installedThemeIds() {
+  return fs.readdirSync(themesRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== 'shared' && fs.existsSync(path.join(themesRoot, entry.name, 'theme.json')))
+    .map((entry) => entry.name)
+    .sort();
+}
+
+const themeIds = installedThemeIds();
+const themeMetadata = new Map(themeIds.map((themeId) => [themeId, readJson(path.join(themesRoot, themeId, 'theme.json'))]));
+
+for (const themeId of requiredCompositionThemes) {
+  assert.ok(themeIds.includes(themeId), `Required composition theme is not installed: ${themeId}`);
+}
 
 test('the shared CJK layer encodes Chinese fonts, spacing, line breaking, and punctuation behavior', () => {
   assert.equal(fs.existsSync(sharedCjk), true, 'shared/cjk.css is missing');
@@ -31,25 +55,23 @@ test('the shared CJK layer encodes Chinese fonts, spacing, line breaking, and pu
   assert.match(css, /\.keep-unit/);
 });
 
-test('all themes expose metadata, CSS, registered layouts, shared contracts, and six-slide previews', () => {
+test('all installed themes expose metadata, CSS, registered layouts, shared contracts, and six-slide previews', () => {
   assert.equal(fs.existsSync(sharedContracts), true, 'shared/layout-contracts.json is missing');
-  const contracts = JSON.parse(read(sharedContracts)).layouts;
+  const contracts = readJson(sharedContracts).layouts;
   for (const themeId of themeIds) {
     const directory = path.join(themesRoot, themeId);
     const required = ['theme.json', 'layout-manifest.json', 'tokens.css', 'layouts.css', 'preview.html'];
     for (const file of required) assert.equal(fs.existsSync(path.join(directory, file)), true, `${themeId}/${file} is missing`);
 
-    const metadata = JSON.parse(read(path.join(directory, 'theme.json')));
-    const registry = JSON.parse(read(path.join(directory, 'layout-manifest.json')));
+    const metadata = themeMetadata.get(themeId);
+    const registry = readJson(path.join(directory, 'layout-manifest.json'));
     assert.equal(metadata.id, themeId);
     assert.equal(registry.theme, themeId);
     assert.deepEqual(metadata.layouts, registry.layouts.map((layout) => layout.id));
-    assert.equal(registry.layouts.length >= (backupThemeIds.includes(themeId) ? 6 : 12), true);
+    assert.equal(registry.layouts.length >= (metadata.tier === 'backup' ? 6 : 12), true);
     for (const layout of registry.layouts) assert.ok(contracts[layout.id], `${themeId} has unknown contract ${layout.id}`);
-    if (backupThemeIds.includes(themeId)) {
-      assert.equal(metadata.tier, 'backup');
-      assert.match(metadata.provenance, /Clean-room/);
-    } else assert.equal(metadata.tier, 'core');
+    if (metadata.tier === 'backup') assert.match(metadata.provenance, /Clean-room/);
+    else assert.equal(metadata.tier, 'core');
 
     const tokens = read(path.join(directory, 'tokens.css'));
     assert.match(tokens, /--theme-cjk-display:/);
@@ -62,6 +84,14 @@ test('all themes expose metadata, CSS, registered layouts, shared contracts, and
     for (const layout of previewLayouts(html)) assert.ok(allowed.has(layout), `${themeId} preview uses unregistered layout ${layout}`);
     assert.match(html, /data-role="deck-title"/);
     assert.match(html, /href="\.\.\/shared\/cjk\.css"/);
+
+    const compositionPrefix = compositionPrefixes.get(themeId);
+    if (compositionPrefix) {
+      assert.equal(registry.layouts.length, 14, `${themeId} must implement the full 14-layout production contract`);
+      assert.ok(registry.layouts.every((layout) => layout.selector.startsWith(compositionPrefix)), `${themeId} reuses a foreign composition selector`);
+      assert.match(html, new RegExp(escapeRegExp(compositionPrefix)));
+      assert.doesNotMatch(html, /class="[^"]*\btheme-(?:cover|section|statement|split|grid|closing)\b/);
+    }
   }
 });
 
@@ -74,12 +104,14 @@ test('all theme previews pass the structural validator', () => {
   }
 });
 
-test('the generator lists core and backup themes with registered layout counts', () => {
+test('the generator lists every installed theme with its tier and registered layout count', () => {
   const result = runNode(['scripts/create-deck.mjs', '--list-themes']);
   assert.equal(result.status, 0, combinedOutput(result));
-  for (const themeId of themeIds) assert.match(result.stdout, new RegExp(`^${themeId}\\t`, 'm'));
-  for (const themeId of backupThemeIds) assert.match(result.stdout, new RegExp(`^${themeId}\\t[^\\n]*\\tbackup\\t6 layouts\\t`, 'm'));
-  for (const themeId of coreThemeIds) assert.match(result.stdout, new RegExp(`^${themeId}\\t[^\\n]*\\tcore\\t14 layouts\\t`, 'm'));
+  for (const themeId of themeIds) {
+    const metadata = themeMetadata.get(themeId);
+    const expected = new RegExp(`^${escapeRegExp(themeId)}\\t[^\\n]*\\t${metadata.tier}\\t${metadata.layouts.length} layouts\\t`, 'm');
+    assert.match(result.stdout, expected);
+  }
 });
 
 test('the generator creates independent projects with CJK and layout registry files for every theme', () => {
@@ -96,18 +128,20 @@ test('the generator creates independent projects with CJK and layout registry fi
     ];
     for (const file of expected) assert.equal(fs.existsSync(path.join(directory, file)), true, `${themeId} generated file missing: ${file}`);
 
-    const metadata = JSON.parse(read(path.join(directory, 'deck.json')));
+    const installedMetadata = themeMetadata.get(themeId);
+    const metadata = readJson(path.join(directory, 'deck.json'));
     assert.equal(metadata.style, themeId);
-    assert.equal(metadata.themeTier, backupThemeIds.includes(themeId) ? 'backup' : 'core');
+    assert.equal(metadata.themeTier, installedMetadata.tier);
     assert.equal(metadata.layoutRegistry, 'theme/layout-manifest.json');
-    assert.ok(metadata.slides.some((slide) => slide.layout === 'three-up'));
+    assert.equal(metadata.slides.length, 6);
+    assert.ok(metadata.slides.every((slide) => installedMetadata.layouts.includes(slide.layout)), `${themeId} generated an unregistered slide layout`);
     assert.ok(!metadata.slides.some((slide) => slide.layout === 'grid'));
-    const portableRegistry = JSON.parse(read(path.join(directory, 'theme', 'layout-manifest.json')));
+    const portableRegistry = readJson(path.join(directory, 'theme', 'layout-manifest.json'));
     assert.equal(portableRegistry.contracts, 'layout-contracts.json');
 
     const html = read(path.join(directory, 'index.html'));
-    assert.match(html, new RegExp(`data-deck-id="${themeId}-deck"`));
-    assert.match(html, /data-layout="three-up"/);
+    assert.match(html, new RegExp(`data-deck-id="${escapeRegExp(themeId)}-deck"`));
+    assert.match(html, /data-layout="[^"]+"/);
     assert.doesNotMatch(html, /data-layout="grid"/);
     assert.match(html, /href="theme\/tokens\.css"/);
     assert.match(html, /href="theme\/layouts\.css"/);

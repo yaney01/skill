@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../schemas/layout.schema.json",
+  "manifestVersion": 1,
+  "theme": "cobalt-executive-deck",
+  "tier": "backup",
+  "stage": "1920x1080",
+  "contracts": "../shared/layout-contracts.json",
+  "legacyAliases": {},
+  "layouts": [
+    {"id":"cover","selector":".cobalt-cover"},
+    {"id":"section","selector":".cobalt-section"},
+    {"id":"statement","selector":".cobalt-statement"},
+    {"id":"split","selector":".cobalt-split"},
+    {"id":"image-focus","selector":".cobalt-image-focus"},
+    {"id":"three-up","selector":".cobalt-three-up"},
+    {"id":"four-grid","selector":".cobalt-four-grid"},
+    {"id":"metrics","selector":".cobalt-metrics"},
+    {"id":"comparison","selector":".cobalt-comparison"},
+    {"id":"timeline","selector":".cobalt-timeline"},
+    {"id":"process","selector":".cobalt-process"},
+    {"id":"chart","selector":".cobalt-chart"},
+    {"id":"quote","selector":".cobalt-quote"},
+    {"id":"closing","selector":".cobalt-closing"}
+  ]
+}

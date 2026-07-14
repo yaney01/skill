@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/layout.schema.json",
+  "manifestVersion": 1,
+  "theme": "blue-growth-deck",
+  "tier": "backup",
+  "stage": "1920x1080",
+  "contracts": "../shared/layout-contracts.json",
+  "legacyAliases": {},
+  "layouts": [{"id":"cover","selector":".growth-cover"},{"id":"section","selector":".growth-section"},{"id":"statement","selector":".growth-statement"},{"id":"split","selector":".growth-split"},{"id":"image-focus","selector":".growth-image-focus"},{"id":"three-up","selector":".growth-three-up"},{"id":"four-grid","selector":".growth-four-grid"},{"id":"metrics","selector":".growth-metrics"},{"id":"comparison","selector":".growth-comparison"},{"id":"timeline","selector":".growth-timeline"},{"id":"process","selector":".growth-process"},{"id":"chart","selector":".growth-chart"},{"id":"quote","selector":".growth-quote"},{"id":"closing","selector":".growth-closing"}]
+}

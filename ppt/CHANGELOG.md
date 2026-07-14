@@ -2,6 +2,16 @@
 
 All notable changes to the HTML PPT Agent Skill are recorded here. Versions follow semantic versioning for the `ppt/` package and its production contracts.
 
+## 0.15.0 — Composition-faithful theme expansion
+
+- Add `cobalt-executive-deck`, `coral-startup-deck`, `ribbon-tab-brochure`, and `blue-growth-deck` as explicit-selection backup themes.
+- Implement independent composition systems for all four themes instead of recoloring existing theme layouts.
+- Register the complete 14-layout contract for every new theme and provide editable six-slide previews.
+- Preserve fixed 1920×1080 playback, browser editing, presenter mode, CJK typography, bundling, and structural validation.
+- Add dynamic theme discovery tests and composition-prefix checks so future themes cannot remain outside CI coverage.
+- Extend theme validation and rendered-QA commands to cover all nine installed themes.
+- Record clean-room provenance; no source script, media, or template asset from the visual-reference repository is copied.
+
 ## 0.14.0 — Release hardening
 
 - Add a permanent pull-request CI workflow.

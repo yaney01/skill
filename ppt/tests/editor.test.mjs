@@ -164,12 +164,26 @@ test('selected-element and current-slide reset preserve unrelated edits', async 
     await setText(page, first, '元素一已修改');
     await setText(page, second, '元素二已修改');
 
-    await first.click();
-    await page.locator('[data-editor-action="reset-element"]').click();
+    const firstId = await first.getAttribute('data-element-id');
+    await first.dispatchEvent('click');
+    await page.waitForFunction((id) => window.htmlPptEditor.selected?.dataset.elementId === id, firstId);
+    const resetElement = page.locator('[data-editor-action="reset-element"]');
+    assert.equal(await resetElement.isDisabled(), false);
+    await resetElement.click();
+    await page.waitForFunction(({ id, html }) => document.querySelector(`[data-element-id="${id}"]`)?.innerHTML === html, { id: firstId, html: originalFirst });
     assert.equal(await first.innerHTML(), originalFirst);
     assert.equal(await second.innerText(), '元素二已修改');
 
     await page.locator('[data-editor-action="reset-slide"]').click();
+    await page.waitForFunction(({ firstId, firstHtml, secondId, secondHtml }) => {
+      return document.querySelector(`[data-element-id="${firstId}"]`)?.innerHTML === firstHtml
+        && document.querySelector(`[data-element-id="${secondId}"]`)?.innerHTML === secondHtml;
+    }, {
+      firstId,
+      firstHtml: originalFirst,
+      secondId: await second.getAttribute('data-element-id'),
+      secondHtml: originalSecond,
+    });
     assert.equal(await first.innerHTML(), originalFirst);
     assert.equal(await second.innerHTML(), originalSecond);
     await context.close();

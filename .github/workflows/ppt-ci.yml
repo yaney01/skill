@@ -174,7 +174,7 @@ jobs:
   rendered:
     name: PPT rendered regression
     runs-on: ubuntu-latest
-    timeout-minutes: 95
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: ppt
@@ -198,6 +198,8 @@ jobs:
         run: npm run tasks:qa
       - name: Render registered layout catalogs
         run: npm run layouts:qa
+      - name: Render theme previews
+        run: npm run themes:qa
       - name: Render production example
         run: npm run example:qa && npm run example:contact-sheet
       - name: Upload rendered QA artifacts
@@ -210,4 +212,5 @@ jobs:
           path: |
             ppt/qa/task-regression/**
             ppt/qa/layout-catalogs/**
+            ppt/qa/themes/**
             ppt/examples/ai-ad-workflow/qa/**

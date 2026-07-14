@@ -23,6 +23,7 @@ const compositionPrefixes = new Map([
 function read(file) { return fs.readFileSync(file, 'utf8'); }
 function readJson(file) { return JSON.parse(read(file)); }
 function previewLayouts(html) { return [...html.matchAll(/data-layout="([^"]+)"/g)].map((match) => match[1]); }
+function previewSections(html) { return [...html.matchAll(/<section\b[^>]*>[\s\S]*?<\/section>/gi)].map((match) => match[0]); }
 function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function installedThemeIds() {
   return fs.readdirSync(themesRoot, { withFileTypes: true })
@@ -93,6 +94,27 @@ test('all installed themes expose metadata, CSS, registered layouts, shared cont
       assert.doesNotMatch(html, /class="[^"]*\btheme-(?:cover|section|statement|split|grid|closing)\b/);
     }
   }
+});
+
+test('composition previews label illustrative metrics and avoid misleading placeholders', () => {
+  for (const themeId of requiredCompositionThemes) {
+    const html = read(path.join(themesRoot, themeId, 'preview.html'));
+    assert.doesNotMatch(html, /\bSHUI\b|visual clarity|workflow ready/i, `${themeId} retains a source-specific or misleading placeholder`);
+
+    for (const section of previewSections(html)) {
+      const hasIllustrativeClaim = /(?:>\s*[+−-]?\d+(?:\.\d+)?(?:%|×)\s*<)|--(?:fill|value):\s*\d+%/i.test(section);
+      if (!hasIllustrativeClaim) continue;
+      assert.match(section, /data-example-data="true"/, `${themeId} contains an unlabeled illustrative metric`);
+      assert.match(section, /示例|SAMPLE|DEMO/i, `${themeId} example metrics lack a visible disclosure`);
+    }
+  }
+
+  const coral = read(path.join(themesRoot, 'coral-startup-deck', 'preview.html'));
+  assert.doesNotMatch(coral, /PLAN\s*\/\s*90 DAYS/i, 'Coral timeline claims 90 days while showing only 12 weeks');
+
+  const ribbon = read(path.join(themesRoot, 'ribbon-tab-brochure', 'preview.html'));
+  assert.match(ribbon, /data-layout="three-up"[\s\S]*class="ribbon-three-up"/i);
+  assert.match(ribbon, /三种核心信息/);
 });
 
 test('all theme previews pass the structural validator', () => {

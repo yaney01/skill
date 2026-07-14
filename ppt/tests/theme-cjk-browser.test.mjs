@@ -17,6 +17,10 @@ function ratio(value, base) {
   return Number.parseFloat(value) / Number.parseFloat(base);
 }
 
+function trackingRatio(value, base) {
+  return value === 'normal' ? 0 : ratio(value, base);
+}
+
 function closeTo(actual, expected, tolerance, message) {
   assert.ok(Math.abs(actual - expected) <= tolerance, `${message}: expected ${expected}±${tolerance}, got ${actual}`);
 }
@@ -71,10 +75,10 @@ test(`${browserName} applies Chinese display, title, body, and metadata rules to
       closeTo(ratio(styles.body.lineHeight, styles.body.fontSize), 1.65, 0.01, `${theme.id} body line-height ratio`);
       closeTo(ratio(styles.meta.lineHeight, styles.meta.fontSize), 1.35, 0.01, `${theme.id} metadata line-height ratio`);
 
-      closeTo(ratio(styles.display.letterSpacing, styles.display.fontSize), -0.005, 0.001, `${theme.id} display tracking ratio`);
-      closeTo(ratio(styles.title.letterSpacing, styles.title.fontSize), 0, 0.001, `${theme.id} title tracking ratio`);
-      closeTo(ratio(styles.body.letterSpacing, styles.body.fontSize), 0.01, 0.001, `${theme.id} body tracking ratio`);
-      closeTo(ratio(styles.meta.letterSpacing, styles.meta.fontSize), 0.08, 0.002, `${theme.id} metadata tracking ratio`);
+      closeTo(trackingRatio(styles.display.letterSpacing, styles.display.fontSize), -0.005, 0.001, `${theme.id} display tracking ratio`);
+      closeTo(trackingRatio(styles.title.letterSpacing, styles.title.fontSize), 0, 0.001, `${theme.id} title tracking ratio`);
+      closeTo(trackingRatio(styles.body.letterSpacing, styles.body.fontSize), 0.01, 0.001, `${theme.id} body tracking ratio`);
+      closeTo(trackingRatio(styles.meta.letterSpacing, styles.meta.fontSize), 0.08, 0.002, `${theme.id} metadata tracking ratio`);
 
       assert.match(styles.display.fontFamily, /Noto Sans SC/, `${theme.id} display CJK stack`);
       assert.match(styles.body.fontFamily, /Noto Sans SC/, `${theme.id} body CJK stack`);

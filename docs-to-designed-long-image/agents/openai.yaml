@@ -1,0 +1,4 @@
+interface:
+  display_name: "文档转设计长图"
+  short_description: "按参考结构生成纯位图长图，保全文案并校验透明插画与中文排版"
+  default_prompt: "使用 $docs-to-designed-long-image，按参考图结构将文档设计为纯位图 PNG 长图，保留全部文案并检查中文断行、透明配图与最终截图。"

@@ -21,13 +21,13 @@
 整套安装：
 
 ```bash
-npx -y skills add https://github.com/yaney01/skill/tree/main/AI%20skills -g --all
+npx -y skills add 'https://github.com/yaney01/skill/tree/main/AI skills' -g --all
 ```
 
 单独安装本模块：
 
 ```bash
-npx -y skills add https://github.com/yaney01/skill/tree/main/AI%20skills --skill go-content-system
+npx -y skills add 'https://github.com/yaney01/skill/tree/main/AI skills' --skill go-content-system
 ```
 
 ## 最短启动链路

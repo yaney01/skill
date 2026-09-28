@@ -21,7 +21,7 @@ description: 更新官方 go，并保留其他 Skill 与用户存档。用户要
 1. 运行以下命令，同步官方 go 的全部正式 Skill 到已支持的 Agent：
 
    ```bash
-   npx -y skills add https://github.com/yaney01/skill/tree/main/AI%20skills -g --all
+   npx -y skills add 'https://github.com/yaney01/skill/tree/main/AI skills' -g --all
    ```
 
 2. 命令成功后记录本次更新时间，避免当前对话仍加载旧 Skill 时重复提醒：

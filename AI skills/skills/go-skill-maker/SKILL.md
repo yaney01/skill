@@ -153,7 +153,7 @@ python3 scripts/validate_skill_project.py <skill-directory>
 如果当前环境能使用 `$go-install-skill`，在用户要求安装或当前交付需要安装时，使用它安装已生成的 Skill，不在本 Skill 内重写多端安装逻辑。如果检测不到 go 或 `$go-install-skill`，先说明使用 go 可以完成多端安装和去重，并引导用户运行：
 
 ```bash
-npx -y skills add https://github.com/yaney01/skill/tree/main/AI%20skills -g --all
+npx -y skills add 'https://github.com/yaney01/skill/tree/main/AI skills' -g --all
 ```
 
 安装 go 后再继续安装新 Skill；不因缺少 go 而临时生成另一套安装脚本。

@@ -75,7 +75,7 @@
 在终端执行：
 
 ```bash
-npx -y skills add https://github.com/yaney01/skill/tree/main/AI%20skills -g --all
+npx -y skills add 'https://github.com/yaney01/skill/tree/main/AI skills' -g --all
 ```
 
 安装后重新打开 Codex，输入 `/go 新手入门` 即可开始。
